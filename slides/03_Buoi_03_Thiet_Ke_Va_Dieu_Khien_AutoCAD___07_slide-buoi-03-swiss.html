@@ -1,0 +1,2040 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buổi 03: Điều Khiển AutoCAD Bằng AI Qua MCP | CES Global</title>
+
+    <!-- Google Fonts (co subset vietnamese): Space Grotesk (tieu de), Plus Jakarta Sans (noi dung), JetBrains Mono (code).
+         Font du phong he thong duoc khai bao trong :root de van hien dung dau tieng Viet khi khong co mang. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap&subset=vietnamese" rel="stylesheet">
+
+    <style>
+        /* ==========================================================================
+           === 1. CSS CUSTOM PROPERTIES (THEME: SWISS MODERN, DONG BO VOI BUOI 02) ===
+           Doi mau, font, co chu tai day de doi toan bo bo slide.
+           ========================================================================== */
+        :root {
+            /* Nen */
+            --stage-bg: #eceae5;
+            --slide-bg: #f9f8f6;
+            --card-bg: #ffffff;
+            --card-border: #e2dfd7;
+
+            /* Mau nhan Swiss */
+            --swiss-black: #0f172a;
+            --swiss-red: #e11d48;
+            --swiss-navy: #1e3a8a;
+            --swiss-emerald: #059669;
+
+            /* Mau chu */
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+
+            /* Font: luon co font du phong he thong hien duoc tieng Viet */
+            --font-display: 'Space Grotesk', 'Segoe UI', Arial, sans-serif;
+            --font-body: 'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif;
+            --font-mono: 'JetBrains Mono', Consolas, 'Courier New', monospace;
+
+            /* He so phong chu (nut A- / A+ tren thanh dieu khien) */
+            --font-scale: 1;
+
+            /* Co chu, tinh tren san khau 1920x1080 */
+            --fs-title: calc(46px * var(--font-scale));
+            --fs-chrome: calc(17px * var(--font-scale));
+            --fs-label: calc(27px * var(--font-scale));
+            --fs-body: calc(25px * var(--font-scale));
+            --fs-table: calc(23px * var(--font-scale));
+            --fs-th: calc(19px * var(--font-scale));
+            --fs-code: calc(20px * var(--font-scale));
+            --fs-quote: calc(30px * var(--font-scale));
+
+            /* Khoang cach: day slide chua cho cho thanh dieu khien */
+            --slide-padding: 52px 80px 96px;
+            --radius-lg: 14px;
+            --radius-sm: 6px;
+
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --transition-smooth: 0.35s var(--ease-out-expo);
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* ==========================================================================
+           === 2. VIEWPORT BASE (nguyen van tu skill frontend-slides) ===
+           San khau co dinh 16:9, 1920x1080, thu phong nguyen khoi theo cua so.
+           ========================================================================== */
+
+        /* 1. Lock the browser viewport */
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background: var(--stage-bg, #000);
+        }
+
+        /* 2. Full-window deck viewport */
+        .deck-viewport {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            background: var(--stage-bg, #000);
+        }
+
+        /* 3. Fixed 16:9 design canvas.
+           JavaScript sets transform: translate(...) scale(...). */
+        .deck-stage {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            transform-origin: 0 0;
+            background: var(--slide-bg, #fff);
+        }
+
+        /* 4. Slides stack inside the fixed stage.
+           Content must be laid out at 1920x1080, not reflowed per device. */
+        .slide {
+            position: absolute;
+            inset: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            display: block;
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            background: var(--slide-bg, #fff);
+        }
+
+        .slide.active,
+        .slide.visible {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 1;
+        }
+
+        /* 5. Keep media inside authored slide bounds */
+        img,
+        video,
+        canvas,
+        svg {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        /* 6. Presentation chrome stays outside the slide design system */
+        .deck-controls {
+            position: fixed;
+            left: 50%;
+            bottom: 22px;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+
+        /* 7. Print one fixed-size slide per page */
+        @media print {
+            html,
+            body {
+                width: 1920px;
+                height: auto;
+                overflow: visible;
+                background: #fff;
+            }
+
+            .deck-viewport {
+                position: static;
+                overflow: visible;
+                background: #fff;
+            }
+
+            .deck-stage {
+                position: static;
+                width: auto;
+                height: auto;
+                transform: none !important;
+                background: none;
+            }
+
+            .slide {
+                position: relative;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                width: 1920px;
+                height: 1080px;
+                break-after: page;
+                page-break-after: always;
+            }
+
+            .slide:last-child {
+                break-after: auto;
+                page-break-after: auto;
+            }
+
+            .deck-controls {
+                display: none !important;
+            }
+        }
+
+        /* 8. Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.2s !important;
+            }
+        }
+
+        /* ==========================================================================
+           === 3. STAGE: NEN LUOI VA VACH DO SWISS ===
+           ========================================================================== */
+        body {
+            font-family: var(--font-body);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .deck-stage {
+            box-shadow: 0 25px 70px rgba(15, 23, 42, 0.12);
+        }
+
+        /* Luoi ke mo, dau hieu nhan dien Swiss */
+        .stage-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(15, 23, 42, 0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(15, 23, 42, 0.035) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Vach do tren cung */
+        .stage-swiss-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: var(--swiss-red);
+            z-index: 100;
+        }
+
+        /* Slide: xep cot, nen trong suot de thay luoi. An/hien van dung visibility + opacity. */
+        .slide {
+            display: flex;
+            flex-direction: column;
+            padding: var(--slide-padding);
+            background: transparent;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .slide.active { z-index: 2; }
+
+        /* Hieu ung hien dan khi slide duoc kich hoat */
+        .reveal {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity var(--transition-smooth), transform var(--transition-smooth);
+        }
+
+        .slide.active .reveal { opacity: 1; transform: translateY(0); }
+        .slide.active .reveal:nth-child(1) { transition-delay: 0.05s; }
+        .slide.active .reveal:nth-child(2) { transition-delay: 0.12s; }
+        .slide.active .reveal:nth-child(3) { transition-delay: 0.19s; }
+        .slide.active .reveal:nth-child(4) { transition-delay: 0.26s; }
+
+        /* Ghi chu giang vien: khong bao gio hien tren slide, chi doc qua ngan ghi chu (phim N) */
+        .notes { display: none !important; }
+
+        /* ==========================================================================
+           === 4. KHUNG SLIDE: HEADER, NHAN SLIDE, TIEU DE ===
+           ========================================================================== */
+        .slide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 10;
+            border-bottom: 1.5px solid var(--card-border);
+            padding-bottom: 14px;
+            flex: none;
+        }
+
+        .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--font-mono);
+            font-size: var(--fs-chrome);
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: var(--swiss-black);
+        }
+
+        .brand-badge .box-icon {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            background: var(--swiss-red);
+        }
+
+        .session-tag {
+            font-family: var(--font-mono);
+            font-size: var(--fs-chrome);
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        .session-tag span { color: var(--swiss-navy); font-weight: 700; }
+
+        .slide-title-wrap { margin-bottom: 22px; position: relative; z-index: 10; flex: none; }
+
+        /* Nhan slide: so thu tu slide, slide tach thi ghi a/b */
+        .slide-category {
+            font-family: var(--font-mono);
+            font-size: var(--fs-chrome);
+            font-weight: 700;
+            color: var(--swiss-red);
+            letter-spacing: 0.12em;
+            margin-bottom: 4px;
+        }
+
+        .slide-title {
+            font-family: var(--font-display);
+            font-size: var(--fs-title);
+            font-weight: 700;
+            line-height: 1.18;
+            letter-spacing: -0.02em;
+            color: var(--swiss-black);
+        }
+
+        .slide-title span { color: var(--swiss-red); }
+
+        .slide-body {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 24px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* ==========================================================================
+           === 5. THANH PHAN NOI DUNG: NHAN MUC, THE, DANH SACH, TRICH DAN ===
+           ========================================================================== */
+        /* Nhan muc nho trong slide (cac dong ### cua file nguon) */
+        .section-label {
+            font-family: var(--font-display);
+            font-size: var(--fs-label);
+            font-weight: 700;
+            color: var(--swiss-black);
+            line-height: 1.3;
+            display: flex;
+            align-items: baseline;
+            gap: 14px;
+        }
+
+        .section-label::before {
+            content: "";
+            flex: none;
+            width: 14px;
+            height: 14px;
+            background: var(--swiss-red);
+            transform: translateY(-1px);
+        }
+
+        .swiss-card {
+            background: var(--card-bg);
+            border: 1.5px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 28px 32px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .swiss-card.highlight { border-color: var(--swiss-red); box-shadow: 0 8px 24px rgba(225, 29, 72, 0.08); }
+        .swiss-card.navy-highlight { border-color: var(--swiss-navy); box-shadow: 0 8px 24px rgba(30, 58, 138, 0.08); }
+
+        .body-text {
+            font-size: var(--fs-body);
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .body-text strong, .bullet-list strong, .step-list strong, .num-card strong { color: var(--swiss-black); }
+
+        /* Danh sach gach dau dong: dau vuong do */
+        .bullet-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .bullet-list li {
+            font-size: var(--fs-body);
+            color: var(--text-secondary);
+            line-height: 1.45;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .bullet-list li::before {
+            content: "";
+            position: absolute;
+            left: 2px;
+            top: 0.55em;
+            width: 10px;
+            height: 10px;
+            background: var(--swiss-red);
+        }
+
+        /* Danh sach co so thu tu */
+        .step-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .step-list li {
+            font-size: var(--fs-body);
+            color: var(--text-secondary);
+            line-height: 1.45;
+            display: flex;
+            align-items: flex-start;
+            gap: 18px;
+        }
+
+        .step-list .n {
+            flex: none;
+            width: 44px;
+            height: 44px;
+            background: var(--swiss-black);
+            color: #ffffff;
+            font-family: var(--font-mono);
+            font-size: calc(21px * var(--font-scale));
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: -3px;
+        }
+
+        /* The danh so lon (Slide 02, 27, 30) */
+        .num-card {
+            background: var(--card-bg);
+            border: 1.5px solid var(--card-border);
+            border-top: 6px solid var(--swiss-black);
+            padding: 22px 28px 26px;
+            font-size: var(--fs-body);
+            color: var(--text-secondary);
+            line-height: 1.45;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+        }
+
+        .num-card .n {
+            display: block;
+            font-family: var(--font-display);
+            font-size: calc(54px * var(--font-scale));
+            font-weight: 700;
+            line-height: 1;
+            color: var(--swiss-red);
+            margin-bottom: 12px;
+        }
+
+        /* Khoi trich dan: vach do ben trai */
+        .quote-block {
+            border-left: 10px solid var(--swiss-red);
+            background: var(--card-bg);
+            padding: 22px 32px;
+            font-family: var(--font-display);
+            font-size: var(--fs-quote);
+            font-weight: 600;
+            line-height: 1.4;
+            color: var(--swiss-black);
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+        }
+
+        .quote-block strong { font-weight: 700; }
+
+        /* Code trong dong */
+        code {
+            font-family: var(--font-mono);
+            font-size: 0.9em;
+            background: #eef0f3;
+            border: 1px solid #dfe3e8;
+            border-radius: 5px;
+            padding: 1px 8px;
+            color: var(--swiss-navy);
+            white-space: nowrap;
+        }
+
+        .mono { font-family: var(--font-mono); white-space: nowrap; }
+
+        /* Luoi */
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: stretch; }
+        .grid-3col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; align-items: stretch; }
+        .grid-split-64 { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 32px; align-items: stretch; }
+        .grid-code { display: grid; grid-template-columns: 1.5fr 0.9fr; gap: 32px; align-items: center; }
+        .stack { display: flex; flex-direction: column; gap: 20px; }
+
+        /* ==========================================================================
+           === 6. BANG VA KHOI CODE / PROMPT ===
+           ========================================================================== */
+        .table-wrap {
+            background: var(--card-bg);
+            border: 1.5px solid var(--card-border);
+            border-top: 6px solid var(--swiss-black);
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+        }
+
+        .swiss-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: var(--fs-table);
+            text-align: left;
+        }
+
+        .swiss-table th {
+            background: #f1f5f9;
+            color: var(--swiss-black);
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: var(--fs-th);
+            letter-spacing: 0.04em;
+            padding: 12px 20px;
+            border-bottom: 2px solid var(--card-border);
+        }
+
+        .swiss-table td {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            line-height: 1.42;
+            vertical-align: top;
+        }
+
+        .swiss-table tr:last-child td { border-bottom: none; }
+        .swiss-table td strong { color: var(--swiss-black); }
+        .swiss-table .rowhead { color: var(--swiss-black); font-weight: 700; white-space: nowrap; }
+        .swiss-table .num { font-family: var(--font-mono); font-weight: 600; white-space: nowrap; }
+        .swiss-table td.warn, .swiss-table td strong.warn { color: var(--swiss-red); }
+
+        /* Khoi code va prompt: nen toi, font monospace, giu nguyen xuong dong */
+        .terminal-box {
+            background: #090d16;
+            border: 1px solid #1e293b;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: 0 16px 36px rgba(15, 23, 42, 0.15);
+            width: 100%;
+        }
+
+        .terminal-header {
+            background: #111827;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border-bottom: 1px solid #1f2937;
+        }
+
+        .terminal-header .sq { width: 11px; height: 11px; background: var(--swiss-red); flex: none; }
+
+        .terminal-title {
+            font-family: var(--font-mono);
+            font-size: calc(16px * var(--font-scale));
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .terminal-body {
+            display: block;
+            padding: 18px 24px;
+            font-family: var(--font-mono);
+            font-size: var(--fs-code);
+            line-height: 1.6;
+            color: #e2e8f0;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            tab-size: 2;
+        }
+
+        /* ==========================================================================
+           === 7. SLIDE RIENG: TIEU DE (01) VA HINH (18) ===
+           ========================================================================== */
+        .cover-grid { display: grid; grid-template-columns: 1.55fr 0.75fr; gap: 56px; align-items: center; }
+
+        .cover-kicker {
+            font-family: var(--font-mono);
+            font-size: calc(24px * var(--font-scale));
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            color: var(--swiss-red);
+            margin-bottom: 14px;
+        }
+
+        .cover-course {
+            font-family: var(--font-display);
+            font-size: calc(74px * var(--font-scale));
+            font-weight: 700;
+            line-height: 1.06;
+            letter-spacing: -0.03em;
+            color: var(--swiss-black);
+            margin-bottom: 30px;
+        }
+
+        .cover-session {
+            font-family: var(--font-display);
+            font-size: calc(38px * var(--font-scale));
+            font-weight: 700;
+            line-height: 1.2;
+            color: var(--swiss-red);
+            border-top: 6px solid var(--swiss-black);
+            padding-top: 22px;
+        }
+
+        .cover-sub {
+            font-size: calc(30px * var(--font-scale));
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin: 8px 0 30px;
+        }
+
+        .cover-block {
+            background: var(--swiss-red);
+            color: #ffffff;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 36px 40px;
+        }
+
+        .cover-block .big {
+            font-family: var(--font-display);
+            font-size: calc(260px * var(--font-scale));
+            font-weight: 700;
+            line-height: 0.85;
+            letter-spacing: -0.05em;
+        }
+
+        .cover-block .small {
+            font-family: var(--font-mono);
+            font-size: calc(24px * var(--font-scale));
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            margin-bottom: 18px;
+        }
+
+        .cover-bar {
+            background: var(--swiss-black);
+            color: #ffffff;
+            font-family: var(--font-mono);
+            font-size: calc(24px * var(--font-scale));
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            padding: 16px 40px;
+        }
+
+        /* Slide 18: hinh chiem 2/3 be ngang, object-fit contain */
+        .figure-grid {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .figure-panel {
+            position: relative;
+            min-height: 0;
+            background: #ffffff;
+            border: 1.5px solid var(--card-border);
+            border-top: 6px solid var(--swiss-black);
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+        }
+
+        .figure-panel img {
+            position: absolute;
+            left: 12px;
+            top: 12px;
+            width: calc(100% - 24px);
+            height: calc(100% - 24px);
+            object-fit: contain;
+            /* File hinh la trang A4 co le trang rong: phong 1.6 lan de ban ve day khung.
+               Phan bi cat chi la le trang (da do vung co net ve). Doi hinh khac thi dat lai scale(1). */
+            transform: scale(1.6);
+            transform-origin: center center;
+        }
+
+        .figure-panel { overflow: hidden; }
+
+        .figure-side { display: flex; flex-direction: column; justify-content: center; gap: 28px; min-height: 0; }
+
+        /* Slide 12: cong thuc to hop */
+        .formula { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 24px; align-items: stretch; }
+
+        .formula .term {
+            background: var(--card-bg);
+            border: 1.5px solid var(--card-border);
+            border-top: 6px solid var(--swiss-black);
+            padding: 22px 28px;
+            font-family: var(--font-display);
+            font-size: calc(40px * var(--font-scale));
+            font-weight: 700;
+            color: var(--swiss-black);
+            line-height: 1.15;
+        }
+
+        .formula .term small {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: calc(22px * var(--font-scale));
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        .formula .term.accent { border-top-color: var(--swiss-red); }
+
+        .formula .plus {
+            font-family: var(--font-display);
+            font-size: calc(64px * var(--font-scale));
+            font-weight: 700;
+            color: var(--swiss-red);
+            align-self: center;
+        }
+
+        /* ==========================================================================
+           === 8. THANH DIEU KHIEN (HUD), DANH SACH SLIDE, NGAN GHI CHU ===
+           ========================================================================== */
+        .deck-hud {
+            position: absolute;
+            bottom: 20px;
+            left: 80px;
+            right: 80px;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+            padding: 9px 22px;
+            border-radius: 999px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
+
+        .hud-left { display: flex; align-items: center; gap: 16px; }
+
+        .hud-counter {
+            font-family: var(--font-mono);
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--swiss-black);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .hud-progress-track { width: 240px; height: 6px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
+        .hud-progress-bar { height: 100%; background: var(--swiss-red); width: 0; transition: width 0.25s ease; }
+        .hud-buttons { display: flex; align-items: center; gap: 8px; }
+
+        .hud-btn {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 15px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .hud-btn:hover { background: #f1f5f9; border-color: var(--swiss-black); }
+        .hud-btn-primary { background: var(--swiss-red); color: #ffffff; border-color: var(--swiss-red); }
+        .hud-btn-primary:hover { background: #be123c; border-color: #be123c; color: #ffffff; }
+
+        .font-scaler-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: #f1f5f9;
+            padding: 3px 6px;
+            border-radius: 999px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .scaler-btn {
+            background: transparent;
+            border: none;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            padding: 3px 8px;
+            border-radius: 999px;
+            cursor: pointer;
+        }
+
+        .scaler-btn:hover { background: #ffffff; color: var(--swiss-red); }
+
+        /* Danh sach slide (phim O) */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.72);
+            backdrop-filter: blur(10px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 1100px;
+            max-height: 85vh;
+            border-radius: var(--radius-lg);
+            padding: 32px 40px;
+            overflow-y: auto;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+        }
+
+        .modal-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1.5px solid #e2e8f0;
+            padding-bottom: 14px;
+        }
+
+        .modal-head h3 { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--swiss-black); }
+
+        .overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 20px; }
+
+        .overview-item {
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .overview-item:hover, .overview-item.active { border-color: var(--swiss-red); background: #ffffff; }
+        .overview-item .num { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--swiss-red); }
+        .overview-item .title { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--swiss-black); margin-top: 4px; }
+
+        /* Ngan ghi chu giang vien (phim N) */
+        .speaker-drawer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.98);
+            border-top: 3px solid var(--swiss-red);
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.1);
+            padding: 18px 80px;
+            z-index: 150;
+            transform: translateY(100%);
+            transition: transform 0.25s var(--ease-out-expo);
+            max-height: 40vh;
+            overflow-y: auto;
+        }
+
+        .speaker-drawer.active { transform: translateY(0); }
+
+        .drawer-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+
+        .drawer-tag {
+            font-family: var(--font-mono);
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--swiss-red);
+            letter-spacing: 0.08em;
+        }
+
+        #speakerContent { font-size: 19px; color: #1e293b; line-height: 1.55; white-space: pre-wrap; }
+
+        /* In an: bo lop dieu khien, giu bo cuc cot cua slide */
+        @media print {
+            .slide { display: flex !important; background: var(--slide-bg); }
+            .deck-hud, .speaker-drawer, .modal-overlay, .stage-grid, .stage-swiss-line { display: none !important; }
+            .reveal { opacity: 1 !important; transform: none !important; }
+        }
+    </style>
+
+    <!-- Che do du phong khi trinh xem KHONG chay JavaScript (vi du khung xem truoc tinh cua ung dung):
+         xep 30 slide thanh mot cot de cuon doc. Khi JavaScript chay, doan script ngay ben duoi
+         go bo khoi style nay truoc khi trang duoc ve, va bo slide chay o che do trinh chieu binh thuong. -->
+    <style id="nojsFallback">
+        html, body { height: auto !important; overflow: auto !important; background: #e2e8f0 !important; }
+        .deck-viewport { position: static !important; overflow: visible !important; background: none !important; }
+        .deck-stage { position: relative !important; width: 1920px !important; height: auto !important;
+                      transform: none !important; overflow: visible !important; background: none !important;
+                      box-shadow: none !important; zoom: 0.95; margin: 0 auto; }
+        .slide { position: relative !important; inset: auto !important; display: flex !important;
+                 visibility: visible !important; opacity: 1 !important; pointer-events: auto !important;
+                 background: var(--slide-bg, #fff) !important; margin: 0 0 28px 0;
+                 border-top: 6px solid var(--swiss-red, #e11d48); }
+        .reveal { opacity: 1 !important; transform: none !important; }
+        .deck-hud, .speaker-drawer, .modal-overlay, .stage-grid, .stage-swiss-line { display: none !important; }
+        @media (max-width: 1900px) { .deck-stage { zoom: 0.938; } }
+        @media (max-width: 1800px) { .deck-stage { zoom: 0.885; } }
+        @media (max-width: 1700px) { .deck-stage { zoom: 0.833; } }
+        @media (max-width: 1600px) { .deck-stage { zoom: 0.781; } }
+        @media (max-width: 1500px) { .deck-stage { zoom: 0.729; } }
+        @media (max-width: 1400px) { .deck-stage { zoom: 0.677; } }
+        @media (max-width: 1300px) { .deck-stage { zoom: 0.625; } }
+        @media (max-width: 1200px) { .deck-stage { zoom: 0.573; } }
+        @media (max-width: 1100px) { .deck-stage { zoom: 0.521; } }
+        @media (max-width: 1000px) { .deck-stage { zoom: 0.469; } }
+        @media (max-width: 900px) { .deck-stage { zoom: 0.417; } }
+        @media (max-width: 800px) { .deck-stage { zoom: 0.365; } }
+        @media (max-width: 700px) { .deck-stage { zoom: 0.312; } }
+        @media (max-width: 600px) { .deck-stage { zoom: 0.260; } }
+        @media (max-width: 500px) { .deck-stage { zoom: 0.208; } }
+    </style>
+    <script>
+        (function () { var f = document.getElementById('nojsFallback'); if (f) { f.parentNode.removeChild(f); } })();
+    </script>
+</head>
+<body>
+
+    <div class="deck-viewport">
+        <main class="deck-stage" id="deckStage">
+            <div class="stage-grid"></div>
+            <div class="stage-swiss-line"></div>
+
+            <!-- ================= SLIDE 01: SLIDE TIEU DE ================= -->
+            <section class="slide active" data-slide="01" data-title="Slide Tiêu Đề">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-body">
+                    <div class="cover-grid">
+                        <div class="reveal">
+                            <div class="cover-kicker">KHÓA ĐÀO TẠO THỰC CHIẾN</div>
+                            <h1 class="cover-course">AI AGENT TRONG<br>KỸ THUẬT &amp; XÂY DỰNG</h1>
+                            <div class="cover-session">BUỔI 03: ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</div>
+                            <div class="cover-sub">Từ một tấm hình đến bản vẽ</div>
+                            <ul class="bullet-list">
+                                <li><strong>Đơn vị tổ chức:</strong> CES Global</li>
+                                <li><strong>Thời lượng:</strong> 150 phút (30% lý thuyết, 70% thực hành)</li>
+                                <li><strong>Thông điệp của buổi:</strong> <em>"AI đứng bếp, kỹ sư nếm và duyệt"</em></li>
+                            </ul>
+                        </div>
+                        <div class="reveal">
+                            <div class="cover-block">
+                                <div class="small">BUỔI</div>
+                                <div class="big">03</div>
+                            </div>
+                            <div class="cover-bar">150 PHÚT</div>
+                        </div>
+                    </div>
+                </div>
+                <aside class="notes">Mở đầu bằng câu hỏi: "Anh chị đã bao giờ nhận một tấm hình mặt bằng qua Zalo và phải ngồi vẽ lại từ đầu chưa?" Hôm nay cả lớp sẽ để Claude làm việc đó, còn mình làm người duyệt.</aside>
+            </section>
+
+            <!-- ================= SLIDE 02: MUC TIEU BUOI 03 ================= -->
+            <section class="slide" data-slide="02" data-title="Mục Tiêu Buổi 03">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 02 / 30</div>
+                    <h2 class="slide-title">Mục Tiêu Buổi 03</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="section-label reveal">6 việc học viên làm được sau buổi hôm nay:</div>
+                    <div class="grid-3col reveal">
+                        <div class="num-card"><span class="n">1</span><strong>Phân biệt cấp toàn máy và cấp dự án</strong> của <code>CLAUDE.md</code>, <code>SKILL.md</code>, MCP.</div>
+                        <div class="num-card"><span class="n">2</span><strong>Giải thích ba cách AI điều khiển AutoCAD:</strong> Script, AutoLISP, MCP.</div>
+                        <div class="num-card"><span class="n">3</span><strong>Tự cài và thiết lập MCP cho AutoCAD</strong> trên máy cá nhân.</div>
+                        <div class="num-card"><span class="n">4</span><strong>Đọc hình trước khi vẽ:</strong> tách ba loại số liệu, cộng kiểm chuỗi kích thước.</div>
+                        <div class="num-card"><span class="n">5</span><strong>Ra lệnh bằng lời để Claude dựng lại mặt bằng</strong> từ một tấm hình.</div>
+                        <div class="num-card"><span class="n">6</span><strong>Kiểm soát chất lượng:</strong> AI nêu giả định, người đo lại bằng <code>DIST</code>.</div>
+                    </div>
+                </div>
+                <aside class="notes">Nhấn mạnh mục 4 và 6. Công cụ thì ai cũng cài được, giá trị của kỹ sư nằm ở khâu kiểm soát.</aside>
+            </section>
+
+            <!-- ================= SLIDE 03: LO TRINH 150 PHUT ================= -->
+            <section class="slide" data-slide="03" data-title="Lộ Trình 150 Phút">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 03 / 30</div>
+                    <h2 class="slide-title">Lộ Trình 150 Phút</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="table-wrap reveal">
+                        <table class="swiss-table">
+                            <thead><tr><th>Thời gian</th><th>Phút</th><th>Nội dung</th></tr></thead>
+                            <tbody>
+                                <tr><td class="num">00:00 - 00:10</td><td class="num">10</td><td>Ôn Buổi 02, nghiệm thu D2</td></tr>
+                                <tr><td class="num">00:10 - 00:20</td><td class="num">10</td><td>Hai cấp cấu hình: toàn máy và dự án</td></tr>
+                                <tr><td class="num">00:20 - 00:35</td><td class="num">15</td><td>Ba cách AI điều khiển AutoCAD, MCP là gì</td></tr>
+                                <tr><td class="num">00:35 - 01:05</td><td class="num">30</td><td>Cài đặt và thiết lập MCP</td></tr>
+                                <tr><td class="num">01:05 - 01:30</td><td class="num">25</td><td>Demo: từ hình căn hộ đến bản vẽ</td></tr>
+                                <tr><td class="num">01:30 - 02:15</td><td class="num">45</td><td>Lab 03</td></tr>
+                                <tr><td class="num">02:15 - 02:30</td><td class="num">15</td><td>Nghiệm thu D3, giao việc Buổi 04</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <aside class="notes">Báo trước phần cài đặt 30 phút là phần dễ kẹt nhất. Ai đã làm checklist ở nhà thì hỗ trợ bạn bên cạnh.</aside>
+            </section>
+
+            <!-- ================= SLIDE 04: ON BUOI 02 VA NGHIEM THU D2 ================= -->
+            <section class="slide" data-slide="04" data-title="Ôn Buổi 02 Và Nghiệm Thu D2">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 04 / 30</div>
+                    <h2 class="slide-title">Ôn Buổi 02 Và Nghiệm Thu D2</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-2col">
+                        <div class="swiss-card reveal">
+                            <div class="section-label">Buổi 02 chúng ta đã có:</div>
+                            <ul class="bullet-list">
+                                <li>Skill <code>soat-ho-so-ky-thuat</code> do chính học viên đóng gói.</li>
+                                <li>Ma trận yêu cầu kỹ thuật và Phiếu RFI.</li>
+                                <li>Đã xem plugin <code>vn-autocad-skill</code>, trong đó có bước xuất DWG qua <strong>AutoCAD MCP</strong>.</li>
+                            </ul>
+                        </div>
+                        <div class="swiss-card highlight reveal">
+                            <div class="section-label">Câu hỏi nối sang hôm nay:</div>
+                            <div class="quote-block" style="box-shadow: none; padding: 8px 0 8px 28px;">Skill của anh chị đang nằm ở đâu trên máy? Mở dự án khác thì nó còn dùng được không?</div>
+                        </div>
+                    </div>
+                </div>
+                <aside class="notes">Gọi 2 học viên trả lời câu hỏi. Đa số sẽ không chắc. Đó là lý do có phần 10 phút tiếp theo.</aside>
+            </section>
+
+            <!-- ================= SLIDE 05: HAI CAP CAU HINH ================= -->
+            <section class="slide" data-slide="05" data-title="Hai Cấp Cấu Hình: Toàn Máy Và Dự Án">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 05 / 30</div>
+                    <h2 class="slide-title">Hai Cấp Cấu Hình: Toàn Máy Và Dự Án</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="section-label reveal">Ví dụ đời thường:</div>
+                    <div class="table-wrap reveal">
+                        <table class="swiss-table">
+                            <thead><tr><th style="width: 50%;">Cấp toàn máy (global)</th><th>Cấp dự án (project)</th></tr></thead>
+                            <tbody>
+                                <tr><td>Thói quen làm việc của riêng anh</td><td>Nội quy của một công trường cụ thể</td></tr>
+                                <tr><td>Đi công trình nào cũng mang theo</td><td>Ai vào công trường đó cũng phải theo</td></tr>
+                                <tr><td>Nằm trong thư mục người dùng: <code>~/.claude/</code></td><td>Nằm ngay trong thư mục dự án</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="section-label reveal">Quy tắc chọn cấp, một câu:</div>
+                    <div class="quote-block reveal"><strong>Thứ gì đi theo con người thì để cấp toàn máy. Thứ gì đi theo công trình thì để cấp dự án.</strong></div>
+                </div>
+                <aside class="notes">Tài liệu chính thức của Claude Code gọi cấp toàn máy là "user" hoặc "personal". Trong lớp gọi là "global" cho dễ nhớ. Trên Windows, `~` là `C:\Users\&lt;tên người dùng&gt;`.</aside>
+            </section>
+
+            <!-- ================= SLIDE 06: CLAUDE.md O HAI CAP ================= -->
+            <section class="slide" data-slide="06" data-title="CLAUDE.md Ở Hai Cấp">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 06 / 30</div>
+                    <h2 class="slide-title">CLAUDE.md Ở Hai Cấp</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="table-wrap reveal">
+                        <table class="swiss-table">
+                            <thead><tr><th style="width: 14%;"></th><th style="width: 40%;">Toàn máy</th><th>Dự án</th></tr></thead>
+                            <tbody>
+                                <tr><td class="rowhead">Vị trí</td><td><code>~/.claude/CLAUDE.md</code></td><td><code>CLAUDE.md</code> ở gốc dự án, hoặc <code>.claude/CLAUDE.md</code></td></tr>
+                                <tr><td class="rowhead">Áp dụng</td><td>Mọi dự án trên máy</td><td>Chỉ dự án đó</td></tr>
+                                <tr><td class="rowhead">Dùng chung</td><td>Chỉ mình anh</td><td>Cả nhóm, qua Git</td></tr>
+                                <tr><td class="rowhead">Nên ghi</td><td>Cách xưng hô, thói quen trình bày, quy tắc an toàn dữ liệu cá nhân</td><td>Thông số công trình, tiêu chuẩn áp dụng, thể thức văn bản</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="section-label reveal">Khi có cả hai:</div>
+                    <ul class="bullet-list reveal">
+                        <li>Claude <strong>nạp cả hai</strong>: bản toàn máy trước, bản dự án sau.</li>
+                        <li>Không bản nào xóa bản nào.</li>
+                        <li>Hai bản nói ngược nhau thì Claude có thể theo bên nào cũng được. <strong>Việc của mình là giữ hai bản không mâu thuẫn.</strong></li>
+                    </ul>
+                </div>
+                <aside class="notes">Mở file `CLAUDE.md` dự án học viên tạo ở Buổi 01. Hỏi lớp: dòng "gọi tôi là anh, xưng em" nên nằm ở đâu? Đáp án: cấp toàn máy. Dòng "bê tông B35" nằm ở đâu? Đáp án: cấp dự án.</aside>
+            </section>
+
+            <!-- ================= SLIDE 07: SKILL.md O HAI CAP ================= -->
+            <section class="slide" data-slide="07" data-title="SKILL.md Ở Hai Cấp">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 07 / 30</div>
+                    <h2 class="slide-title">SKILL.md Ở Hai Cấp</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="table-wrap reveal">
+                        <table class="swiss-table">
+                            <thead><tr><th style="width: 14%;"></th><th style="width: 43%;">Toàn máy</th><th>Dự án</th></tr></thead>
+                            <tbody>
+                                <tr><td class="rowhead">Vị trí</td><td><code>~/.claude/skills/&lt;tên&gt;/SKILL.md</code></td><td><code>.claude/skills/&lt;tên&gt;/SKILL.md</code></td></tr>
+                                <tr><td class="rowhead">Áp dụng</td><td>Mọi dự án trên máy</td><td>Chỉ dự án đó</td></tr>
+                                <tr><td class="rowhead">Dùng chung</td><td>Chỉ mình anh</td><td>Cả nhóm, qua Git</td></tr>
+                                <tr><td class="rowhead">Nên đặt</td><td>Kỹ năng ở đâu cũng cần: làm slide, tóm tắt tài liệu</td><td>Kỹ năng gắn với một dự án: <code>soat-ho-so-ky-thuat</code></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="section-label reveal">Điểm dễ nhầm:</div>
+                    <div class="quote-block reveal">Hai cấp có skill <strong>trùng tên</strong> thì bản toàn máy được dùng, bản dự án bị bỏ qua.</div>
+                    <p class="body-text reveal">Quy tắc thực hành: đặt tên skill dự án khác hẳn tên skill toàn máy.</p>
+                </div>
+                <aside class="notes">Trả lời câu hỏi ở Slide 04: skill Buổi 02 nằm ở cấp dự án, nên mở dự án khác sẽ không thấy. Muốn dùng mọi nơi thì chép thư mục skill sang `~/.claude/skills/`.</aside>
+            </section>
+
+            <!-- ================= SLIDE 08: CLAUDE.md KHAC SKILL.md, MCP HAI CAP ================= -->
+            <section class="slide" data-slide="08" data-title="CLAUDE.md Khác SKILL.md Ở Đâu, Và MCP Cũng Có Hai Cấp">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 08 / 30</div>
+                    <h2 class="slide-title">CLAUDE.md Khác SKILL.md Ở Đâu, Và MCP Cũng Có Hai Cấp</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="table-wrap reveal">
+                        <table class="swiss-table">
+                            <thead><tr><th style="width: 22%;"></th><th style="width: 34%;"><code>CLAUDE.md</code></th><th><code>SKILL.md</code></th></tr></thead>
+                            <tbody>
+                                <tr><td class="rowhead">Khi nào được nạp</td><td>Mỗi phiên, luôn luôn</td><td>Chỉ khi việc đang làm cần tới, hoặc khi gọi <code>/tên-skill</code></td></tr>
+                                <tr><td class="rowhead">Hợp với</td><td>Quy tắc ngắn cần nhớ mọi lúc</td><td>Quy trình nhiều bước, tài liệu dài</td></tr>
+                                <tr><td class="rowhead">Độ dài</td><td>Nên dưới 200 dòng</td><td>Dài được</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="section-label reveal">MCP cũng hai cấp:</div>
+                    <div class="table-wrap reveal">
+                        <table class="swiss-table">
+                            <thead><tr><th style="width: 22%;"></th><th style="width: 34%;">Toàn máy</th><th>Dự án</th></tr></thead>
+                            <tbody>
+                                <tr><td class="rowhead">Nơi lưu</td><td><code>~/.claude.json</code></td><td><code>.mcp.json</code> ở gốc dự án</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="body-text reveal">Hôm nay cả lớp khai báo AutoCAD MCP ở <strong>cấp dự án</strong>.</p>
+                </div>
+                <aside class="notes">Ví dụ: `CLAUDE.md` giống tấm bảng nội quy treo ở cổng, ai vào cũng đọc. `SKILL.md` giống cuốn quy trình cất trong tủ, khi nào làm việc đó mới lấy ra. Dặn lớp không khai báo cùng một tên máy chủ MCP ở cả hai cấp.</aside>
+            </section>
+
+            <!-- ================= SLIDE 09: BA CACH AI DIEU KHIEN AUTOCAD ================= -->
+            <section class="slide" data-slide="09" data-title="Ba Cách AI Điều Khiển AutoCAD">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 09 / 30</div>
+                    <h2 class="slide-title">Ba Cách AI Điều Khiển AutoCAD</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="table-wrap reveal">
+                        <table class="swiss-table">
+                            <thead><tr><th style="width: 18%;">Cách</th><th style="width: 44%;">Hoạt động</th><th>Hạn chế</th></tr></thead>
+                            <tbody>
+                                <tr><td class="rowhead"><strong>Script <code>.scr</code></strong></td><td>Chuỗi lệnh AutoCAD chạy từ trên xuống</td><td>Không tính toán, không vòng lặp</td></tr>
+                                <tr><td class="rowhead"><strong>AutoLISP <code>.lsp</code></strong></td><td>AI viết mã, người chép vào AutoCAD và chạy</td><td>Người phải chép tay; AI không thấy kết quả</td></tr>
+                                <tr><td class="rowhead"><strong>MCP</strong></td><td>Claude gửi lệnh thẳng vào AutoCAD đang mở, nhận kết quả về</td><td>Phải cài một lần; tốn hạn mức sử dụng hơn</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="section-label reveal">Ví dụ đời thường:</div>
+                    <ul class="bullet-list reveal">
+                        <li>Script, AutoLISP: AI viết công thức nấu ăn, mình tự nấu.</li>
+                        <li>MCP: AI đứng bếp nấu luôn, mình nếm và duyệt.</li>
+                    </ul>
+                </div>
+                <aside class="notes">Hỏi lớp ai đã từng dùng file `.lsp`. Nói rõ AutoLISP không bị bỏ: nó là phương án dự phòng và vẫn chạy được qua MCP bằng lệnh `execute_lisp`.</aside>
+            </section>
+
+            <!-- ================= SLIDE 10: MCP HOAT DONG THE NAO ================= -->
+            <section class="slide" data-slide="10" data-title="MCP Hoạt Động Thế Nào">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 10 / 30</div>
+                    <h2 class="slide-title">MCP Hoạt Động Thế Nào</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-split-64" style="align-items: center;">
+                        <div class="terminal-box reveal">
+                            <div class="terminal-header"><span class="sq"></span><span class="terminal-title">Sơ đồ luồng lệnh</span></div>
+<pre class="terminal-body">Anh gõ yêu cầu bằng lời
+        │
+        ▼
+Claude chọn lệnh phù hợp
+        │
+        ▼
+Máy chủ MCP (chương trình Python trên máy anh)
+        │
+        ▼
+File trao đổi trong C:/temp
+        │
+        ▼
+mcp_dispatch.lsp (đã nạp sẵn trong AutoCAD)
+        │
+        ▼
+AutoCAD vẽ, trả kết quả ngược lại cho Claude</pre>
+                        </div>
+                        <div class="swiss-card reveal">
+                            <div class="section-label">Hai chế độ:</div>
+                            <ul class="bullet-list">
+                                <li><strong><code>file_ipc</code>:</strong> nối AutoCAD thật, vẽ lên bản vẽ đang mở.</li>
+                                <li><strong><code>ezdxf</code>:</strong> không cần AutoCAD, Claude tự sinh file DXF.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <aside class="notes">Không cần học viên nhớ sơ đồ. Chỉ cần nhớ hai mắt xích hay đứt: AutoCAD chưa nạp `mcp_dispatch.lsp`, và Claude chưa được khai báo máy chủ MCP.</aside>
+            </section>
+
+            <!-- ================= SLIDE 11: TAM NHOM LENH ================= -->
+            <section class="slide" data-slide="11" data-title="Tám Nhóm Lệnh Claude Dùng Được">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 11 / 30</div>
+                    <h2 class="slide-title">Tám Nhóm Lệnh Claude Dùng Được</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="table-wrap reveal">
+                        <table class="swiss-table">
+                            <thead><tr><th style="width: 22%;">Nhóm lệnh</th><th>Dùng để</th></tr></thead>
+                            <tbody>
+                                <tr><td><code>drawing</code></td><td>Tạo, mở, lưu bản vẽ, xuất DXF, in PDF</td></tr>
+                                <tr><td><code>layer</code></td><td>Tạo layer, đặt màu, khóa, đóng băng</td></tr>
+                                <tr><td><code>entity</code></td><td>Vẽ và sửa: đường thẳng, chữ nhật, polyline, cung tròn, hatch, copy, move</td></tr>
+                                <tr><td><code>annotation</code></td><td>Chữ, dim, đường dẫn ghi chú</td></tr>
+                                <tr><td><code>block</code></td><td>Chèn block, đọc và sửa thuộc tính</td></tr>
+                                <tr><td><code>view</code></td><td>Zoom, chụp màn hình bản vẽ</td></tr>
+                                <tr><td><code>system</code></td><td>Kiểm tra kết nối, <code>batch</code>, <code>execute_lisp</code></td></tr>
+                                <tr><td><code>pid</code></td><td>Sơ đồ công nghệ đường ống (không dùng hôm nay)</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <aside class="notes">Học viên không cần gõ tên lệnh. Họ nói bằng lời, Claude tự chọn. Bảng này để họ hiểu Claude làm được gì và không làm được gì.</aside>
+            </section>
+
+            <!-- ================= SLIDE 12: HIEU QUA KHONG CHI DO MODEL ================= -->
+            <section class="slide" data-slide="12" data-title="Hiệu Quả Không Chỉ Do Model">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 12 / 30</div>
+                    <h2 class="slide-title">Hiệu Quả Không Chỉ Do Model</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="section-label reveal">Tổ hợp quyết định kết quả:</div>
+                    <div class="formula reveal">
+                        <div class="term">Model<small>(Buổi 01)</small></div>
+                        <div class="plus">+</div>
+                        <div class="term">Skill<small>(Buổi 02)</small></div>
+                        <div class="plus">+</div>
+                        <div class="term accent">MCP và công cụ<small>(Buổi 03)</small></div>
+                    </div>
+                    <div class="section-label reveal" style="margin-top: 16px;">Một lượt dựng bản vẽ gồm hàng chục đến hàng trăm lần gọi lệnh</div>
+                    <ul class="bullet-list reveal">
+                        <li>Mỗi lần gọi lệnh đều tiêu hạn mức sử dụng.</li>
+                        <li>Ra lệnh gọn thì tiết kiệm: vẽ 17 món nội thất bằng <strong>một lệnh <code>batch</code></strong> thay vì 17 lệnh riêng.</li>
+                    </ul>
+                </div>
+                <aside class="notes">Nhắc lại phần Quota và Context Window của Buổi 01. Lệnh `batch` và hỗ trợ chữ tiếng Việt là hai điểm repo `vn-autocad-claude` bổ sung so với bản gốc.</aside>
+            </section>
+
+            <!-- ================= SLIDE 13: CAI DAT MCP: 5 BUOC ================= -->
+            <section class="slide" data-slide="13" data-title="Cài Đặt MCP: 5 Bước">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 13 / 30</div>
+                    <h2 class="slide-title">Cài Đặt MCP: 5 Bước</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="table-wrap reveal">
+                        <table class="swiss-table">
+                            <thead><tr><th style="width: 10%;">Bước</th><th style="width: 42%;">Việc làm</th><th>Dấu hiệu đã xong</th></tr></thead>
+                            <tbody>
+                                <tr><td class="num">1</td><td>Tải mã nguồn</td><td>Có thư mục <code>vn-autocad-claude</code></td></tr>
+                                <tr><td class="num">2</td><td>Cài thư viện</td><td>Có thư mục con <code>.venv</code></td></tr>
+                                <tr><td class="num">3</td><td>Nạp <code>mcp_dispatch.lsp</code> vào AutoCAD</td><td>AutoCAD báo đã nạp MCP Dispatch</td></tr>
+                                <tr><td class="num">4</td><td>Khai báo MCP cho Claude</td><td>Claude liệt kê được <code>autocad-mcp</code></td></tr>
+                                <tr><td class="num">5</td><td>Kiểm tra kết nối</td><td>Claude báo <code>backend: file_ipc</code></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="section-label reveal">Cần có sẵn: Windows 10/11, Python 3.10 trở lên, Git, <code>uv</code>, AutoCAD</div>
+                </div>
+                <aside class="notes">Kiểm tra nhanh bằng giơ tay: ai đã xong checklist ở nhà. Chia nhóm để người xong rồi kèm người chưa xong.</aside>
+            </section>
+
+            <!-- ================= SLIDE 14: BUOC 1 VA 2: TAI VE VA CAI ================= -->
+            <section class="slide" data-slide="14" data-title="Bước 1 Và 2: Tải Về Và Cài">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 14 / 30</div>
+                    <h2 class="slide-title">Bước 1 Và 2: Tải Về Và Cài</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-code">
+                        <div class="stack reveal">
+                            <div class="terminal-box">
+                                <div class="terminal-header"><span class="sq"></span><span class="terminal-title">bash</span></div>
+<pre class="terminal-body">git clone https://github.com/andyluu98/vn-autocad-claude.git</pre>
+                            </div>
+                            <div class="terminal-box">
+                                <div class="terminal-header"><span class="sq"></span><span class="terminal-title">bash</span></div>
+<pre class="terminal-body">cd vn-autocad-claude</pre>
+                            </div>
+                            <div class="terminal-box">
+                                <div class="terminal-header"><span class="sq"></span><span class="terminal-title">bash</span></div>
+<pre class="terminal-body">uv sync</pre>
+                            </div>
+                        </div>
+                        <div class="swiss-card highlight reveal">
+                            <div class="section-label">Lưu ý:</div>
+                            <p class="body-text">README của repo còn ghi địa chỉ <code>puran-water/autocad-mcp</code>. Đó là bản gốc, <strong>không có hỗ trợ chữ tiếng Việt</strong>. Dùng đúng địa chỉ trên slide này.</p>
+                        </div>
+                    </div>
+                </div>
+                <aside class="notes">Có thể nhờ chính Claude chạy ba lệnh này. Prompt: "Tải repo andyluu98/vn-autocad-claude về thư mục C:\tools và chạy uv sync, báo tôi khi có thư mục .venv."</aside>
+            </section>
+
+            <!-- ================= SLIDE 15: BUOC 3: NAP DOAN MA TRUNG GIAN ================= -->
+            <section class="slide" data-slide="15" data-title="Bước 3: Nạp Đoạn Mã Trung Gian Vào AutoCAD">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 15 / 30</div>
+                    <h2 class="slide-title">Bước 3: Nạp Đoạn Mã Trung Gian Vào AutoCAD</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-split-64" style="align-items: center;">
+                        <div class="swiss-card reveal">
+                            <ol class="step-list">
+                                <li><span class="n">1</span><span>Mở AutoCAD, tạo bản vẽ mới.</span></li>
+                                <li><span class="n">2</span><span>Gõ <code>APPLOAD</code>.</span></li>
+                                <li><span class="n">3</span><span>Tìm tới <code>vn-autocad-claude/lisp-code/mcp_dispatch.lsp</code>, bấm <strong>Load</strong>.</span></li>
+                                <li><span class="n">4</span><span>Thêm file vào <strong>Startup Suite</strong> để lần sau AutoCAD tự nạp.</span></li>
+                            </ol>
+                        </div>
+                        <div class="swiss-card highlight reveal">
+                            <div class="section-label">Dấu hiệu đã xong:</div>
+                            <p class="body-text">Dòng lệnh AutoCAD hiện thông báo đã nạp MCP Dispatch.</p>
+                        </div>
+                    </div>
+                </div>
+                <aside class="notes">Đây là bước hay bị quên nhất ở những lần mở máy sau. Startup Suite giải quyết việc đó.</aside>
+            </section>
+
+            <!-- ================= SLIDE 16: BUOC 4: KHAI BAO MCP CHO CLAUDE ================= -->
+            <section class="slide" data-slide="16" data-title="Bước 4: Khai Báo MCP Cho Claude">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 16 / 30</div>
+                    <h2 class="slide-title">Bước 4: Khai Báo MCP Cho Claude</h2>
+                </div>
+                <div class="slide-body">
+                    <p class="body-text reveal">Tạo file <code>.mcp.json</code> ở thư mục gốc dự án:</p>
+                    <div class="grid-code">
+                        <div class="terminal-box reveal">
+                            <div class="terminal-header"><span class="sq"></span><span class="terminal-title">json</span></div>
+<pre class="terminal-body">{
+  "mcpServers": {
+    "autocad-mcp": {
+      "command": "C:\\path\\to\\vn-autocad-claude\\.venv\\Scripts\\python.exe",
+      "args": ["-m", "autocad_mcp"],
+      "env": { "AUTOCAD_MCP_BACKEND": "auto" }
+    }
+  }
+}</pre>
+                        </div>
+                        <div class="swiss-card reveal">
+                            <ul class="bullet-list">
+                                <li>Thay <code>C:\\path\\to</code> bằng đường dẫn thật.</li>
+                                <li>Mở <strong>phiên Claude mới</strong> để nạp khai báo.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <aside class="notes">Nối lại Slide 08: đây là khai báo cấp dự án. Học viên có thể nhờ Claude tạo file. Prompt: "Tạo file .mcp.json ở gốc dự án khai báo máy chủ autocad-mcp, dùng python trong .venv của thư mục C:\tools\vn-autocad-claude."</aside>
+            </section>
+
+            <!-- ================= SLIDE 17: BUOC 5: KIEM TRA VA XU LY LOI ================= -->
+            <section class="slide" data-slide="17" data-title="Bước 5: Kiểm Tra Và Xử Lý Lỗi">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 17 / 30</div>
+                    <h2 class="slide-title">Bước 5: Kiểm Tra Và Xử Lý Lỗi</h2>
+                </div>
+                <div class="slide-body" style="gap: 18px;">
+                    <div class="terminal-box reveal">
+                        <div class="terminal-header"><span class="sq"></span><span class="terminal-title">Prompt kiểm tra:</span></div>
+<pre class="terminal-body">Kiểm tra trạng thái kết nối AutoCAD MCP và cho tôi biết đang chạy ở chế độ nào.</pre>
+                    </div>
+                    <div class="table-wrap reveal">
+                        <table class="swiss-table">
+                            <thead><tr><th style="width: 34%;">Hiện tượng</th><th>Hướng xử lý</th></tr></thead>
+                            <tbody>
+                                <tr><td>Claude chờ rất lâu không trả lời</td><td>AutoCAD chưa mở, chưa nạp <code>mcp_dispatch.lsp</code>, hoặc đang có hộp thoại mở</td></tr>
+                                <tr><td>Luôn ra <code>ezdxf</code> dù AutoCAD đang mở</td><td>Mở Claude trước, mở AutoCAD sau: yêu cầu Claude "khởi tạo lại kết nối AutoCAD MCP". Vẫn không được thì nạp lại <code>mcp_dispatch.lsp</code></td></tr>
+                                <tr><td>Ảnh chụp bản vẽ ra toàn màu đen</td><td>Cửa sổ AutoCAD đang thu nhỏ. Mở cửa sổ lên lại</td></tr>
+                                <tr><td>Hết thời gian chờ khi vẽ nhiều</td><td>Tăng <code>AUTOCAD_MCP_IPC_TIMEOUT</code></td></tr>
+                                <tr><td>Claude không thấy <code>autocad-mcp</code></td><td>Chưa mở phiên mới; hoặc <code>.mcp.json</code> đặt sai thư mục</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <aside class="notes">Học viên ra `file_ipc` thì chụp màn hình lại ngay, đó là sản phẩm nộp số 1 của D3. Ai ra `ezdxf` vẫn làm Lab được, chỉ khác là kết quả ra file DXF. Thứ tự mở đúng: AutoCAD trước, Claude sau. Hai lỗi `ezdxf` và ảnh đen đã gặp thật khi chạy thử trên AutoCAD 2027 ngày 30/09/2026.</aside>
+            </section>
+
+            <!-- ================= SLIDE 18: BAI TOAN: CHI CO MOT TAM HINH ================= -->
+            <section class="slide" data-slide="18" data-title="Bài Toán: Chỉ Có Một Tấm Hình">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="figure-grid">
+                    <div class="figure-panel reveal">
+                        <img src="demo/01_mat-bang-can-ho-mau.png" alt="Mặt bằng bố trí nội thất căn hộ mẫu">
+                    </div>
+                    <div class="figure-side reveal">
+                        <div>
+                            <div class="slide-category">SLIDE 18 / 30</div>
+                            <h2 class="slide-title">Bài Toán: Chỉ Có Một Tấm Hình</h2>
+                        </div>
+                        <ul class="bullet-list">
+                            <li>Mặt bằng bố trí nội thất một căn hộ.</li>
+                            <li>Phủ bì <strong>6805 x 8631 mm</strong>.</li>
+                            <li>17 món nội thất có đánh số.</li>
+                            <li><strong>Không có file DWG.</strong></li>
+                        </ul>
+                    </div>
+                </div>
+                <aside class="notes">Cho lớp 30 giây nhìn hình. Hỏi: "Nếu vẽ tay lại bản này, anh chị mất bao lâu?" Ghi vài con số lên bảng để cuối buổi so lại.</aside>
+            </section>
+
+            <!-- ================= SLIDE 19: BUOC 0: DOC HINH TRUOC KHI VE ================= -->
+            <section class="slide" data-slide="19" data-title="Bước 0: Đọc Hình Trước Khi Vẽ">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 19 / 30</div>
+                    <h2 class="slide-title">Bước 0: Đọc Hình Trước Khi Vẽ</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="section-label reveal">Yêu cầu Claude tách ba loại số liệu:</div>
+                    <div class="table-wrap reveal">
+                        <table class="swiss-table">
+                            <thead><tr><th style="width: 20%;">Loại</th><th style="width: 40%;">Nghĩa</th><th>Ví dụ trên hình</th></tr></thead>
+                            <tbody>
+                                <tr><td class="rowhead"><strong>Đọc được</strong></td><td>Số ghi rõ trên hình</td><td>Tường trái dày 320, bàn ăn 1200 x 761</td></tr>
+                                <tr><td class="rowhead"><strong>Cần xác nhận lại</strong></td><td>Có số nhưng mờ, hoặc chưa rõ ứng với cạnh nào</td><td>Đoạn 1625 hay 1626 ở cạnh phải</td></tr>
+                                <tr><td class="rowhead"><strong>Hình không ghi</strong></td><td>Hình không có thông tin này</td><td>Bề rộng cửa, kích thước bồn cầu</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="quote-block reveal"><strong>Chưa có bảng này thì chưa cho Claude vẽ.</strong></div>
+                </div>
+                <aside class="notes">Đây là slide quan trọng nhất của buổi. Prompt: "Đọc hình demo/01_mat-bang-can-ho-mau.png. Chưa vẽ gì cả. Lập bảng số liệu chia ba loại: đọc được, cần xác nhận lại, hình không ghi."</aside>
+            </section>
+
+            <!-- ================= SLIDE 20: CONG KIEM BON CHUOI KICH THUOC ================= -->
+            <section class="slide" data-slide="20" data-title="Cộng Kiểm Bốn Chuỗi Kích Thước">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 20 / 30</div>
+                    <h2 class="slide-title">Cộng Kiểm Bốn Chuỗi Kích Thước</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="table-wrap reveal">
+                        <table class="swiss-table">
+                            <thead><tr><th>Chuỗi</th><th>Các đoạn</th><th>Tự cộng</th><th>Trên hình</th><th>Kết quả</th></tr></thead>
+                            <tbody>
+                                <tr><td class="rowhead">Cạnh trên</td><td class="num">320 + 1900 + 1195 + 120 + 2980 + 290</td><td class="num">6805</td><td class="num">6805</td><td>Khớp</td></tr>
+                                <tr><td class="rowhead">Cạnh dưới</td><td class="num">320 + 3095 + 120 + 300 + 2100 + 580 + 290</td><td class="num">6805</td><td class="num">6805</td><td>Khớp</td></tr>
+                                <tr><td class="rowhead">Cạnh trái</td><td class="num">2595 + 2361 + 2504 + 115 + 1056</td><td class="num">8631</td><td class="num">8631</td><td>Khớp</td></tr>
+                                <tr><td class="rowhead">Cạnh phải</td><td class="num">145 + 1625 + 120 + 2160 + 120 + 4340 + 120</td><td class="num">8630</td><td class="num">8631</td><td class="warn"><strong class="warn">Lệch 1 mm</strong></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="section-label reveal">Kiểm chéo: cạnh trên và cạnh dưới cùng cho vách ngăn dọc ở mốc 3415 đến 3535</div>
+                </div>
+                <aside class="notes">Hỏi lớp: lệch 1 mm thì làm gì? Đáp án: không tự chọn số cho khớp. Báo lệch, ghi "cần xác nhận lại", hỏi người gửi hình. Có thể đoạn 1625 thực ra là 1626.</aside>
+            </section>
+
+            <!-- ================= SLIDE 21: HINH KHONG NOI GI, VA HINH NOI SAI O DAU ================= -->
+            <section class="slide" data-slide="21" data-title="Hình Không Nói Gì, Và Hình Nói Sai Ở Đâu">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 21 / 30</div>
+                    <h2 class="slide-title">Hình Không Nói Gì, Và Hình Nói Sai Ở Đâu</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-2col">
+                        <div class="swiss-card highlight reveal">
+                            <div class="section-label">Sai lệch trong chính tấm hình:</div>
+                            <ul class="bullet-list">
+                                <li>Trên mặt bằng, bàn trà là <strong>số 17</strong>.</li>
+                                <li>Trong bảng chú thích, dòng cuối ghi <strong>số 16, "BÀN TRÀ"</strong>. Số 16 bị lặp, không có dòng 17.</li>
+                            </ul>
+                        </div>
+                        <div class="swiss-card reveal">
+                            <div class="section-label">Hình không ghi:</div>
+                            <ul class="bullet-list">
+                                <li>Bề rộng cửa chính, cửa vệ sinh, cửa phòng ngủ.</li>
+                                <li>Kích thước lavabo, bồn cầu, bếp, tủ lạnh.</li>
+                                <li>Bề dày tường trái đoạn dưới khu bếp.</li>
+                                <li>Tên phòng, tỷ lệ bản vẽ, cao độ.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="quote-block reveal"><strong>Thấy sai lệch thì báo, không tự sửa. Thiếu dữ liệu thì nêu giả định.</strong></div>
+                </div>
+                <aside class="notes">Lưu ý cho lớp: "KỆ TIVI" có ở số 6 và 12, "TỦ ÁO" có ở số 11 và 16. Đó là hai món ở hai phòng khác nhau, không phải lỗi. Lỗi thật chỉ có số 16 bị lặp.</aside>
+            </section>
+
+            <!-- ================= SLIDE 22: TRINH TU DUNG BAN VE: 7 BUOC ================= -->
+            <section class="slide" data-slide="22" data-title="Trình Tự Dựng Bản Vẽ: 7 Bước">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 22 / 30</div>
+                    <h2 class="slide-title">Trình Tự Dựng Bản Vẽ: 7 Bước</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="table-wrap reveal">
+                        <table class="swiss-table">
+                            <thead><tr><th style="width: 10%;">Bước</th><th style="width: 56%;">Nội dung</th><th>Nhóm lệnh</th></tr></thead>
+                            <tbody>
+                                <tr><td class="num">1</td><td>Tạo 6 layer</td><td><code>layer</code></td></tr>
+                                <tr><td class="num">2</td><td>Tường bao 6805 x 8631</td><td><code>entity</code></td></tr>
+                                <tr><td class="num">3</td><td>Vách ngăn 120</td><td><code>entity</code></td></tr>
+                                <tr><td class="num">4</td><td>Hatch tường</td><td><code>entity</code></td></tr>
+                                <tr><td class="num">5</td><td>Cửa đi, cửa lùa, cửa sổ</td><td><code>entity</code></td></tr>
+                                <tr><td class="num">6</td><td>17 món nội thất và số ký hiệu</td><td><code>system</code> (<code>batch</code>), <code>annotation</code></td></tr>
+                                <tr><td class="num">7</td><td>Dim, bảng chú thích, tên bản vẽ, chụp màn hình soát</td><td><code>annotation</code>, <code>view</code></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="body-text reveal"><strong>Layer:</strong> <code>L_TUONG</code>, <code>L_CUA</code>, <code>L_NOITHAT</code>, <code>L_DIM</code>, <code>L_TEXT</code>, <code>L_HATCH</code></p>
+                </div>
+                <aside class="notes">Trình tự này đúng thứ tự người vẽ tay vẫn làm: khung trước, chi tiết sau, chữ và dim cuối cùng. Làm từng bước, dừng lại xem kết quả, không ra một lệnh "vẽ hết cho tôi".</aside>
+            </section>
+
+            <!-- ================= SLIDE 23: PROMPT MAU: VE TUONG VA VACH ================= -->
+            <section class="slide" data-slide="23" data-title="Prompt Mẫu: Vẽ Tường Và Vách">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 23 / 30</div>
+                    <h2 class="slide-title">Prompt Mẫu: Vẽ Tường Và Vách</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-code">
+                        <div class="terminal-box reveal">
+                            <div class="terminal-header"><span class="sq"></span><span class="terminal-title">Prompt</span></div>
+<pre class="terminal-body">Dựa trên bảng số liệu vừa lập, vẽ tường bao và vách ngăn vào AutoCAD.
+Gốc tọa độ đặt tại góc ngoài dưới bên trái. Đơn vị mm.
+Chỉ dùng số thuộc loại "đọc được".
+Kích thước nào thuộc loại "hình không ghi" thì dừng lại hỏi tôi trước khi vẽ.
+Vẽ xong hãy báo kích thước phủ bì thực tế của bản vẽ.</pre>
+                        </div>
+                        <div class="swiss-card reveal">
+                            <div class="section-label">Ba thứ làm nên một prompt vẽ tốt:</div>
+                            <ol class="step-list">
+                                <li><span class="n">1</span><span>Chốt gốc tọa độ và đơn vị.</span></li>
+                                <li><span class="n">2</span><span>Nói rõ được dùng loại số liệu nào.</span></li>
+                                <li><span class="n">3</span><span>Bắt Claude báo lại một con số để mình đối chiếu.</span></li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <aside class="notes">Thị phạm trực tiếp. Khi Claude hỏi lại về kích thước không ghi, chỉ cho lớp thấy: đó là hành vi đúng, không phải Claude kém.</aside>
+            </section>
+
+            <!-- ================= SLIDE 24: CLAUDE TU SOAT, NGUOI DO LAI ================= -->
+            <section class="slide" data-slide="24" data-title="Claude Tự Soát, Người Đo Lại">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 24 / 30</div>
+                    <h2 class="slide-title">Claude Tự Soát, Người Đo Lại</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-code">
+                        <div class="terminal-box reveal">
+                            <div class="terminal-header"><span class="sq"></span><span class="terminal-title">Prompt soát:</span></div>
+<pre class="terminal-body">Zoom toàn bộ bản vẽ, chụp màn hình và tự kiểm tra:
+1. Phủ bì đúng 6805 x 8631.
+2. Vách ngăn dọc nằm ở mốc 3415 đến 3535 tính từ mép ngoài tường trái.
+3. Đủ 17 số ký hiệu nội thất.
+Lập bảng: hạng mục, số trên hình, số trên bản vẽ, đạt hay không.
+Điểm nào không chắc thì ghi "cần kỹ sư kiểm tra lại".</pre>
+                        </div>
+                        <div class="swiss-card highlight reveal">
+                            <div class="section-label">Sau đó kỹ sư tự đo bằng <code>DIST</code>, ít nhất 3 kích thước.</div>
+                        </div>
+                    </div>
+                </div>
+                <aside class="notes">Đo trước lớp hai kích thước do học viên chọn ngẫu nhiên. Nhấn mạnh: Claude tự soát là lớp kiểm tra thứ nhất, người đo là lớp thứ hai. Không có lớp thứ hai thì không dùng bản vẽ.</aside>
+            </section>
+
+            <!-- ================= SLIDE 25: LAB 03: DE BAI ================= -->
+            <section class="slide" data-slide="25" data-title="Lab 03: Đề Bài">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 25 / 30</div>
+                    <h2 class="slide-title">Lab 03: Đề Bài</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="section-label reveal">Tự dựng lại mặt bằng căn hộ trên máy mình (45 phút)</div>
+                    <div class="table-wrap reveal">
+                        <table class="swiss-table">
+                            <thead><tr><th style="width: 10%;">Bước</th><th style="width: 10%;">Phút</th><th>Việc làm</th></tr></thead>
+                            <tbody>
+                                <tr><td class="num">1</td><td class="num">5</td><td>Lập bảng số liệu ba loại, cộng kiểm bốn chuỗi</td></tr>
+                                <tr><td class="num">2</td><td class="num">5</td><td>Tạo 6 layer</td></tr>
+                                <tr><td class="num">3</td><td class="num">10</td><td>Tường bao, vách ngăn, hatch</td></tr>
+                                <tr><td class="num">4</td><td class="num">5</td><td>Cửa, ghi rõ giả định</td></tr>
+                                <tr><td class="num">5</td><td class="num">10</td><td>17 món nội thất bằng <code>batch</code></td></tr>
+                                <tr><td class="num">6</td><td class="num">5</td><td>Dim, bảng chú thích, tên bản vẽ</td></tr>
+                                <tr><td class="num">7</td><td class="num">5</td><td>Soát, đo <code>DIST</code>, lưu DWG, xuất PDF</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <aside class="notes">Trợ giảng đi vòng kiểm tra Bước 1 trước. Ai chưa có bảng số liệu thì chưa được sang Bước 2.</aside>
+            </section>
+
+            <!-- ================= SLIDE 26: BA TANG DU PHONG ================= -->
+            <section class="slide" data-slide="26" data-title="Ba Tầng Dự Phòng">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 26 / 30</div>
+                    <h2 class="slide-title">Ba Tầng Dự Phòng</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="table-wrap reveal">
+                        <table class="swiss-table">
+                            <thead><tr><th style="width: 42%;">Tình huống</th><th>Cách làm Lab</th></tr></thead>
+                            <tbody>
+                                <tr><td>Có AutoCAD, MCP đã thông</td><td>Vẽ trực tiếp qua MCP</td></tr>
+                                <tr><td>Không có AutoCAD, hoặc AutoCAD không tương thích</td><td>Chế độ <code>ezdxf</code>: Claude sinh file DXF</td></tr>
+                                <tr><td>Không cài được MCP</td><td>Vẫn làm Bước 1, rồi nhờ Claude viết file <code>.lsp</code> và <code>APPLOAD</code> như cách cũ</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="quote-block reveal">Không ai bị bỏ lại. Bước 1 (đọc hình, kiểm số liệu) ai cũng làm được và chiếm 25 điểm.</div>
+                </div>
+                <aside class="notes">Chế độ `ezdxf` không có `offset`, `fillet`, `chamfer`, `plot_pdf`. Học viên dùng chế độ này nộp file DXF thay cho DWG.</aside>
+            </section>
+
+            <!-- ================= SLIDE 27: SAU QUY TAC AN TOAN KHI DE AI VE ================= -->
+            <section class="slide" data-slide="27" data-title="Sáu Quy Tắc An Toàn Khi Để AI Vẽ">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 27 / 30</div>
+                    <h2 class="slide-title">Sáu Quy Tắc An Toàn Khi Để AI Vẽ</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-3col reveal">
+                        <div class="num-card"><span class="n">1</span><strong>Đọc trước, vẽ sau.</strong> Chưa có bảng số liệu thì chưa vẽ.</div>
+                        <div class="num-card"><span class="n">2</span><strong>Thiếu dữ liệu thì nêu giả định.</strong> Giả định phải được đánh dấu trên bản vẽ.</div>
+                        <div class="num-card"><span class="n">3</span><strong>Thấy sai lệch thì báo, không tự sửa.</strong></div>
+                        <div class="num-card"><span class="n">4</span><strong>Chỉ vẽ trên bản vẽ nháp.</strong> Lệnh tạo bản vẽ mới sẽ xóa sạch bản đang mở.</div>
+                        <div class="num-card"><span class="n">5</span><strong>Người đo lại</strong> bằng <code>DIST</code> trước khi dùng bản vẽ.</div>
+                        <div class="num-card"><span class="n">6</span><strong>Che thông tin chủ đầu tư</strong> trước khi đưa hình dự án thật vào AI.</div>
+                    </div>
+                </div>
+                <aside class="notes">Bản vẽ AI dựng là bản sơ bộ. AI hỗ trợ dựng hình, kỹ sư chịu trách nhiệm kiểm tra và ký duyệt. Nối lại ranh giới an toàn đã nói ở Buổi 02.</aside>
+            </section>
+
+            <!-- ================= SLIDE 28: NGHIEM THU SAN PHAM D3 ================= -->
+            <section class="slide" data-slide="28" data-title="Nghiệm Thu Sản Phẩm D3">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 28 / 30</div>
+                    <h2 class="slide-title">Nghiệm Thu Sản Phẩm D3</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-2col" style="align-items: center;">
+                        <div class="swiss-card reveal">
+                            <div class="section-label">Hồ sơ nộp:</div>
+                            <ol class="step-list">
+                                <li><span class="n">1</span><span>Ảnh chụp Claude báo kết nối MCP thành công.</span></li>
+                                <li><span class="n">2</span><span>Bảng số liệu ba loại, có phép cộng kiểm.</span></li>
+                                <li><span class="n">3</span><span>File <code>.dwg</code> (hoặc <code>.dxf</code>) và PDF.</span></li>
+                                <li><span class="n">4</span><span>Danh sách giả định và kết quả đo <code>DIST</code>.</span></li>
+                            </ol>
+                        </div>
+                        <div class="table-wrap reveal">
+                            <table class="swiss-table">
+                                <thead><tr><th>Tiêu chí</th><th style="width: 22%;">Điểm</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Thiết lập MCP</td><td class="num">25</td></tr>
+                                    <tr><td>Đọc hình và kiểm soát số liệu</td><td class="num">25</td></tr>
+                                    <tr><td>Độ chính xác hình học</td><td class="num">25</td></tr>
+                                    <tr><td>Hoàn thiện bản vẽ</td><td class="num">15</td></tr>
+                                    <tr><td>Giả định và đo kiểm</td><td class="num">10</td></tr>
+                                    <tr><td><strong>Tổng</strong></td><td class="num"><strong>100</strong></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <aside class="notes">Mời 3 học viên chiếu bản vẽ. Cả lớp cùng soát theo đáp án tại `demo/02_bang-so-lieu-doc-tu-hinh.md`.</aside>
+            </section>
+
+            <!-- ================= SLIDE 29: GIAO VIEC CHO BUOI 04 ================= -->
+            <section class="slide" data-slide="29" data-title="Giao Việc Cho Buổi 04">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 29 / 30</div>
+                    <h2 class="slide-title">Giao Việc Cho Buổi 04</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-2col">
+                        <div class="swiss-card navy-highlight reveal">
+                            <div class="section-label">Từ bản vẽ căn hộ vừa dựng, Buổi 04 sẽ bóc khối lượng:</div>
+                            <ul class="bullet-list">
+                                <li>Chiều dài tường và vách ngăn.</li>
+                                <li>Diện tích sàn.</li>
+                                <li>Danh mục 17 món nội thất.</li>
+                            </ul>
+                        </div>
+                        <div class="swiss-card reveal">
+                            <div class="section-label">Việc làm trước ở nhà:</div>
+                            <ul class="bullet-list">
+                                <li>Hoàn thiện bản vẽ nếu chưa xong.</li>
+                                <li>Lưu file <code>.dwg</code> vào thư mục <code>03_Thiet_Ke_Va_AutoCAD/</code> của dự án.</li>
+                                <li>Chép skill đang dùng thường xuyên sang cấp toàn máy nếu muốn dùng ở mọi dự án.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <aside class="notes">Nhắc học viên chưa cài xong MCP liên hệ trợ giảng trước Buổi 04.</aside>
+            </section>
+
+            <!-- ================= SLIDE 30: TONG KET BUOI 03 ================= -->
+            <section class="slide" data-slide="30" data-title="Tổng Kết Buổi 03">
+                <div class="slide-header">
+                    <div class="brand-badge"><span class="box-icon"></span> CES GLOBAL</div>
+                    <div class="session-tag">BUỔI 03: <span>ĐIỀU KHIỂN AUTOCAD BẰNG AI QUA MCP</span></div>
+                </div>
+                <div class="slide-title-wrap">
+                    <div class="slide-category">SLIDE 30 / 30</div>
+                    <h2 class="slide-title">Tổng Kết Buổi 03</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="section-label reveal">Ba điều mang về:</div>
+                    <div class="grid-3col reveal">
+                        <div class="num-card"><span class="n">1</span><strong>Đặt đúng chỗ:</strong> thứ đi theo người để cấp toàn máy, thứ đi theo công trình để cấp dự án.</div>
+                        <div class="num-card"><span class="n">2</span><strong>MCP cho AI đôi tay:</strong> Claude vẽ thẳng vào AutoCAD và tự nhìn lại kết quả.</div>
+                        <div class="num-card"><span class="n">3</span><strong>Kỹ sư giữ quyền duyệt:</strong> đọc trước vẽ sau, giả định phải nói ra, người đo lại.</div>
+                    </div>
+                    <div class="quote-block reveal"><em>"AI đứng bếp, kỹ sư nếm và duyệt."</em></div>
+                </div>
+                <aside class="notes">Quay lại con số thời gian vẽ tay lớp ước lượng ở Slide 18, so với thời gian thực tế của Lab. Để học viên tự rút kết luận.</aside>
+            </section>
+
+
+            <!-- ================= THANH DIEU KHIEN ================= -->
+            <nav class="deck-hud" aria-label="Điều khiển slide">
+                <div class="hud-left">
+                    <div class="hud-counter" id="slideIndicator">01 / 30</div>
+                    <div class="hud-progress-track"><div class="hud-progress-bar" id="progressBar"></div></div>
+                </div>
+                <div class="hud-buttons">
+                    <div class="font-scaler-group">
+                        <button class="scaler-btn" id="btnFontDec" title="Thu nhỏ chữ">A-</button>
+                        <button class="scaler-btn" id="btnFontReset" title="Đặt lại cỡ chữ">100%</button>
+                        <button class="scaler-btn" id="btnFontInc" title="Phóng to chữ">A+</button>
+                    </div>
+                    <button class="hud-btn" id="btnPrev" title="Phím mũi tên trái">Trước</button>
+                    <button class="hud-btn hud-btn-primary" id="btnNext" title="Phím mũi tên phải hoặc Space">Sau</button>
+                    <button class="hud-btn" id="btnOverview" title="Phím tắt: O">Danh sách (O)</button>
+                    <button class="hud-btn" id="btnNotes" title="Phím tắt: N">Ghi chú (N)</button>
+                    <button class="hud-btn" id="btnFullscreen" title="Phím tắt: F">Toàn màn hình (F)</button>
+                </div>
+            </nav>
+        </main>
+    </div>
+
+    <!-- ================= DANH SACH SLIDE (PHIM O) ================= -->
+    <div class="modal-overlay" id="overviewModal">
+        <div class="modal-card">
+            <div class="modal-head">
+                <h3>DANH SÁCH SLIDE: BUỔI 03</h3>
+                <button class="hud-btn" id="btnCloseOverview">Đóng (Esc)</button>
+            </div>
+            <div class="overview-grid" id="overviewGrid"></div>
+        </div>
+    </div>
+
+    <!-- ================= NGAN GHI CHU GIANG VIEN (PHIM N) ================= -->
+    <div class="speaker-drawer" id="speakerDrawer">
+        <div class="drawer-head">
+            <div class="drawer-tag">GHI CHÚ GIẢNG VIÊN</div>
+            <button class="hud-btn" id="btnCloseNotes">Đóng (N)</button>
+        </div>
+        <div id="speakerContent"></div>
+    </div>
+
+    <script>
+        /* ==========================================================================
+           BO DIEU KHIEN SLIDE
+           - Thu phong san khau 1920x1080 theo cua so
+           - Dieu huong: phim mui ten, Space, PageUp/PageDown, Home/End, lan chuot, vuot man hinh
+           - O: danh sach slide, N: ghi chu giang vien, F: toan man hinh, Esc: dong
+           - Ghi chu lay tu phan tu <aside class="notes"> nam trong tung slide
+           ========================================================================== */
+        (function () {
+            const stage = document.getElementById('deckStage');
+            const slides = Array.from(document.querySelectorAll('.slide'));
+            const totalSlides = slides.length;
+            let current = 0;
+
+            const slideIndicator = document.getElementById('slideIndicator');
+            const progressBar = document.getElementById('progressBar');
+            const overviewModal = document.getElementById('overviewModal');
+            const overviewGrid = document.getElementById('overviewGrid');
+            const speakerDrawer = document.getElementById('speakerDrawer');
+            const speakerContent = document.getElementById('speakerContent');
+            const btnFontReset = document.getElementById('btnFontReset');
+            let fontScale = 1;
+
+            const pad = (n) => (n < 10 ? '0' + n : '' + n);
+
+            /* 1. Thu phong san khau co dinh 16:9 */
+            function fitStage() {
+                const factor = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+                const x = (window.innerWidth - 1920 * factor) / 2;
+                const y = (window.innerHeight - 1080 * factor) / 2;
+                stage.style.transform = 'translate(' + x + 'px, ' + y + 'px) scale(' + factor + ')';
+            }
+            window.addEventListener('resize', fitStage);
+            window.addEventListener('load', fitStage);
+            /* Khung xem truoc nhung trong ung dung co the doi kich thuoc ma khong phat su kien resize */
+            if (window.ResizeObserver) { new ResizeObserver(fitStage).observe(document.documentElement); }
+
+            /* 2. Hien slide */
+            function showSlide(index) {
+                if (index < 0 || index >= totalSlides) return;
+                current = index;
+                slides.forEach((s, i) => {
+                    s.classList.toggle('active', i === current);
+                    s.classList.toggle('visible', i === current);
+                });
+                slideIndicator.textContent = pad(current + 1) + ' / ' + pad(totalSlides);
+                progressBar.style.width = ((current + 1) / totalSlides * 100) + '%';
+
+                const note = slides[current].querySelector('.notes');
+                speakerContent.textContent = note ? note.textContent.trim() : 'Slide này không có ghi chú.';
+
+                overviewGrid.querySelectorAll('.overview-item').forEach((item, i) => {
+                    item.classList.toggle('active', i === current);
+                });
+                try { history.replaceState(null, '', '#' + (current + 1)); } catch (err) { /* file:// co the chan */ }
+            }
+
+            const nextSlide = () => showSlide(current + 1);
+            const prevSlide = () => showSlide(current - 1);
+
+            function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(() => {});
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+
+            /* 3. Phong chu: gioi han 85% den 115% de khong tran slide */
+            function setFontScale(v) {
+                fontScale = Math.min(Math.max(v, 0.85), 1.15);
+                document.documentElement.style.setProperty('--font-scale', fontScale);
+                btnFontReset.textContent = Math.round(fontScale * 100) + '%';
+            }
+            document.getElementById('btnFontInc').addEventListener('click', () => setFontScale(fontScale + 0.05));
+            document.getElementById('btnFontDec').addEventListener('click', () => setFontScale(fontScale - 0.05));
+            btnFontReset.addEventListener('click', () => setFontScale(1));
+
+            /* 4. Danh sach slide va ngan ghi chu */
+            const toggleOverview = () => overviewModal.classList.toggle('active');
+            const toggleNotes = () => speakerDrawer.classList.toggle('active');
+
+            slides.forEach((s, i) => {
+                const item = document.createElement('div');
+                item.className = 'overview-item';
+                const num = document.createElement('div');
+                num.className = 'num';
+                num.textContent = 'SLIDE ' + (s.getAttribute('data-slide') || pad(i + 1));
+                const title = document.createElement('div');
+                title.className = 'title';
+                title.textContent = s.getAttribute('data-title') || '';
+                item.appendChild(num);
+                item.appendChild(title);
+                item.addEventListener('click', () => { showSlide(i); toggleOverview(); });
+                overviewGrid.appendChild(item);
+            });
+
+            document.getElementById('btnOverview').addEventListener('click', toggleOverview);
+            document.getElementById('btnCloseOverview').addEventListener('click', toggleOverview);
+            document.getElementById('btnNotes').addEventListener('click', toggleNotes);
+            document.getElementById('btnCloseNotes').addEventListener('click', toggleNotes);
+            document.getElementById('btnNext').addEventListener('click', nextSlide);
+            document.getElementById('btnPrev').addEventListener('click', prevSlide);
+            document.getElementById('btnFullscreen').addEventListener('click', toggleFullscreen);
+
+            /* 5. Ban phim */
+            window.addEventListener('keydown', (e) => {
+                if (overviewModal.classList.contains('active')) {
+                    if (e.key === 'Escape' || e.key === 'o' || e.key === 'O') toggleOverview();
+                    return;
+                }
+                switch (e.key) {
+                    case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ':
+                        e.preventDefault(); nextSlide(); break;
+                    case 'ArrowLeft': case 'ArrowUp': case 'PageUp':
+                        e.preventDefault(); prevSlide(); break;
+                    case 'Home': e.preventDefault(); showSlide(0); break;
+                    case 'End': e.preventDefault(); showSlide(totalSlides - 1); break;
+                    case 'f': case 'F': toggleFullscreen(); break;
+                    case 'o': case 'O': toggleOverview(); break;
+                    case 'n': case 'N': toggleNotes(); break;
+                    case 'Escape': speakerDrawer.classList.remove('active'); break;
+                }
+            });
+
+            /* 6. Lan chuot (co chong rung) va vuot man hinh cam ung */
+            let wheelLock = false;
+            window.addEventListener('wheel', (e) => {
+                if (wheelLock || overviewModal.classList.contains('active')) return;
+                if (e.target.closest && e.target.closest('.speaker-drawer')) return;
+                if (Math.abs(e.deltaY) < 20) return;
+                wheelLock = true;
+                if (e.deltaY > 0) nextSlide(); else prevSlide();
+                setTimeout(() => { wheelLock = false; }, 450);
+            }, { passive: true });
+
+            let touchX = null;
+            window.addEventListener('touchstart', (e) => { touchX = e.changedTouches[0].clientX; }, { passive: true });
+            window.addEventListener('touchend', (e) => {
+                if (touchX === null || overviewModal.classList.contains('active')) return;
+                const dx = e.changedTouches[0].clientX - touchX;
+                touchX = null;
+                if (Math.abs(dx) < 50) return;
+                if (dx < 0) nextSlide(); else prevSlide();
+            }, { passive: true });
+
+            /* 7. Khoi dong: doc so slide tren dia chi (vi du #18) */
+            const hashNum = parseInt(window.location.hash.replace('#', ''), 10);
+            if (!isNaN(hashNum) && hashNum >= 1 && hashNum <= totalSlides) current = hashNum - 1;
+            fitStage();
+            showSlide(current);
+        })();
+    </script>
+</body>
+</html>

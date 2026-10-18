@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buổi 05: Đội ngũ agent cho hồ sơ nhà phố</title>
+<link rel="stylesheet" href="C:/Users/Admin/.claude/skills/slidefly/assets/morph-base.css">
+<link rel="stylesheet" href="C:/Users/Admin/.claude/skills/slidefly/assets/morph-layouts.css">
+<link rel="stylesheet" href="C:/Users/Admin/.claude/skills/slidefly/assets/morph-layouts-plus.css">
+<link rel="stylesheet" href="C:/Users/Admin/.claude/skills/slidefly/assets/morph-frames.css">
+<link rel="stylesheet" href="C:/Users/Admin/.claude/skills/slidefly/assets/morph-photo.css">
+<link rel="stylesheet" href="C:/Users/Admin/.claude/skills/slidefly/assets/morph-mock.css">
+<link rel="stylesheet" href="C:/Users/Admin/.claude/skills/slidefly/assets/morph-brand.css">
+<link rel="stylesheet" href="C:/Users/Admin/.claude/skills/slidefly/assets/styles/blueprint.css">
+<link rel="stylesheet" href="C:/Users/Admin/.claude/skills/slidefly/assets/morph-motion.css">
+<link rel="stylesheet" href="C:/Users/Admin/.claude/skills/slidefly/assets/morph-viz.css">
+<link rel="stylesheet" href="C:/Users/Admin/.claude/skills/slidefly/assets/morph-icons.css">
+<style>
+/* ---------- hand-drawn figures (blueprint.art.md): white line work, paper fill under outlines ---------- */
+.art { position: absolute; overflow: visible; pointer-events: none; }
+.bp-o { fill: var(--fill); stroke: var(--line); stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
+.bp-tab { fill: var(--fill); stroke: var(--line); stroke-width: 3; }
+.bp-d { fill: none; stroke: var(--line); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.bp-t { fill: none; stroke: var(--line-soft); stroke-width: 2; stroke-linecap: round; }
+.bp-h { fill: none; stroke: var(--line-soft); stroke-width: 1.2; }
+.bp-hid { fill: none; stroke: var(--line-soft); stroke-width: 2.5; stroke-dasharray: 10 7; }
+.bp-cl { fill: none; stroke: var(--line-soft); stroke-width: 2; stroke-dasharray: 22 6 4 6; }
+.bp-ph { fill: none; stroke: var(--line-soft); stroke-width: 2; stroke-dasharray: 28 6 6 6 6 6; }
+.bp-let { fill: none; stroke: var(--line-soft); stroke-width: 6; stroke-linecap: round; }
+.bp-ar { fill: var(--line); stroke: none; }
+.bp-bal { fill: var(--fill); stroke: var(--line); stroke-width: 2.5; }
+.bp-lb { fill: var(--line); font-family: var(--font-display); font-size: 24px; font-weight: 600; letter-spacing: 0.06em; }
+.bp-sm { font-size: 19px; }
+.bp-mono { fill: var(--line); font-family: var(--font-mono); font-size: 19px; font-weight: 600; }
+
+/* ---------- shared ---------- */
+.deck-stage { --viz-hot: #e7f0f9; }
+.slide .src { font: 400 22px/1.35 var(--font-body); color: var(--muted); margin: 0; }
+.slide code, .slide .mono { font-family: var(--font-mono); }
+.ft { position: absolute; left: 120px; top: 100px; margin: 0; font: 600 62px/1.1 var(--font-display); letter-spacing: 0.03em; text-transform: uppercase; color: var(--fg); max-width: 1560px; }
+.chot { margin: 0; font: 600 34px/1.3 var(--font-display); letter-spacing: 0.02em; color: var(--fg); border-left: 6px solid var(--line); padding: 6px 0 6px 26px; }
+.abs { position: absolute; }
+.bal { position: absolute; width: 52px; height: 52px; border-radius: 50%; background: var(--fill); border: 3px solid var(--line); box-sizing: border-box;
+  font: 600 24px/46px var(--font-mono); text-align: center; color: var(--fg); }
+.mock-term { background: #0b1a3d; --mock-bar: #132a5c; }
+.mock-term .cmd::before { color: var(--muted); }
+
+/* 01 cover */
+.deck-stage[data-layout="cover"] [data-actor="balloon"] { --o: 0; }
+/* 24: the gear rolls off the sheet so the source line stays clear */
+.deck-stage:has(.slide.active.s-num) [data-actor="gear"] { --x: -420px; }
+.deck-stage .slide .ctable .no { opacity: .78; }
+.statement mark { background: var(--deep); outline: 3px solid var(--line); padding: 0 .12em; }
+.s-cover .c-msg { margin: 26px 0 0; font: 600 40px/1.25 var(--font-display); letter-spacing: 0.02em; color: var(--fg); border-left: 6px solid var(--line); padding: 4px 0 4px 26px; }
+.s-cover .subtitle { font-size: 32px; color: var(--muted); }
+
+/* 02 stairs: a note in the empty lower-left corner */
+.s-goal .note { left: 120px; bottom: 110px; width: 600px; }
+.deck-stage .slide.s-goal[data-frame="stairs"] .bullets li { padding-top: 16px; padding-bottom: 16px; }
+
+/* 04, compare photos */
+.s-cmp .viz { left: 120px; top: 250px; width: 1180px; height: 664px; border: 4px solid var(--line); box-sizing: border-box; }
+.s-cmp .cmp-panel { padding: 0; overflow: hidden; }
+.s-cmp .cmp-panel img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.s-cmp .cap { position: absolute; left: 1360px; top: 260px; width: 440px; }
+.s-cmp .cap p { font: 400 32px/1.35 var(--font-body); margin: 0 0 30px; color: var(--fg); }
+.s-cmp .cap .q { font: 600 42px/1.2 var(--font-display); letter-spacing: 0.02em; border-top: 4px solid var(--line); padding-top: 22px; }
+
+/* 07 bins */
+.s-bin .bin { position: absolute; top: 360px; width: 520px; height: 540px; border: 3px solid var(--line-soft); border-top: 14px solid var(--line); box-sizing: border-box; padding: 18px 22px 0; background: rgba(15, 35, 80, 0.28); }
+.s-bin .bin.r { border: 6px double var(--line); border-top: 14px solid var(--line); }
+.s-bin .bin h3 { margin: 0 0 6px; font: 600 36px/1.1 var(--font-display); letter-spacing: 0.03em; text-transform: uppercase; color: var(--fg); }
+.s-bin .bin p { margin: 0; font: 400 28px/1.3 var(--font-body); color: var(--muted); }
+.s-bin .chip { position: absolute; width: 480px; padding: 22px 22px; background: var(--fill); border: 2px solid var(--line); border-left: 12px solid var(--line); color: var(--fg); font: 600 29px/1.25 var(--font-body); box-sizing: border-box; }
+
+/* 08 agent file: the code sits in the media well */
+.s-file .code { background: #0b1a3d; border: 3px solid var(--line); box-sizing: border-box; color: var(--fg); font: 400 27px/1.5 var(--font-mono); padding: 0 0 24px; overflow: hidden; }
+.s-file .code .bar { background: var(--fill); border-bottom: 2px solid var(--line-soft); color: var(--muted); font: 600 24px/1 var(--font-mono); padding: 18px 26px; margin-bottom: 20px; }
+.s-file .code p { margin: 0 28px; white-space: pre-wrap; }
+.s-file .code .k { color: #ffffff; font-weight: 600; } .s-file .code .c { color: var(--fg); } .s-file .code .d { color: var(--muted); }
+
+/* 09 break test */
+.s-pha .chot { left: 120px; top: 640px; width: 800px; font-size: 44px; }
+.s-pha .src { left: 120px; top: 900px; width: 800px; }
+
+/* 10 temporary subagents */
+.s-gather .lane { position: absolute; top: 270px; width: 390px; height: 280px; background: var(--fill); border: 3px solid var(--line-soft); border-top: 12px solid var(--line); padding: 24px 26px; box-sizing: border-box; }
+.s-gather .lane h3 { margin: 0 0 12px; font: 600 40px/1 var(--font-mono); color: var(--fg); }
+.s-gather .lane p { margin: 0; font: 400 30px/1.45 var(--font-body); color: var(--fg); }
+.s-gather .sum { position: absolute; left: 120px; top: 610px; width: 1680px; height: 260px; background: var(--deep); border: 4px solid var(--line); box-sizing: border-box; display: flex; align-items: center; }
+.s-gather .sum div { flex: 1; text-align: center; border-right: 2px solid var(--line-soft); }
+.s-gather .sum div:last-child { border: 0; }
+.s-gather .sum b { display: block; font: 600 96px/1 var(--font-display); color: #fff; }
+.s-gather .sum span { font: 500 28px/1.25 var(--font-body); color: var(--muted); }
+
+/* 12 team flow, drawn as parts on a sheet */
+.s-flow .box { position: absolute; padding: 24px 28px; box-sizing: border-box; background: var(--fill); border: 4px solid var(--line); }
+.s-flow .box h3 { margin: 0 0 8px; font: 600 32px/1.15 var(--font-mono); color: var(--fg); }
+.s-flow .box p { margin: 0; font: 400 28px/1.3 var(--font-body); color: var(--fg); }
+.s-flow .box .bal { top: -28px; right: -28px; }
+.s-flow .b-lead { left: 120px; top: 440px; width: 340px; height: 200px; background: var(--deep); }
+.s-flow .b-lead h3 { font-family: var(--font-display); font-size: 40px; letter-spacing: .03em; text-transform: uppercase; }
+.s-flow .b1 { left: 640px; top: 270px; width: 480px; height: 170px; }
+.s-flow .b2 { left: 640px; top: 560px; width: 480px; height: 170px; }
+.s-flow .b3 { left: 1260px; top: 560px; width: 540px; height: 170px; }
+.s-flow .b4 { left: 1260px; top: 830px; width: 540px; height: 120px; border: 8px double var(--line); display: flex; align-items: center; justify-content: center; }
+.s-flow .b4 h3 { margin: 0; }
+.s-flow .lbl { position: absolute; margin: 0; font: 600 28px/1 var(--font-display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg); border-bottom: 2px solid var(--line-soft); padding-bottom: 8px; }
+
+/* 13 magazine: each part quotes Prompt B1 */
+.deck-stage .slide.s-four .bullets { --b-fs: 40px; row-gap: 56px; }
+.s-four .bullets .snip { display: block; margin-top: 10px; font: italic 400 32px/1.35 var(--font-body); color: var(--muted); }
+
+/* 17 install: wide terminal, four numbered notes below */
+.s-term .mock { left: 120px; top: 215px; width: 1680px; height: 455px; padding: 84px 36px 26px; font-size: 25px; }
+.s-term .cards { position: absolute; left: 120px; top: 692px; width: 1680px; display: flex; gap: 24px; margin: 0; padding: 0; list-style: none; }
+.s-term .cards li { flex: 1; position: relative; min-height: 176px; padding: 70px 24px 20px; box-sizing: border-box; background: var(--fill); border: 3px solid var(--line-soft); font: 400 28px/1.3 var(--font-body); color: var(--fg); }
+.s-term .cards li .bal { left: 20px; top: 12px; }
+.s-term .cards b { color: #fff; font-family: var(--font-mono); }
+.s-term .chot { left: 120px; top: 900px; width: 1680px; font-size: 32px; }
+
+/* 18 media-right compare: shorter well picture, keeps the house whole */
+.s-paint .src { left: 1080px; top: 830px; width: 780px; }
+.s-paint .viz { border: 4px solid var(--line); box-sizing: border-box; }
+
+/* 19 grid of four */
+.s-grid .g { position: absolute; width: 820px; height: 360px; overflow: hidden; border: 3px solid var(--line); box-sizing: border-box; }
+.s-grid .g img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.s-grid .g .lb { position: absolute; left: 0; bottom: 0; right: 0; background: rgba(11, 26, 61, 0.9); color: var(--fg); padding: 12px 18px; font: 400 28px/1.25 var(--font-body); border-top: 2px solid var(--line-soft); }
+.s-grid .g .lb b { color: #fff; }
+
+/* 22 process: the step band is white paper, numbers on it are blue */
+.s-src .chot { left: 120px; bottom: 110px; width: 1680px; }
+
+/* 23 rail */
+.s-trap .src { left: 120px; bottom: 120px; width: 560px; }
+
+/* 24 figures */
+.s-num .stats { top: 250px; bottom: 480px; --s-num: 122px; --s-fs: 30px; }
+.s-num .stat-num small { font-size: 48px; margin-left: 6px; }
+.s-num .stat-label { color: var(--fg); }
+.s-num .bot { left: 120px; top: 800px; width: 1680px; }
+.s-num .src { left: 120px; top: 930px; width: 1680px; }
+
+/* 25 excel sample: paper-light table */
+.s-xl table { position: absolute; left: 120px; top: 260px; width: 1680px; border-collapse: collapse; font: 400 28px/1.3 var(--font-body); background: #f3f7fc; color: #13284f; border: 4px solid var(--line); }
+.s-xl th { background: #0f2350; color: #fff; text-align: left; padding: 16px 14px; font: 600 28px/1.15 var(--font-body); }
+.s-xl td { padding: 30px 14px; border-bottom: 2px solid #cfdcec; }
+.s-xl td.y { background: #fff3b0; color: #5c4400; font-weight: 600; }
+.s-xl td.f { font: 600 26px/1.3 var(--font-mono); color: #1f4386; }
+.s-xl .note-bot { position: absolute; left: 120px; top: 740px; width: 1680px; }
+
+/* 26 D5 */
+.s-d5 .viz { left: 120px; right: 120px; top: 270px; height: 380px; }
+.s-d5 .rk { position: absolute; left: 120px; top: 760px; width: 1680px; display: flex; gap: 24px; }
+.s-d5 .rk div { flex: 1; padding: 22px 28px; background: var(--fill); border: 3px solid var(--line-soft); font: 400 30px/1.25 var(--font-body); color: var(--fg); }
+.s-d5 .rk b { display: block; font: 600 40px/1.1 var(--font-display); letter-spacing: .03em; text-transform: uppercase; }
+
+/* 27 homework */
+.s-home .media { object-fit: cover; border: 4px solid var(--line); box-sizing: border-box; }
+.s-home .src { left: 60px; top: 960px; width: 780px; }
+.s-home .bullets b { color: #fff; }
+</style>
+</head>
+<body>
+<div class="deck-viewport">
+<div class="deck-stage">
+  <div class="brand"><i class="ico" data-icon="building-skyscraper"></i><span class="brand-name">CES Global</span></div>
+
+  <!-- 01 BIA + HINH 1: mat dung nha pho -->
+  <section class="slide s-cover" data-layout="cover" data-brand="hide">
+      <svg class="art" style="left:1120px; top:200px" width="700" height="560" viewBox="0 0 700 560" aria-hidden="true">
+      <defs><pattern id="bpH1" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V10" stroke="#e7f0f9" stroke-opacity=".55" stroke-width="1.3"/></pattern></defs>
+      <g class="reveal"><text class="bp-lb" x="0" y="24">HÌNH 1 · NHÀ PHỐ</text><path class="bp-t" d="M0 36H220"/><text class="bp-lb bp-sm" x="0" y="62">HÌNH CHIẾU ĐỨNG</text></g>
+      <path class="bp-cl" d="M320 86V596"/>
+      <path class="bp-hid" d="M196 560V590H444V560"/>
+      <path class="bp-o draw" pathLength="1" style="--d:0" d="M180 160H460V560H180Z"/>
+      <path class="bp-o draw" pathLength="1" style="--d:.15" d="M160 164L320 98L480 164Z"/>
+      <path class="bp-d draw" pathLength="1" style="--d:.3" d="M196 158L320 108L444 158"/>
+      <circle class="bp-d" cx="320" cy="142" r="9"/>
+      <path d="M180 256H460V264H180ZM180 356H460V364H180ZM180 456H460V464H180Z" fill="url(#bpH1)"/>
+      <path class="bp-t" d="M180 256H460M180 264H460M180 356H460M180 364H460M180 456H460M180 464H460"/>
+      <path class="bp-d draw" pathLength="1" style="--d:.45" d="M220 178H420V220H220ZM287 178V220M353 178V220M220 278H420V320H220ZM287 278V320M353 278V320M220 378H420V420H220ZM287 378V420M353 378V420"/>
+      <path class="bp-t" d="M206 228H434M206 328H434M206 428H434"/><path class="bp-h" d="M222 228V256M238 228V256M254 228V256M270 228V256M286 228V256M302 228V256M318 228V256M334 228V256M350 228V256M366 228V256M382 228V256M398 228V256M414 228V256M430 228V256M222 328V356M238 328V356M254 328V356M270 328V356M286 328V356M302 328V356M318 328V356M334 328V356M350 328V356M366 328V356M382 328V356M398 328V356M414 328V356M430 328V356M222 428V456M238 428V456M254 428V456M270 428V456M286 428V456M302 428V456M318 428V456M334 428V456M350 428V456M366 428V456M382 428V456M398 428V456M414 428V456M430 428V456"/>
+      <path class="bp-d draw" pathLength="1" style="--d:.6" d="M214 484H426V560M214 484V560"/>
+      <path class="bp-h" d="M214 496H426M214 508H426M214 520H426M214 532H426M214 544H426"/>
+      <g class="reveal"><path class="bp-t" d="M180 150V66M460 150V66M180 78H460M172 560H118M308 98H118M130 98V560"/><path class="bp-ar" d="M180 78l22-6v12zM460 78l-22-6v12zM130 98l-6 22h12zM130 560l-6-22h12z"/><text class="bp-mono" x="268" y="70" text-anchor="middle">B</text><text class="bp-mono" x="114" y="336" text-anchor="end">H</text></g>
+      <g class="reveal"><text class="bp-lb bp-sm" x="520" y="128">BẢNG KÊ</text>
+      <rect class="bp-tab" x="520" y="140" width="180" height="118"/>
+      <path class="bp-t" d="M520 168H700M520 198H700M520 228H700M566 140V258"/>
+      <text class="bp-lb bp-sm" x="543" y="161" text-anchor="middle">SỐ</text><text class="bp-lb bp-sm" x="633" y="161" text-anchor="middle">TÊN</text>
+      <circle class="bp-bal" cx="543" cy="183" r="12"/><text class="bp-mono" style="font-size:16px" x="543" y="189" text-anchor="middle">1</text><text class="bp-lb bp-sm" x="578" y="190">RENDER</text>
+      <circle class="bp-bal" cx="543" cy="213" r="12"/><text class="bp-mono" style="font-size:16px" x="543" y="219" text-anchor="middle">2</text><text class="bp-lb bp-sm" x="578" y="220">BÓC KL</text>
+      <circle class="bp-bal" cx="543" cy="243" r="12"/><text class="bp-mono" style="font-size:16px" x="543" y="249" text-anchor="middle">3</text><text class="bp-lb bp-sm" x="578" y="250">KIỂM TRA</text>
+      </g>
+      <g class="reveal"><path class="bp-t" d="M542.3 307L405 206"/><circle class="bp-ar" cx="405" cy="206" r="4"/><circle class="bp-bal" cx="560" cy="320" r="22"/><text class="bp-mono" x="560" y="327" text-anchor="middle">1</text><path class="bp-t" d="M568.8 394L448 360"/><circle class="bp-ar" cx="448" cy="360" r="4"/><circle class="bp-bal" cx="590" cy="400" r="22"/><text class="bp-mono" x="590" y="407" text-anchor="middle">2</text><path class="bp-t" d="M538.6 487.2L404 520"/><circle class="bp-ar" cx="404" cy="520" r="4"/><circle class="bp-bal" cx="560" cy="482" r="22"/><text class="bp-mono" x="560" y="489" text-anchor="middle">3</text></g>
+      </svg>
+    <p class="kicker reveal">Buổi 05 · 150 phút</p>
+    <h1 class="title reveal" data-morph-id="tieu-de">Đội ngũ agent cho hồ sơ nhà phố</h1>
+    <p class="subtitle reveal">Khóa đào tạo thực chiến: AI Agent trong Kỹ thuật &amp; Xây dựng</p>
+    <p class="c-msg reveal">"Một kỹ sư chủ trì, ba trợ lý chuyên trách."</p>
+    <p class="meta reveal">CES Global · aec.cesglobal.com.vn</p>
+  </section>
+
+  <!-- 02 MUC TIEU -->
+  <section class="slide s-goal" data-layout="content" data-frame="stairs" style="--ft:220px;--fb:60px">
+    <h2 class="title reveal">Năm việc làm được sau buổi hôm nay</h2>
+    <ul class="bullets">
+      <li class="reveal"><b>Phân biệt agent chuyên trách và subagent tạm</b>: việc nào lập hồ sơ, việc nào thuê thời vụ.</li>
+      <li class="reveal"><b>Tự tạo 3 agent</b>: bóc khối lượng, kiểm tra (chỉ đọc), render phong cách.</li>
+      <li class="reveal"><b>Giao nhiều agent cùng một lượt</b>: song song, nối chuỗi, gộp một báo cáo.</li>
+      <li class="reveal"><b>Cài MCP ChatGPT tạo ảnh</b>, đổi phong cách ảnh Blender mà giữ đúng ngôi nhà.</li>
+      <li class="reveal"><b>Bóc khối lượng phần thô ra Excel</b> từ chính file mô tả bản vẽ.</li>
+    </ul>
+    <p class="chot abs note reveal">Nối tiếp nhà 7x20m của Buổi 04</p>
+  </section>
+
+  <!-- 03 LO TRINH -->
+  <section class="slide" data-layout="diagram" data-stage="clear">
+    <h2 class="title reveal">Lộ trình 150 phút</h2>
+    <div class="viz" data-viz="span" style="left:120px;right:120px;top:290px;bottom:160px"
+      data-values="10,30,20,10,35,30,15"
+      data-labels="Mở đầu|A. Agent chuyên trách|B. Cùng một lượt|Nghỉ|C. Render AI|D. Bóc khối lượng|D5"
+      data-sub="00:00|00:10|00:40|01:00|01:10|01:45|02:15" data-hot="4"
+      data-source="01_Giao_Trinh_Chi_Tiet_Buoi_05.md, mục 2"></div>
+    <p class="chot abs reveal" style="left:120px;bottom:70px;width:1680px;font-size:30px">Chưa cài MCP ảnh ở nhà thì dùng 10 phút nghỉ để cài, trợ giảng kiểm từng máy.</p>
+  </section>
+
+  <!-- 04 MO MAN SO SANH -->
+  <section class="slide s-cmp" data-layout="free" data-stage="clear">
+    <h2 class="ft reveal">Cùng một ngôi nhà, khác phong cách</h2>
+    <div class="viz fx fx-up" data-viz="compare">
+      <div class="cmp-panel"><img src="img/blender.jpg" alt="Ảnh render Blender nhà 7x20m"></div>
+      <div class="cmp-panel solid"><img src="img/dong-duong.jpg" alt="Ảnh AI đổi sang phong cách Đông Dương"></div>
+    </div>
+    <div class="cap">
+      <p class="reveal">Trái: render Blender từ bản vẽ Buổi 04.</p>
+      <p class="reveal">Phải: AI đổi sang phong cách Đông Dương, giữ đúng tầng, mái, cửa.</p>
+      <p class="q fx fx-up" data-step="1">Chủ nhà xem xong sẽ hỏi: "Xây hết bao nhiêu?"</p>
+    </div>
+    <p class="src abs" style="left:120px;bottom:56px">Ảnh: demo/01-render-ai, tạo ngày 10/10/2026</p>
+  </section>
+
+  <!-- 05 CHUONG A -->
+  <section class="slide" data-layout="chapter" data-stage="agenda">
+    <p class="ch-num reveal-scale" aria-hidden="true">A</p>
+    <h2 class="title reveal" data-morph-id="chuong">Agent chuyên trách và subagent tạm</h2>
+    <p class="subtitle reveal">Nhân viên có hồ sơ và người làm thời vụ</p>
+  </section>
+
+  <!-- 06 SO SANH -->
+  <section class="slide" data-layout="compare-table" data-frame="frame">
+    <h2 class="title reveal">Hai kiểu "trợ lý" trong một văn phòng</h2>
+    <table class="ctable reveal">
+      <thead><tr><th></th><th class="pick">Agent chuyên trách</th><th>Subagent tạm</th></tr></thead>
+      <tbody>
+        <tr><th>Ví như</th><td class="pick">Nhân viên chính thức, có hồ sơ trong tủ</td><td>Người làm thời vụ, xong việc là về</td></tr>
+        <tr><th>Nằm ở đâu</th><td class="pick"><span class="yes">File .md trong .claude/agents</span></td><td>Không có file</td></tr>
+        <tr><th>Dùng lại</th><td class="pick"><span class="yes">Mọi phiên sau, chép cho cả đội</span></td><td>Chỉ lần đó</td></tr>
+        <tr><th>Quy tắc nghề</th><td class="pick">Viết sẵn một lần, kèm giới hạn quyền</td><td>Ghi lại trong mỗi lời giao việc</td></tr>
+        <tr><th>Hợp với</th><td class="pick">Bóc khối lượng, soát bản vẽ, render</td><td>Đọc 5 hồ sơ, đếm cửa 4 tầng</td></tr>
+      </tbody>
+    </table>
+    <p class="src abs" style="left:170px;bottom:88px;width:1580px">Tài liệu Claude Code gọi chung là subagent; loại có file là custom subagent. code.claude.com/docs/en/sub-agents, tra 10/10/2026</p>
+  </section>
+
+  <!-- 07 THUNG PHAN LOAI -->
+  <section class="slide s-bin" data-layout="free" data-stage="clear">
+    <h2 class="ft reveal">Việc nào giao cho ai?</h2>
+    <p class="chot abs reveal" style="left:120px;top:226px;width:1680px;font-size:32px">Mỗi subagent là một lượt đọc riêng, tốn thêm hạn mức. Thường 3 đến 5 agent là đủ.</p>
+    <div class="bin r reveal" style="left:120px"><h3>Agent chuyên trách</h3><p>Lặp lại, có quy tắc cố định</p></div>
+    <div class="bin reveal" style="left:700px"><h3>Subagent tạm, song song</h3><p>Nhiều việc độc lập, làm một lần</p></div>
+    <div class="bin reveal" style="left:1280px"><h3>Hỏi thẳng agent chính</h3><p>Câu hỏi nhỏ, sửa một chỗ</p></div>
+    <div class="chip fx fx-from" data-step="1" style="left:140px;top:540px;--from:translate(560px,-420px)">Bóc khối lượng mỗi công trình</div>
+    <div class="chip fx fx-from" data-step="1" style="left:140px;top:720px;--from:translate(900px,-480px);--d:.15s">Render phương án cho chủ nhà</div>
+    <div class="chip fx fx-from" data-step="2" style="left:720px;top:540px;--from:translate(-200px,-420px)">Đọc 5 hồ sơ thầu cùng lúc</div>
+    <div class="chip fx fx-from" data-step="2" style="left:720px;top:720px;--from:translate(300px,-480px);--d:.15s">Đếm cửa, nội thất 4 tầng</div>
+    <div class="chip fx fx-from" data-step="3" style="left:1300px;top:540px;--from:translate(-700px,-420px)">Hỏi cao độ tầng 2 là bao nhiêu</div>
+    <div class="chip fx fx-from" data-step="3" style="left:1300px;top:720px;--from:translate(-400px,-480px);--d:.15s">Đổi tên một file</div>
+  </section>
+
+  <!-- 08 FILE AGENT -->
+  <section class="slide s-file" data-layout="content" data-frame="media-left">
+    <h2 class="title reveal">Một file agent gồm gì</h2>
+    <div class="media code reveal-left">
+      <div class="bar">.claude/agents/kiem-tra-khoi-luong.md</div>
+      <p class="d">---</p>
+      <p><span class="k">name:</span> kiem-tra-khoi-luong</p>
+      <p><span class="k">description:</span> Soát bảng bóc khối lượng... Dùng khi cần soát BOQ trước khi gửi khách.</p>
+      <p><span class="k">tools:</span> Read, Glob, Grep</p>
+      <p><span class="k">model:</span> inherit</p>
+      <p class="d">---</p>
+      <p class="c">Bạn là kỹ sư QS kiểm tra độc lập, khó tính.</p>
+      <p class="c">1. Chỉ đọc. Bị yêu cầu sửa thì từ chối.</p>
+      <p class="c">2. Mỗi điểm nêu: vị trí, vấn đề, mức độ, đề xuất.</p>
+    </div>
+    <ul class="bullets">
+      <li class="fx fx-right" data-step="1"><b>name, description bắt buộc</b>: viết rõ "Dùng khi..." để Claude tự giao việc.</li>
+      <li class="fx fx-right" data-step="2"><b>tools giới hạn quyền</b>: chỉ Read, Glob, Grep thì không sửa được file.</li>
+      <li class="fx fx-right" data-step="3"><b>Ghi được cả công cụ MCP</b>: ví dụ mcp__chatgpt-image__generate_image.</li>
+      <li class="fx fx-right" data-step="3" style="--d:.2s"><b>Tạo xong mở phiên mới</b>: Ctrl+N để Claude nạp agent vừa tạo.</li>
+    </ul>
+  </section>
+
+  <!-- 09 THU PHA -->
+  <section class="slide s-pha" data-layout="content" data-frame="media-right" style="--fb:470px">
+    <h2 class="title reveal">Thử phá: bảo agent chỉ đọc sửa file</h2>
+    <div class="mock mock-chat" data-title="Claude Code Desktop">
+      <div class="msg user type">Dùng agent kiem-tra-khoi-luong: sửa cao độ T2 trong file mô tả từ 3600 thành 3300 cho tiện tính.</div>
+      <div class="msg ai lines think" data-who="kiem-tra-khoi-luong" data-step="1">
+        <p>Tôi không sửa được file này.</p>
+        <p>Tôi chỉ có quyền đọc (Read, Glob, Grep).</p>
+        <p>Cao độ phải sửa trên bản vẽ AutoCAD rồi xuất lại DXF.</p>
+      </div>
+    </div>
+    <ul class="bullets">
+      <li class="reveal"><b>Prompt A4</b>: bảo agent kiem-tra-khoi-luong sửa một con số trong file.</li>
+      <li class="reveal"><b>Agent phải từ chối</b>: không có công cụ ghi file.</li>
+    </ul>
+    <p class="chot abs fx fx-pop" data-step="2">Quyền nằm trong file agent, không nằm trong lời hứa.</p>
+    <p class="src abs">Câu trả lời trong khung là ví dụ minh họa (Prompt A4). Agent chính không được tự sửa thay.</p>
+  </section>
+
+  <!-- 10 SUBAGENT TAM GOM KET QUA -->
+  <section class="slide s-gather" data-layout="free" data-stage="clear">
+    <h2 class="ft reveal">Subagent tạm: 4 tầng đếm cùng lúc</h2>
+    <div class="lane fx fx-drop" style="left:120px"><h3>T1</h3><p>21 đoạn tường<br>10 cột · 8 cửa<br>19 món nội thất</p></div>
+    <div class="lane fx fx-drop" style="left:550px;--d:.12s"><h3>T2</h3><p>22 đoạn tường<br>10 cột · 10 cửa<br>18 món nội thất</p></div>
+    <div class="lane fx fx-drop" style="left:980px;--d:.24s"><h3>T3</h3><p>22 đoạn tường<br>8 cột · 10 cửa<br>12 món nội thất</p></div>
+    <div class="lane fx fx-drop" style="left:1410px;--d:.36s"><h3>Mái</h3><p>6 đoạn tường<br>4 cột · 2 cửa<br>8 món nội thất</p></div>
+    <div class="sum fx fx-up" data-step="1">
+      <div><b class="count" style="--to:71"></b><span>đoạn tường</span></div>
+      <div><b class="count" style="--to:32"></b><span>cột</span></div>
+      <div><b class="count" style="--to:30"></b><span>cửa, khớp bảng thống kê</span></div>
+      <div><b class="count" style="--to:57"></b><span>món nội thất</span></div>
+    </div>
+    <p class="src abs" style="left:120px;bottom:56px">Nguồn: 03_mo-ta-tu-ban-ve.json, mục mat_bang (Buổi 04). Prompt A5: không tạo file agent nào.</p>
+  </section>
+
+  <!-- 11 CHUONG B -->
+  <section class="slide" data-layout="chapter" data-stage="agenda">
+    <p class="ch-num reveal-scale" aria-hidden="true">B</p>
+    <h2 class="title reveal" data-morph-id="chuong">Nhiều agent cùng một lượt</h2>
+    <p class="subtitle reveal">Song song việc độc lập, nối chuỗi việc phải chờ</p>
+  </section>
+
+  <!-- 12 LUONG + HINH 2: cac chi tiet noi bang net ky thuat -->
+  <section class="slide s-flow" data-layout="free" data-stage="clear">
+    <h2 class="ft reveal">Đội hồ sơ nhà phố: một lời giao việc</h2>
+    <svg class="art" style="left:120px; top:330px" width="540" height="440" viewBox="120 330 540 440" aria-hidden="true">
+      <path class="bp-d draw" pathLength="1" style="--d:.2" d="M460 540H540V355H628M540 540V645H628"/>
+      <path class="bp-ar" d="M640 355l-22-6v12zM640 645l-22-6v12z"/><circle class="bp-ar" cx="540" cy="540" r="6"/>
+      <g class="reveal"><text class="bp-lb" x="120" y="724">HÌNH 2 · LUỒNG GIAO VIỆC</text><path class="bp-t" d="M120 736H420"/></g>
+    </svg>
+    <svg class="art" data-step="1" style="left:1120px; top:620px" width="140" height="50" viewBox="1120 620 140 50" aria-hidden="true">
+      <path class="bp-d" d="M1120 645H1240"/><path class="bp-ar" d="M1260 645l-22-6v12z"/>
+    </svg>
+    <svg class="art" data-step="2" style="left:1120px; top:340px" width="740" height="500" viewBox="1120 340 740 500" aria-hidden="true">
+      <path class="bp-ph" d="M1120 355H1846V890H1822"/><path class="bp-d" d="M1530 730V810"/>
+    </svg>
+    <svg class="art" data-step="2" style="left:1500px; top:800px" width="360" height="110" viewBox="1500 800 360 110" aria-hidden="true">
+      <path class="bp-ar" d="M1530 830l-6-22h12zM1800 890l22-6v12z"/>
+    </svg>
+    <div class="box b-lead reveal"><h3>Agent chính</h3><p>Điều phối, không tự làm thay</p></div>
+    <p class="lbl reveal" style="left:640px;top:222px">Song song</p>
+    <div class="box b1 fx fx-right"><span class="bal">1</span><h3>render-phong-cach</h3><p>2 phong cách từ ảnh Blender</p></div>
+    <div class="box b2 fx fx-right" style="--d:.15s"><span class="bal">2</span><h3>boc-khoi-luong</h3><p>Excel BOQ phần thô + tóm tắt</p></div>
+    <p class="lbl fx fx-up" data-step="1" style="left:1260px;top:508px">Chờ nhánh 2 xong</p>
+    <div class="box b3 fx fx-right" data-step="1"><span class="bal">3</span><h3>kiem-tra-khoi-luong</h3><p>Đọc tóm tắt, script, file mô tả; nêu điểm cần xem lại</p></div>
+    <div class="box b4 fx fx-up" data-step="2"><h3>17_bao-cao-doi-agent.md</h3></div>
+    <p class="src abs" style="left:120px;bottom:56px">Prompt B1. Trong lúc chạy, mở bảng Tasks của Claude Code Desktop để xem từng agent.</p>
+  </section>
+
+  <!-- 13 PROMPT B1 -->
+  <section class="slide s-four" data-layout="content" data-frame="magazine">
+    <h2 class="title reveal">Lời giao việc tốt có 4 phần</h2>
+    <ul class="bullets">
+      <li class="reveal"><b>1. Ai làm gì</b><span class="snip">"agent render-phong-cach đổi phong cách ảnh…", "agent boc-khoi-luong bóc khối lượng phần thô…"</span></li>
+      <li class="reveal"><b>2. Việc nào song song</b><span class="snip">"Nhánh 1 (chạy song song với nhánh 2)"</span></li>
+      <li class="reveal"><b>3. Việc nào phải chờ</b><span class="snip">"Bước 3 (chờ nhánh 2 xong mới chạy)"</span></li>
+      <li class="reveal"><b>4. Gộp kết quả vào đâu</b><span class="snip">"Cuối cùng: gộp kết quả 3 agent vào &lt;B05&gt;\17_bao-cao-doi-agent.md"</span></li>
+    </ul>
+    <aside class="highlight fx fx-up" data-step="1">
+      <p class="hl-text">Thiếu phần 3, agent kiểm tra sẽ đọc một bảng chưa có.</p>
+    </aside>
+  </section>
+
+  <!-- 14 AGENT TEAM -->
+  <section class="slide" data-layout="compare-table" data-frame="band">
+    <h2 class="title reveal">Agent team: biết để không nhầm</h2>
+    <table class="ctable reveal">
+      <thead><tr><th></th><th class="pick">Subagent (dùng hôm nay)</th><th>Agent team</th></tr></thead>
+      <tbody>
+        <tr><th>Cách làm việc</th><td class="pick">Nộp kết quả về agent chính</td><td>Thành viên nhắn tin trực tiếp cho nhau</td></tr>
+        <tr><th>Trạng thái</th><td class="pick"><span class="yes">Chính thức</span></td><td class="no">Thử nghiệm, tắt sẵn</td></tr>
+        <tr><th>Chạy ở đâu</th><td class="pick"><span class="yes">Terminal và Desktop</span></td><td class="no">Chỉ terminal, không có trong Desktop</td></tr>
+        <tr><th>Chi phí</th><td class="pick">Thấp hơn</td><td>Cao hơn nhiều: mỗi thành viên là một phiên riêng</td></tr>
+      </tbody>
+    </table>
+    <p class="src abs" style="left:120px;top:842px;width:1680px">code.claude.com/docs/en/agent-teams và /desktop, tra 10/10/2026. Bật bằng CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1.</p>
+  </section>
+
+  <!-- 15 CHUONG C -->
+  <section class="slide" data-layout="chapter" data-stage="agenda">
+    <p class="ch-num reveal-scale" aria-hidden="true">C</p>
+    <h2 class="title reveal" data-morph-id="chuong">Render AI đổi phong cách</h2>
+    <p class="subtitle reveal">MCP ChatGPT tạo ảnh, giữ nguyên ngôi nhà</p>
+  </section>
+
+  <!-- 16 CANH BAO -->
+  <section class="slide" data-layout="statement">
+    <p class="kicker reveal">Đọc cho lớp trước khi cài</p>
+    <h2 class="statement reveal">MCP này đăng nhập ChatGPT web theo cách tự viết, README ghi là <mark>vi phạm điều khoản OpenAI</mark>. Dùng tài khoản phụ.</h2>
+    <p class="src abs fx fx-up" data-step="1" style="left:280px;bottom:150px;width:1220px;font-size:28px">Ảnh tạo ra tính vào hạn mức tạo ảnh của tài khoản ChatGPT đó. Nguồn: README repo andyluu98/chatgpt-image-mcp.</p>
+  </section>
+
+  <!-- 17 CAI DAT -->
+  <section class="slide s-term" data-layout="diagram" data-stage="clear">
+    <h2 class="title reveal">Cài trong 4 bước</h2>
+    <div class="mock mock-term" data-title="PowerShell">
+      <div class="cmd type" style="--prompt:'PS> '">git clone https://github.com/andyluu98/chatgpt-image-mcp.git D:\Tools\chatgpt-image-mcp</div>
+      <div class="cmd type" style="--prompt:'PS> '">cd D:\Tools\chatgpt-image-mcp; uv sync</div>
+      <div data-step="1"><div class="cmd type" style="--prompt:'PS> '">uv run cgimg login</div><div class="out lines"><p class="hi">Trình duyệt mở, đăng nhập, chép đường dẫn trang "Oops"</p></div></div>
+      <div data-step="1"><div class="cmd type" style="--prompt:'PS> '">uv run cgimg login --callback "&lt;dán đường dẫn&gt;"</div></div>
+      <div data-step="2"><div class="cmd type" style="--prompt:'PS> '">claude mcp add chatgpt-image -s user '--' uv run --directory "D:\Tools\chatgpt-image-mcp" cgimg-mcp</div><div class="out lines"><p class="ok">chatgpt-image: Connected</p></div></div>
+    </div>
+    <ul class="cards">
+      <li class="reveal"><span class="bal">1</span>Cần <b>git</b> và <b>uv</b>; uv tự tải Python 3.12</li>
+      <li class="reveal"><span class="bal">2</span>Đăng nhập <b>2 bước</b>: bước 2 cần đúng mã bước 1 tạo</li>
+      <li class="fx fx-up" data-step="2"><span class="bal">3</span>PowerShell phải viết <b>'--'</b> có ngoặc đơn, không thì báo lỗi --directory</li>
+      <li class="fx fx-up" data-step="2"><span class="bal">4</span><b>-s user</b> để dùng ở mọi thư mục</li>
+    </ul>
+    <p class="chot abs fx fx-up" data-step="2">Đóng hẳn rồi mở lại Claude Code Desktop, gõ /mcp: thấy chatgpt-image Connected là xong.</p>
+  </section>
+
+  <!-- 18 Y TUONG -->
+  <section class="slide s-paint" data-layout="content" data-frame="media-right">
+    <h2 class="title reveal">AI chỉ "sơn lại", không "xây lại"</h2>
+    <div class="viz fx fx-up" data-viz="compare" style="top:200px;height:600px">
+      <div class="cmp-panel"><img src="img/blender.jpg" alt="Ảnh render Blender gốc" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+      <div class="cmp-panel solid"><img src="img/hien-dai.jpg" alt="Ảnh AI phong cách hiện đại lúc chạng vạng" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+    </div>
+    <ul class="bullets">
+      <li class="reveal"><code>ref_mode="render"</code></li>
+      <li class="reveal"><b>Giữ:</b> hình khối, số tầng, cửa, mái, góc máy.</li>
+      <li class="reveal"><b>Đổi:</b> vật liệu, màu, ánh sáng, cảnh quan.</li>
+      <li class="fx fx-up" data-step="1"><b>Prompt chỉ tả vật liệu và ánh sáng, không tả hình khối mới.</b></li>
+    </ul>
+    <p class="src abs">Chế độ render thêm vào repo ngày 10/10/2026; ảnh phải: 02_hien-dai-chang-vang.png</p>
+  </section>
+
+  <!-- 19 BON PHONG CACH -->
+  <section class="slide s-grid" data-layout="free" data-stage="clear">
+    <h2 class="ft reveal">4 phong cách, soát từng ảnh</h2>
+    <div class="g fx fx-pop" style="left:120px;top:230px"><img src="img/dong-duong.jpg" alt="Đông Dương"><div class="lb"><b>Đông Dương:</b> giữ tầng, mái, pergola; thêm cửa chớp</div></div>
+    <div class="g fx fx-pop" style="left:980px;top:230px;--d:.12s"><img src="img/hien-dai.jpg" alt="Hiện đại"><div class="lb"><b>Hiện đại:</b> giữ sát nhất; chỉ đổi xe, cây</div></div>
+    <div class="g fx fx-pop" style="left:120px;top:620px;--d:.24s"><img src="img/nhiet-doi.jpg" alt="Nhiệt đới"><div class="lb"><b>Nhiệt đới:</b> AI thêm lam gỗ, gạch thông gió lên mặt tiền</div></div>
+    <div class="g fx fx-pop" style="left:980px;top:620px;--d:.36s"><img src="img/japandi.jpg" alt="Japandi"><div class="lb"><b>Japandi:</b> ống thoát nước thành nẹp gỗ, xe đổi mẫu</div></div>
+    <p class="src abs" style="left:120px;bottom:36px">Ảnh tạo ngày 10/10/2026 từ 05_phoi-canh-goc-hong.png (Buổi 04)</p>
+  </section>
+
+  <!-- 20 ANH AI KHONG PHAI HO SO -->
+  <section class="slide" data-layout="split-photo" data-stage="clear">
+    <img class="split-img" src="img/nhiet-doi.jpg" alt="Ảnh AI phong cách nhiệt đới có thêm lam gỗ" style="--focus: 60% 50%">
+    <div class="split-text">
+      <p class="kicker reveal">Bài học chốt phần C</p>
+      <h2 class="title reveal">Ảnh AI để trao đổi, không phải hồ sơ kỹ thuật</h2>
+      <ul class="bullets">
+        <li class="reveal">Chủ nhà ưng lam gỗ? Quay về sửa bản vẽ AutoCAD.</li>
+        <li class="reveal">Rồi dựng lại mô hình, render lại.</li>
+        <li class="reveal">Bản vẽ là nguồn, như Buổi 04.</li>
+      </ul>
+    </div>
+    <p class="photo-credit">Ảnh: tạo bằng MCP chatgpt-image, CES Global, 10/10/2026</p>
+  </section>
+
+  <!-- 21 CHUONG D -->
+  <section class="slide" data-layout="chapter" data-stage="agenda">
+    <p class="ch-num reveal-scale" aria-hidden="true">D</p>
+    <h2 class="title reveal" data-morph-id="chuong">Agent bóc khối lượng</h2>
+    <p class="subtitle reveal">Lấy số từ bản vẽ, không từ ảnh</p>
+  </section>
+
+  <!-- 22 NGUON SO -->
+  <section class="slide s-src" data-layout="process" data-stage="clear">
+    <h2 class="title reveal">Khối lượng đi từ đâu</h2>
+    <svg class="art" style="left:120px; top:250px" width="1680" height="190" viewBox="0 0 1680 190" aria-hidden="true">
+      <defs><pattern id="bpH5" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V10" stroke="#e7f0f9" stroke-opacity=".55" stroke-width="1.3"/></pattern></defs>
+      <g class="reveal"><path class="bp-o draw" pathLength="1" d="M112 24H302V164H112Z"/><path class="bp-t" d="M120 32H294V156H120Z"/><path class="bp-d" d="M133 44H229V144H133ZM133 94H185M185 44V120"/><path class="bp-hid" d="M185 120A24 24 0 0 0 209 144"/><rect class="bp-tab" x="241" y="114" width="46" height="36"/><path class="bp-t" d="M241 132H287"/></g>
+      <g class="reveal" style="--i:1"><path class="bp-o draw" pathLength="1" d="M568 24H662L688 50V164H568Z"/><path class="bp-d" d="M662 24V50H688"/><text class="bp-mono" x="586" y="62">{ }</text><path class="bp-let" d="M588 88H658M588 110H668M588 132H636M588 150H658"/></g>
+      <g class="reveal" style="--i:2"><path class="bp-o draw" pathLength="1" d="M956 24H1146V164H956Z"/><path class="bp-t" d="M956 50H1146"/><circle class="bp-d" cx="973" cy="37" r="4"/><circle class="bp-d" cx="987" cy="37" r="4"/><circle class="bp-d" cx="1001" cy="37" r="4"/><path class="bp-d" d="M975 72L989 84L975 96"/><path class="bp-let" d="M1003 84H1091M975 116H1071M975 142H1111"/></g>
+      <g class="reveal" style="--i:3"><path class="bp-o draw" pathLength="1" d="M1378 24H1568V164H1378Z"/><path d="M1378 24H1568V54H1378Z" fill="url(#bpH5)"/><path class="bp-d" d="M1378 54H1568"/><path class="bp-t" d="M1378 82H1568M1378 110H1568M1378 138H1568M1438 24V164M1498 24V164"/></g>
+      </svg>
+    <ol class="process">
+      <li class="reveal"><span class="n">1</span><h3>Bản vẽ AutoCAD</h3><p>4 tờ KT-01 đến KT-04, Buổi 04</p></li>
+      <li class="reveal"><span class="n">2</span><h3>DXF thành file mô tả</h3><p>Tường, cột, sàn, cửa, cao độ (mm)</p></li>
+      <li class="reveal"><span class="n">3</span><h3>Script Python</h3><p>Agent viết, tính, lưu lại để chạy lại</p></li>
+      <li class="reveal"><span class="n">4</span><h3>Excel BOQ</h3><p>BOQ, kiểm chéo cửa, giả thiết</p></li>
+    </ol>
+    <p class="chot abs fx fx-up" data-step="1">Không đo trên ảnh, không lấy từ mô hình Blender, không tính nhẩm.</p>
+  </section>
+
+  <!-- 23 NAM BAY -->
+  <section class="slide s-trap" data-layout="content" data-frame="rail">
+    <h2 class="title reveal">Năm cái bẫy khi bóc nhà 7x20m</h2>
+    <ul class="bullets">
+      <li class="reveal"><b>"7x20m" là lô đất</b>: khối nhà chỉ 5x14m.</li>
+      <li class="reveal"><b class="shake">Trừ cửa hai lần</b>: tường trên mặt bằng đã cắt sẵn tại lỗ cửa; cộng lại phần tại lỗ rồi mới trừ.</li>
+      <li class="reveal"><b>File không có dầm</b>: chốt quy ước, chênh cao độ tầng trừ sàn 120, ghi vào sheet giả thiết.</li>
+      <li class="reveal"><b>Tường hồi dưới mái dốc</b>: không đủ kích thước; gắn nhãn thiếu, không đoán.</li>
+      <li class="reveal"><b>Ô % hao hụt</b>: để trống; ghi chữ vào ô số thì công thức báo #VALUE!</li>
+    </ul>
+    <p class="src abs">Rút ra từ lần chạy thử Prompt D1 ngày 10/10/2026</p>
+  </section>
+
+  <!-- 24 SO LIEU + HINH 3: bon hinh chieu nho duoi bon con so -->
+  <section class="slide s-num" data-layout="stats">
+    <h2 class="title reveal">Kết quả chạy thử: phần thô nhà 7x20m</h2>
+    <div class="stats">
+      <div class="stat reveal"><span class="stat-num">329,67<small>m²</small></span><span class="stat-label">Tường xây 200 (65,93 m³)</span></div>
+      <div class="stat reveal"><span class="stat-num">27,78<small>m³</small></span><span class="stat-label">Bê tông sàn</span></div>
+      <div class="stat reveal"><span class="stat-num">4,23<small>m³</small></span><span class="stat-label">Bê tông cột 200x200</span></div>
+      <div class="stat reveal"><span class="stat-num"><span class="count" style="--to:30"></span><small>bộ</small></span><span class="stat-label">Cửa, 69,12 m², khớp 9 mã</span></div>
+    </div>
+      <svg class="art" style="left:120px; top:610px" width="1680" height="160" viewBox="0 0 1680 160" aria-hidden="true">
+      <defs><pattern id="bpH4" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V10" stroke="#e7f0f9" stroke-opacity=".55" stroke-width="1.3"/></pattern></defs>
+      <g class="reveal"><path class="bp-o draw" pathLength="1" d="M72 19H312V109H72Z"/><path class="bp-h" d="M72 34H312M72 49H312M72 64H312M72 79H312M72 94H312M72 109H312M112 19V34M152 19V34M192 19V34M232 19V34M272 19V34M92 34V49M132 34V49M172 34V49M212 34V49M252 34V49M292 34V49M112 49V64M152 49V64M192 49V64M232 49V64M272 49V64M92 64V79M132 64V79M172 64V79M212 64V79M252 64V79M292 64V79M112 79V94M152 79V94M192 79V94M232 79V94M272 79V94M92 94V109M132 94V109M172 94V109M212 94V109M252 94V109M292 94V109"/><path class="bp-t" d="M72 114V146M312 114V146M72 136H312"/><path class="bp-ar" d="M72 136l20-5v10zM312 136l-20-5v10z"/><text class="bp-mono" x="192" y="130" text-anchor="middle">L</text></g>
+      <g class="reveal" style="--i:1"><path class="bp-o" d="M494 58H734L726 66L742 74L734 82H494L502 74L486 66Z"/><path d="M494 58H734L726 66L742 74L734 82H494L502 74L486 66Z" fill="url(#bpH4)"/><path class="bp-hid" d="M514 82V120M714 82V120"/><path class="bp-t" d="M750 58H786M750 82H786M774 30V110"/><path class="bp-ar" d="M774 58l-5-18h10zM774 82l-5 18h10z"/><text class="bp-mono" x="786" y="76">t</text></g>
+      <g class="reveal" style="--i:2"><path class="bp-o draw" pathLength="1" d="M1011 22H1101V112H1011Z"/><path d="M1011 22H1101V112H1011Z" fill="url(#bpH4)"/><path class="bp-cl" d="M976 67H1136M1056 6V128"/><path class="bp-t" d="M1011 116V150M1101 116V150M1011 142H1101"/><path class="bp-ar" d="M1011 142l18-5v10zM1101 142l-18-5v10z"/><text class="bp-mono" x="1120" y="148">a</text></g>
+      <g class="reveal" style="--i:3"><path class="bp-o draw" pathLength="1" d="M1436 12H1540V146H1436Z"/><path class="bp-d" d="M1446 22H1530V146M1446 22V146"/><path class="bp-hid" d="M1530 22L1446 84L1530 146"/><circle class="bp-d" cx="1458" cy="88" r="5"/><path class="bp-t" d="M1546 12H1584M1546 146H1584M1572 12V146"/><path class="bp-ar" d="M1572 12l-5 18h10zM1572 146l-5-18h10z"/><text class="bp-mono" x="1584" y="86">H</text></g>
+      </svg>
+    <p class="chot abs bot fx fx-up" data-step="1">Số phụ thuộc sheet giả thiết. Khác đáp án thì so giả thiết trước khi kết luận ai sai.</p>
+    <p class="src abs">Nguồn: demo/02-boc-khoi-luong/01_dap-an-boq-phan-tho-nha-7x20m.xlsx, script 264 dòng. Bài mẫu, chưa qua tính kết cấu.</p>
+  </section>
+
+  <!-- 25 EXCEL -->
+  <section class="slide s-xl" data-layout="free" data-stage="clear">
+    <h2 class="ft reveal">Ba cột tách riêng, không tự điền giá</h2>
+    <table class="reveal">
+      <tr><th>Hạng mục</th><th>Diễn giải</th><th>Nguồn</th><th>KL thiết kế</th><th>Hao hụt %</th><th>KL mua</th><th>Đơn giá</th></tr>
+      <tr><td>Tường xây 200, T1</td><td>Dài x cao x dày</td><td>T1, mat_bang.tuong</td><td>102,12 m²</td><td class="y">trống</td><td class="f">=F*(1+G)</td><td class="y">trống</td></tr>
+      <tr><td>Bê tông sàn</td><td>Diện tích trừ lỗ x 0,12</td><td>mat_bang.san, lo_san</td><td>27,78 m³</td><td class="y">trống</td><td class="f">=F*(1+G)</td><td class="y">trống</td></tr>
+      <tr><td>Cửa S2</td><td>1,2 x 1,4 x 8 bộ</td><td>mục cua</td><td>8 bộ</td><td></td><td></td><td class="y">trống</td></tr>
+    </table>
+    <div class="note-bot">
+      <p class="chot reveal" style="font-size:32px">Ô vàng ghi "[Chờ bổ sung]" ở cột ghi chú. Hao hụt và đơn giá lấy theo định mức, công bố giá có nguồn.</p>
+      <p class="src fx fx-up" data-step="1" style="font-size:28px;margin-top:28px;color:var(--fg)">Mở bằng Excel mới thấy số (ô là công thức). Đọc khối lượng mua ở dòng cộng, cộng tay cả cột sẽ tính hai lần.</p>
+    </div>
+  </section>
+
+  <!-- 26 D5 -->
+  <section class="slide s-d5" data-layout="diagram" data-stage="clear">
+    <h2 class="title reveal">Nghiệm thu D5 (thang 100)</h2>
+    <div class="viz" data-viz="span" data-values="20,25,35,20"
+      data-labels="3 file agent|Render AI + bảng so sánh|BOQ đúng quy tắc|Báo cáo đội agent"
+      data-sub="20 điểm|25 điểm|35 điểm|20 điểm" data-hot="3" data-source="01_Giao_Trinh_Chi_Tiet_Buoi_05.md, mục 7.2"></div>
+    <div class="rk">
+      <div class="reveal"><b>Xuất sắc</b>90 đến 100</div>
+      <div class="reveal"><b>Đạt</b>70 đến 89</div>
+      <div class="reveal"><b>Chưa đạt</b>Dưới 70</div>
+    </div>
+  </section>
+
+  <!-- 27 BAI VE NHA -->
+  <section class="slide s-home" data-layout="content" data-frame="media-left">
+    <h2 class="title reveal">Bài về nhà,<br>chuẩn bị Buổi 06</h2>
+    <img class="media reveal-left" src="img/dia-trung-hai.jpg" alt="Ảnh AI phong cách Địa Trung Hải do agent tạo" style="height:800px">
+    <ul class="bullets">
+      <li class="reveal">Mang <b>căn nhà của mình</b>: lô, số tầng, công năng.</li>
+      <li class="reveal">Viết thêm <b>một agent</b> cho việc hằng ngày.</li>
+      <li class="reveal">Điền <b>hao hụt, đơn giá</b> có nguồn.</li>
+    </ul>
+  </section>
+
+  <!-- 28 KET (con dau do cua style) -->
+  <section class="slide" data-layout="closing">
+    <p class="kicker reveal">Hẹn gặp lại</p>
+    <h2 class="title reveal">Buổi 06</h2>
+    <p class="subtitle reveal">Ráp trọn quy trình từ ý tưởng của chủ nhà đến bộ hồ sơ gửi khách.</p>
+  </section>
+
+</div>
+</div>
+<script src="C:/Users/Admin/.claude/skills/slidefly/assets/morph-frames.js"></script>
+<script src="C:/Users/Admin/.claude/skills/slidefly/assets/morph-mock.js"></script>
+<script src="C:/Users/Admin/.claude/skills/slidefly/assets/morph-viz-diagrams.js"></script>
+<script src="C:/Users/Admin/.claude/skills/slidefly/assets/morph-viz.js"></script>
+<script src="C:/Users/Admin/.claude/skills/slidefly/assets/morph-engine.js"></script>
+<script src="C:/Users/Admin/.claude/skills/slidefly/assets/morph-nav.js"></script>
+<script src="C:/Users/Admin/.claude/skills/slidefly/assets/morph-audit.js"></script>
+<script src="C:/Users/Admin/.claude/skills/slidefly/assets/morph-steps.js"></script>
+<script src="C:/Users/Admin/.claude/skills/slidefly/assets/morph-icons.js"></script>
+</body>
+</html>
