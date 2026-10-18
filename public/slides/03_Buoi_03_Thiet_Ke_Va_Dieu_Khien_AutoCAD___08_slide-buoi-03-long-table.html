@@ -1,0 +1,1624 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buổi 03: Điều khiển AutoCAD bằng AI qua MCP</title>
+<style>
+/* ===========================================================
+   MORPH-SLIDES BASE
+   Stage 1920x1080 scaled by JS (idea from frontend-slides
+   viewport-base.css, MIT). Actors = persistent shapes that
+   morph between poses; slides = per-slide content layer.
+   =========================================================== */
+
+:root {
+  --morph-dur: 1.2s;
+  --morph-ease: cubic-bezier(0.16, 1, 0.3, 1);   /* ease-out-expo */
+  --fade-dur: 0.35s;
+  --reveal-base: 0.45s;   /* content waits for actors to start moving */
+  --reveal-step: 0.09s;
+  --stage-bg: #000;
+}
+
+html, body {
+  width: 100%; height: 100%; margin: 0;
+  overflow: hidden;
+  background: var(--stage-bg);
+}
+*, *::before, *::after { box-sizing: border-box; }
+
+.deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--stage-bg); }
+
+.deck-stage {
+  position: absolute; left: 0; top: 0;
+  width: 1920px; height: 1080px;
+  overflow: hidden;
+  transform-origin: 0 0;
+  background-color: var(--bg, #fff);
+  color: var(--fg, #111);
+  font-family: var(--font-body, system-ui, sans-serif);
+  transition: background-color var(--morph-dur) var(--morph-ease),
+              color var(--morph-dur) var(--morph-ease);
+}
+
+/* ---------- ACTORS ----------
+   Pose = CSS variables set by style files per layout/pose:
+   --x --y --w --h (px, --h defaults to --w), --r (deg), --s (scale),
+   --o (opacity), --bw (outline width, centered on the edge like
+   PowerPoint lines). Width/height animate so borders keep thickness. */
+.actors { position: absolute; inset: 0; pointer-events: none; }
+.actors.back  { z-index: 0; }
+.actors.front { z-index: 20; }
+
+.actor {
+  position: absolute; left: 0; top: 0;
+  width: calc(var(--w, 200px) + var(--bw, 0px));
+  height: calc(var(--h, var(--w, 200px)) + var(--bw, 0px));
+  transform: translate(calc(var(--x, -400px) - var(--bw, 0px) / 2), calc(var(--y, -400px) - var(--bw, 0px) / 2))
+             rotate(var(--r, 0deg)) scale(var(--s, 1));
+  opacity: var(--o, 1);
+  transition-property: transform, width, height, opacity, background-color,
+                       border-color, border-width, border-radius, box-shadow, filter, color;
+  transition-duration: var(--morph-dur);
+  transition-timing-function: var(--morph-ease);
+  /* no will-change: it caused 1px seams on large panels when the stage is scaled down */
+}
+.actor > svg { display: block; width: 100%; height: 100%; overflow: visible; }
+
+/* ---------- SLIDES (content layer) ---------- */
+.slide {
+  position: absolute; inset: 0; z-index: 10;
+  width: 1920px; height: 1080px;
+  overflow: hidden;
+  visibility: hidden; opacity: 0; pointer-events: none;
+  transition: opacity var(--fade-dur) ease, visibility 0s linear var(--fade-dur);
+}
+.slide.active {
+  visibility: visible; opacity: 1; pointer-events: auto;
+  transition: opacity var(--fade-dur) ease, visibility 0s;
+}
+
+/* Reveal: hidden until slide is active, staggered by --i (set by engine) */
+.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-blur {
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease;
+}
+.reveal       { transform: translateY(40px); }
+.reveal-left  { transform: translateX(-60px); }
+.reveal-right { transform: translateX(60px); }
+.reveal-scale { transform: scale(0.85); }
+.reveal-blur  { filter: blur(12px); }
+/* repeated layouts enter differently: variant 2 slides in from the left, variant 3 zooms in */
+.slide[data-variant="2"] .reveal { transform: translateX(-56px); }
+.slide[data-variant="3"] .reveal { transform: scale(0.92); }
+
+.slide.active :is(.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-blur) {
+  opacity: 1; transform: none; filter: none;
+  transition-duration: 0.8s;
+  transition-timing-function: var(--morph-ease);
+  transition-delay: calc(var(--reveal-base) + var(--i, 0) * var(--reveal-step));
+}
+
+/* FLIP: element shared between two slides (data-morph-id) */
+.slide .flip-run {
+  opacity: 1 !important; filter: none !important;
+  transform-origin: 0 0;
+  transition: transform var(--morph-dur) var(--morph-ease) !important;
+}
+.slide .flip-src { opacity: 0 !important; transition: none !important; }
+
+/* ---------- UI chrome (outside design) ---------- */
+.deck-progress {
+  position: fixed; left: 0; bottom: 0; height: 4px; width: 0;
+  background: var(--accent, #3b82f6); z-index: 1000;
+  /* dark + light hairline so the bar stays visible on any background colour */
+  box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.35), 0 -2px 0 rgba(255, 255, 255, 0.35);
+  transition: width 0.6s var(--morph-ease);
+}
+.deck-counter {
+  position: fixed; right: 18px; bottom: 12px; z-index: 1000;
+  font: 600 13px/1 system-ui, sans-serif; letter-spacing: 0.08em;
+  color: #fff; mix-blend-mode: difference; opacity: 0.55;
+}
+
+/* Reduced motion (often from Windows "Animation effects" = off):
+   keep a short, gentle morph because motion IS the deck's content. */
+@media (prefers-reduced-motion: reduce) {
+  :root { --morph-dur: 0.7s; --reveal-base: 0.2s; --reveal-step: 0.04s; }
+  .reveal-blur { filter: none; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; }
+}
+
+</style>
+<style>
+/* ===========================================================
+   MORPH-SLIDES LAYOUTS: 9 slide types that FILL their zone.
+   - Inner slides: title row + body zone (--body-top..--body-bottom)
+   - Engine sets data-density="lg|md|sm" from item count,
+     so few items => bigger type, many items => smaller type.
+   Tokens: --fg --muted --accent --card-bg --card-fg --font-display
+           --font-body --title-weight --title-case --title-tracking
+   =========================================================== */
+
+.slide {
+  --body-top: 270px; --body-bottom: 90px; --pad-x: 120px;
+  color: var(--fg); font-family: var(--font-body); font-size: 32px; line-height: 1.45;
+}
+.slide h1, .slide h2, .slide h3, .slide p, .slide ul, .slide ol, .slide blockquote { margin: 0; }
+.slide ul, .slide ol { padding: 0; list-style: none; }
+
+.title, .num, .stat-num, .quote, .hl-big, .when {
+  font-family: var(--font-display); font-weight: var(--title-weight, 800);
+  letter-spacing: var(--title-tracking, -0.01em); font-style: var(--title-style, normal);
+}
+.title { text-transform: var(--title-case, none); line-height: 1.1; }
+.kicker { font-size: 22px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); }
+.subtitle { font-size: 34px; color: var(--muted); }
+.meta { font-size: 24px; color: var(--muted); }
+.accent { color: var(--accent); }
+b, strong { font-weight: 700; }
+
+/* body zone shared by inner layouts */
+.slide > .title:first-child { position: absolute; left: var(--pad-x); top: 90px; width: var(--title-w, 1500px); font-size: 64px; }
+.slide:is([data-layout="cover"], [data-layout="closing"], [data-layout="section"], [data-layout="quote"]) > .title:first-child { position: static; width: auto; }
+.body-zone, .bullets, .cols, .stats, .timeline, .agenda-list, .highlight {
+  position: absolute; top: var(--body-top); bottom: var(--body-bottom);
+}
+
+/* ---------- 1. cover / 9. closing ---------- */
+.slide:is([data-layout="cover"], [data-layout="closing"]) {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 28px; padding: 0 300px; text-align: center;
+}
+.slide:is([data-layout="cover"], [data-layout="closing"]) .title { font-size: 92px; }
+.slide[data-layout="closing"] .title { font-size: 120px; }
+
+/* ---------- 2. agenda: 2 columns of tiles filling the zone ---------- */
+.agenda-list {
+  left: var(--pad-x); right: var(--pad-x);
+  display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--agenda-gap, 640px);
+  grid-template-rows: repeat(var(--rows, 4), 1fr); grid-auto-flow: column;
+}
+.agenda-list li { display: flex; align-items: center; gap: 28px; border-top: var(--tile-line, none); }
+.agenda-list li.is-right { flex-direction: row-reverse; text-align: right; }
+.agenda-list .num { line-height: 1; color: var(--accent); min-width: 1.3em; }
+.agenda-list li.is-right .num { text-align: right; }
+.agenda-list h3 { font-family: var(--font-display); line-height: 1.15; }
+.agenda-list p { color: var(--muted); margin-top: 6px; }
+[data-density="lg"] .agenda-list { --n-num: 120px; --n-h: 52px; --n-p: 30px; }
+[data-density="md"] .agenda-list { --n-num: 88px;  --n-h: 40px; --n-p: 26px; }
+[data-density="sm"] .agenda-list { --n-num: 64px;  --n-h: 32px; --n-p: 22px; }
+.agenda-list .num { font-size: var(--n-num); }
+.agenda-list h3 { font-size: var(--n-h); }
+.agenda-list p { font-size: var(--n-p); }
+
+/* ---------- 3. section ---------- */
+.slide[data-layout="section"] { display: flex; flex-direction: column; justify-content: center; gap: 24px; padding: 0 900px 0 160px; }
+.slide[data-layout="section"] .num { font-size: 220px; line-height: 0.9; color: var(--accent); }
+.slide[data-layout="section"] .title { font-size: 84px; }
+
+/* ---------- 4. content: bullets left + highlight right ---------- */
+.bullets { left: var(--pad-x); width: var(--bullets-w, 1040px); display: flex; flex-direction: column; justify-content: center; gap: var(--b-gap); }
+.bullets li { position: relative; padding-left: 1.4em; font-size: var(--b-fs); line-height: 1.35; }
+.bullets li::before {
+  content: ""; position: absolute; left: 0; top: 0.45em;
+  width: 0.45em; height: 0.45em; border-radius: var(--bullet-radius, 50%); background: var(--accent);
+}
+[data-density="lg"] .bullets { --b-fs: 44px; --b-gap: 52px; }
+[data-density="md"] .bullets { --b-fs: 36px; --b-gap: 40px; }
+[data-density="sm"] .bullets { --b-fs: 30px; --b-gap: 20px; }
+
+/* highlight = the real point of the slide shown big (number, icon, short claim) */
+.highlight {
+  left: var(--hl-left, 1260px); right: var(--hl-right, 120px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; text-align: center;
+}
+.hl-big { font-size: 160px; line-height: 1; color: var(--accent); }
+.hl-icon { width: 200px; height: 200px; color: var(--accent); }
+.hl-icon svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.hl-text { font-family: var(--font-display); font-size: 34px; font-weight: 700; line-height: 1.25; }
+
+/* ---------- 5. two-col: cards stretch full height ---------- */
+.cols { left: var(--pad-x); right: var(--pad-x); display: grid; grid-template-columns: 1fr 1fr; gap: 64px; }
+.slide:has(.takeaway) .cols { bottom: 240px; }
+.col { display: flex; flex-direction: column; padding: 48px 56px; border-radius: var(--card-radius, 24px); background: var(--card-bg, transparent); color: var(--card-fg, var(--fg)); }
+.col h3 { font-family: var(--font-display); font-size: var(--c-h); line-height: 1.15; color: var(--accent); }
+.col ul { flex: 1; display: flex; flex-direction: column; justify-content: space-evenly; }
+.col p, .col li { font-size: var(--c-fs); line-height: 1.35; }
+.col li { position: relative; padding-left: 1.2em; }
+.col li::before { content: ""; position: absolute; left: 0; top: 0.5em; width: 0.4em; height: 0.4em; border-radius: var(--bullet-radius, 50%); background: var(--accent); }
+[data-density="lg"] .cols { --c-h: 52px; --c-fs: 36px; }
+[data-density="md"] .cols { --c-h: 46px; --c-fs: 32px; }
+[data-density="sm"] .cols { --c-h: 40px; --c-fs: 28px; }
+.takeaway {
+  position: absolute; left: var(--pad-x); right: var(--pad-x); bottom: var(--body-bottom); min-height: 110px;
+  display: flex; align-items: center; padding: 20px 36px; border-left: 10px solid var(--accent);
+  font-family: var(--font-display); font-size: 36px; font-weight: 700; line-height: 1.25;
+}
+
+/* ---------- 6. stats: numbers centred in the zone ---------- */
+.stats { left: var(--pad-x); right: var(--pad-x); display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 48px; align-content: center; }
+.stat { text-align: center; }
+.stat-num { display: block; line-height: 1; color: var(--accent); font-size: var(--s-num); }
+.stat-label { display: block; margin-top: 22px; color: var(--muted); font-size: var(--s-fs); line-height: 1.35; }
+[data-density="lg"] .stats { --s-num: 220px; --s-fs: 36px; }
+[data-density="md"] .stats { --s-num: 150px; --s-fs: 30px; }
+[data-density="sm"] .stats { --s-num: 110px; --s-fs: 26px; }
+
+/* ---------- 7. timeline: zig-zag around a centred axis ---------- */
+.timeline {
+  left: var(--pad-x); right: var(--pad-x);
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; grid-template-rows: 1fr 1fr; column-gap: 32px;
+}
+.timeline::before { content: ""; position: absolute; left: 0; right: 0; top: calc(50% - 2px); height: 4px; background: var(--accent); opacity: 0.35; }
+.step { position: relative; }
+/* each step owns a column, odd above / even below the axis */
+.step:nth-child(1) { grid-column: 1; } .step:nth-child(2) { grid-column: 2; } .step:nth-child(3) { grid-column: 3; } .step:nth-child(4) { grid-column: 4; } .step:nth-child(5) { grid-column: 5; } .step:nth-child(6) { grid-column: 6; } .step:nth-child(7) { grid-column: 7; } .step:nth-child(8) { grid-column: 8; }
+.step:nth-child(odd)  { grid-row: 1; align-self: end; padding-bottom: 52px; }
+.step:nth-child(even) { grid-row: 2; align-self: start; padding-top: 52px; }
+.step::before { content: ""; position: absolute; left: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--accent); }
+.step:nth-child(odd)::before  { bottom: -16px; }
+.step:nth-child(even)::before { top: -16px; }
+.step .when { font-size: var(--t-when); line-height: 1; color: var(--accent); }
+.step h3 { font-family: var(--font-display); font-size: var(--t-h); line-height: 1.2; margin: 10px 0 6px; }
+.step p { font-size: var(--t-fs); color: var(--muted); line-height: 1.35; }
+[data-density="lg"] .timeline { --t-when: 76px; --t-h: 50px; --t-fs: 32px; }
+[data-density="md"] .timeline { --t-when: 64px; --t-h: 42px; --t-fs: 29px; }
+[data-density="sm"] .timeline { --t-when: 50px; --t-h: 34px; --t-fs: 25px; }
+
+/* ---------- 8. quote ---------- */
+.slide[data-layout="quote"] { display: flex; flex-direction: column; justify-content: center; padding: 0 280px; gap: 36px; }
+.quote { font-size: 64px; line-height: 1.25; }
+.cite { font-size: 28px; color: var(--muted); }
+
+/* audit mode: measure final positions (no reveal offsets) */
+.deck-stage.auditing :is(.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-blur) {
+  transform: none !important; filter: none !important; transition: none !important;
+}
+
+</style>
+<style>
+/* ===========================================================
+   STYLE: LONG TABLE (adapted from frontend-slides bold template
+   "long-table", MIT). Supper-club program: one rust ink on cream
+   paper with a 4px dot texture, outlined shapes only, Bricolage
+   uppercase display, Fraunces italic body and jumbo numerals.
+   Actors: cloth (tonal paper panel), table (outlined card with
+           solid/dashed dividers), plate (rim + dashed inner ring),
+           amp (jumbo italic glyph), pill (outlined capsule),
+           rule (1.5px topbar rule), dash (dashed divider).
+           DOM order = z-order (cloth first).
+   =========================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,600&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap');
+
+.deck-stage {
+  --actors: "cloth table plate amp pill rule dash";
+  --font-display: 'Bricolage Grotesque', sans-serif;
+  --font-body: 'Lora', Georgia, serif; /* Fraunces italic h reads like k in Vietnamese: body uses Lora */
+  --bg: #faf1e2; --fg: #b53d2a; --muted: #c05440;
+  --accent: #b53d2a; --accent-2: #8e2d1f;
+  --card-bg: transparent; --card-fg: #b53d2a; --card-radius: 0px;
+  --title-weight: 800; --title-tracking: -0.012em; --title-case: uppercase; --bullet-radius: 50%;
+  --ink: #b53d2a; --ink-32: rgba(181, 61, 42, 0.32); --paper-d: #f2e5cf;
+  --dots: radial-gradient(circle at 1px 1px, rgba(181, 61, 42, 0.09) 0.6px, transparent 1px);
+  background-image: var(--dots); background-size: 4px 4px;
+}
+
+/* ---------- actor looks + off-stage defaults ---------- */
+[data-actor="cloth"] { background-color: var(--paper-d); background-image: var(--dots); background-size: 4px 4px; --x: 1920px; --y: 0px; --w: 0px; --h: 1080px; }
+[data-actor="table"] { border: 1.5px solid var(--ink); overflow: hidden; --bw: 1.5px; --x: 960px; --y: 540px; --w: 0px; --h: 0px; }
+[data-actor="table"]::before, [data-actor="table"]::after {
+  content: ""; position: absolute; left: 6%; right: 6%; opacity: var(--dl, 1); transition: opacity 0.6s ease;
+}
+[data-actor="table"]::before { top: 18%; border-top: 1px solid var(--ink-32); }
+[data-actor="table"]::after  { bottom: 18%; border-top: 1px dashed var(--ink-32); }
+[data-actor="plate"] { border: 1.5px solid var(--ink); border-radius: 50%; --bw: 1.5px; --x: 1920px; --y: 1080px; --w: 0px; }
+[data-actor="plate"]::after { content: ""; position: absolute; inset: 11%; border: 1px dashed var(--ink-32); border-radius: 50%; }
+[data-actor="amp"] {
+  display: flex; align-items: center; justify-content: center; color: var(--ink);
+  font: 400 400px/1 'Fraunces', Georgia, serif; --x: 1600px; --y: -500px; --w: 400px; --h: 400px; --s: 0.2;
+}
+[data-actor="amp"]::before { content: "&"; }
+[data-actor="pill"] { border: 1.5px solid var(--ink); border-radius: 999px; --bw: 1.5px; --x: 960px; --y: 1180px; --w: 0px; --h: 60px; }
+[data-actor="pill"]::before {
+  content: "\B7   \B7   \B7"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font: italic 400 34px/1 'Fraunces', serif; color: var(--ink); white-space: pre; opacity: var(--pt, 0); transition: opacity 0.6s ease;
+}
+[data-actor="rule"] { background: var(--ink); --x: 120px; --y: 214px; --w: 0px; --h: 1.5px; }
+[data-actor="dash"] { border-left: 1.5px dashed rgba(181, 61, 42, 0.5); --x: 960px; --y: 630px; --w: 0px; --h: 0px; }
+
+/* ---------- 1. cover: program card on the right, amp on a plate ---------- */
+[data-layout="cover"] [data-actor="cloth"] { --x: 1040px; --w: 880px; }
+[data-layout="cover"] [data-actor="table"] { --x: 1140px; --y: 110px; --w: 680px; --h: 860px; }
+[data-layout="cover"] [data-actor="plate"] { --x: 1230px; --y: 290px; --w: 500px; }
+[data-layout="cover"] [data-actor="amp"]   { --x: 1280px; --y: 334px; --s: 1; }
+[data-layout="cover"] [data-actor="pill"]  { --x: 1340px; --y: 160px; --w: 280px; --h: 56px; --pt: 1; }
+[data-layout="cover"] [data-actor="rule"]  { --x: 120px; --y: 940px; --w: 820px; }
+[data-layout="cover"] [data-actor="dash"]  { --x: 1000px; --y: 120px; --h: 840px; }
+
+/* ---------- 2. agenda: tonal topbar, page border, amp in a label pill ---------- */
+[data-layout="agenda"] [data-actor="cloth"] { --x: 0px; --w: 1920px; --h: 232px; }
+[data-layout="agenda"] [data-actor="table"] { --x: 40px; --y: 40px; --w: 1840px; --h: 1000px; --dl: 0; }
+[data-layout="agenda"] [data-actor="plate"] { --x: 900px; --y: 960px; --w: 120px; }
+[data-layout="agenda"] [data-actor="amp"]   { --x: 1500px; --y: -68px; --s: 0.3; }
+[data-layout="agenda"] [data-actor="pill"]  { --x: 1600px; --y: 86px; --w: 200px; --h: 88px; }
+[data-layout="agenda"] [data-actor="rule"]  { --x: 0px; --y: 232px; --w: 1920px; }
+[data-layout="agenda"] [data-actor="dash"]  { --x: 960px; --y: 300px; --h: 640px; }
+
+/* ---------- 3. section: cloth swaps to the left, tall card + plate right ---------- */
+[data-layout="section"] [data-actor="cloth"] { --x: 0px; --w: 1060px; }
+[data-layout="section"] [data-actor="table"] { --x: 1240px; --y: 90px; --w: 480px; --h: 900px; }
+[data-layout="section"] [data-actor="plate"] { --x: 1270px; --y: 330px; --w: 420px; }
+[data-layout="section"] [data-actor="amp"]   { --x: 1280px; --y: 344px; --s: 0.95; }
+[data-layout="section"] [data-actor="pill"]  { --x: 160px; --y: 890px; --w: 300px; --h: 64px; --pt: 1; }
+[data-layout="section"] [data-actor="rule"]  { --x: 160px; --y: 200px; --w: 860px; }
+[data-layout="section"] [data-actor="dash"]  { --x: 1140px; --y: 120px; --h: 840px; }
+
+/* ---------- 4. content: highlight sits on a framed tonal card ---------- */
+[data-layout="content"] [data-actor="cloth"] { --x: 1240px; --y: 262px; --w: 580px; --h: 736px; }
+[data-layout="content"] [data-actor="table"] { --x: 1260px; --y: 290px; --w: 540px; --h: 680px; }
+[data-layout="content"] [data-actor="plate"] { --x: 1780px; --y: 980px; --w: 300px; }
+[data-layout="content"] [data-actor="amp"]   { --x: 1480px; --y: -68px; --s: 0.2; }
+[data-layout="content"] [data-actor="pill"]  { --x: 1560px; --y: 96px; --w: 240px; --h: 72px; }
+[data-layout="content"] [data-actor="rule"]  { --x: 120px; --y: 214px; --w: 1680px; }
+[data-layout="content"] [data-actor="dash"]  { --x: 1200px; --y: 290px; --h: 680px; }
+/* even: cloth becomes a full-height column, pill grows into a menu stadium */
+[data-layout="content"][data-parity="even"] [data-actor="cloth"] { --x: 1220px; --y: 0px; --w: 700px; --h: 1080px; }
+[data-layout="content"][data-parity="even"] [data-actor="table"] { --x: 80px; --y: 250px; --w: 1100px; --h: 760px; --dl: 0; }
+[data-layout="content"][data-parity="even"] [data-actor="plate"] { --x: 1704px; --y: 84px; --w: 96px; }
+[data-layout="content"][data-parity="even"] [data-actor="amp"]   { --x: 1552px; --y: -66px; --s: 0.16; }
+[data-layout="content"][data-parity="even"] [data-actor="pill"]  { --x: 1290px; --y: 280px; --w: 480px; --h: 700px; }
+[data-layout="content"][data-parity="even"] [data-actor="rule"]  { --x: 120px; --y: 214px; --w: 1060px; }
+[data-layout="content"][data-parity="even"] [data-actor="dash"]  { --x: 1860px; --y: 120px; --h: 840px; }
+
+/* ---------- 5. two-col: tonal card vs outlined card, pill = takeaway ---------- */
+[data-layout="two-col"] [data-actor="cloth"] { --x: 120px; --y: 270px; --w: 808px; --h: 720px; }
+[data-layout="two-col"] [data-actor="table"] { --x: 992px; --y: 270px; --w: 808px; --h: 720px; --dl: 0; }
+[data-layout="two-col"] [data-actor="plate"] { --x: 1704px; --y: 84px; --w: 96px; }
+[data-layout="two-col"] [data-actor="amp"]   { --x: 1552px; --y: -66px; --s: 0.16; }
+[data-layout="two-col"] [data-actor="pill"]  { --x: 120px; --y: 1120px; --w: 1680px; --h: 110px; }
+[data-layout="two-col"] [data-actor="rule"]  { --x: 120px; --y: 214px; --w: 1680px; }
+[data-layout="two-col"] [data-actor="dash"]  { --x: 960px; --y: 300px; --h: 660px; }
+.deck-stage:has(.slide.active .takeaway)[data-layout="two-col"] :is([data-actor="cloth"], [data-actor="table"]) { --h: 570px; }
+.deck-stage:has(.slide.active .takeaway)[data-layout="two-col"] [data-actor="pill"] { --y: 876px; --h: 118px; }
+.deck-stage:has(.slide.active .takeaway)[data-layout="two-col"] [data-actor="dash"] { --h: 510px; }
+
+/* ---------- 6. stats: tonal runner, ledger card, plate peeks top-right ---------- */
+[data-layout="stats"] [data-actor="cloth"] { --x: 0px; --y: 262px; --w: 1920px; --h: 736px; }
+[data-layout="stats"] [data-actor="table"] { --x: 80px; --y: 290px; --w: 1760px; --h: 680px; }
+[data-layout="stats"] [data-actor="plate"] { --x: 1620px; --y: -220px; --w: 440px; }
+[data-layout="stats"] [data-actor="amp"]   { --x: 1600px; --y: -110px; --s: 0.3; }
+[data-layout="stats"] [data-actor="pill"]  { --x: -400px; --y: 600px; --w: 200px; --h: 60px; }
+[data-layout="stats"] [data-actor="rule"]  { --x: 0px; --y: 262px; --w: 1920px; }
+[data-layout="stats"] [data-actor="dash"]  { --x: 960px; --y: 1080px; --h: 0px; }
+
+/* ---------- 7. timeline: the long table runner, pill track, plate at the head ---------- */
+[data-layout="timeline"] [data-actor="cloth"] { --x: 0px; --y: 590px; --w: 1920px; --h: 80px; }
+[data-layout="timeline"] [data-actor="table"] { --x: 40px; --y: 40px; --w: 1840px; --h: 1000px; --dl: 0; }
+[data-layout="timeline"] [data-actor="plate"] { --x: 1806px; --y: 576px; --w: 108px; }
+[data-layout="timeline"] [data-actor="amp"]   { --x: 1660px; --y: 434px; --s: 0.16; }
+[data-layout="timeline"] [data-actor="pill"]  { --x: 100px; --y: 606px; --w: 1696px; --h: 48px; }
+[data-layout="timeline"] [data-actor="rule"]  { --x: 120px; --y: 214px; --w: 1680px; }
+[data-layout="timeline"] [data-actor="dash"]  { --x: 120px; --y: 630px; --h: 0px; }
+
+/* ---------- 8. quote: cloth floods, framed card, amp turns into a quote mark ---------- */
+[data-layout="quote"] [data-actor="cloth"] { --x: 0px; --y: 0px; --w: 1920px; --h: 1080px; }
+[data-layout="quote"] [data-actor="table"] { --x: 200px; --y: 160px; --w: 1520px; --h: 760px; }
+[data-layout="quote"] [data-actor="plate"] { --x: 1580px; --y: 760px; --w: 480px; }
+[data-layout="quote"] [data-actor="amp"]   { --x: 20px; --y: 10px; --s: 0.8; }
+[data-layout="quote"] [data-actor="amp"]::before { content: "\201C"; }
+[data-layout="quote"] [data-actor="pill"]  { --x: 760px; --y: -200px; --w: 400px; --h: 60px; }
+[data-layout="quote"] [data-actor="rule"]  { --x: 200px; --y: 980px; --w: 1520px; }
+[data-layout="quote"] [data-actor="dash"]  { --x: 1860px; --y: 120px; --h: 840px; }
+
+/* ---------- 9. closing: tonal stadium inside a pill, lamp line from above ---------- */
+[data-layout="closing"] [data-actor="cloth"] { --x: 300px; --y: 320px; --w: 1320px; --h: 440px; border-radius: 999px; }
+[data-layout="closing"] [data-actor="table"] { --x: 40px; --y: 40px; --w: 1840px; --h: 1000px; --dl: 0; }
+[data-layout="closing"] [data-actor="plate"] { --x: -160px; --y: 380px; --w: 320px; }
+[data-layout="closing"] [data-actor="amp"]   { --x: 1600px; --y: 340px; --s: 0.45; }
+[data-layout="closing"] [data-actor="pill"]  { --x: 260px; --y: 290px; --w: 1400px; --h: 500px; }
+[data-layout="closing"] [data-actor="rule"]  { --x: 760px; --y: 840px; --w: 400px; }
+[data-layout="closing"] [data-actor="dash"]  { --x: 960px; --y: 40px; --h: 250px; }
+
+/* ---------- content tweaks: uppercase Bricolage display, italic Fraunces body ---------- */
+.slide { --title-w: 1360px; }
+.slide > .title:first-child { font-size: 60px; line-height: 1.2; }
+.slide .kicker { font-family: var(--font-display); font-size: 20px; letter-spacing: 0.18em; }
+.slide .subtitle, .slide .meta, .slide .cite, .bullets li, .col li, .col p, .step p, .agenda-list p, .stat-label, .takeaway { font-style: italic; }
+:is(.num, .stat-num, .hl-big, .when) { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; }
+:is(.agenda-list h3, .col h3, .step h3, .hl-text) { font-weight: 800; text-transform: uppercase; letter-spacing: -0.01em; line-height: 1.2; }
+.bullets li::before, .col li::before { background: transparent; border: 1.5px solid var(--ink); }
+.slide[data-layout="cover"] { align-items: flex-start; text-align: left; padding: 0 1000px 0 120px; }
+.slide[data-layout="cover"] .title { font-size: 92px; line-height: 1.12; }
+.slide[data-layout="cover"] .subtitle { font-size: 36px; }
+.slide[data-layout="closing"] .title { font-size: 150px; line-height: 1.15; }
+.slide[data-layout="section"] .num { font-size: 240px; }
+.slide[data-layout="section"] .title { font-size: 80px; line-height: 1.15; }
+.agenda-list { --agenda-gap: 200px; --tile-line: 1px solid var(--ink-32); }
+.agenda-list li { align-items: flex-start; padding-top: 32px; }
+.agenda-list li.is-right { flex-direction: row; text-align: left; }
+.agenda-list li.is-right .num { text-align: left; }
+[data-density="lg"] .bullets { --b-fs: 46px; --b-gap: 60px; }
+[data-density="md"] .bullets { --b-fs: 41px; --b-gap: 54px; }
+.slide[data-layout="content"] .hl-big { font-size: 170px; }
+.slide[data-layout="content"] .hl-text { font-size: 32px; padding: 0 40px; }
+.col { padding: 44px 52px; }
+.col h3 { padding-bottom: 18px; border-bottom: 1px solid var(--ink-32); }
+.takeaway { border-left: 0; padding: 20px 72px; font-family: var(--font-body); font-weight: 400; font-size: 38px; }
+.step::before { background: var(--bg); border: 1.5px solid var(--ink); }
+.slide[data-layout="stats"] .stat-num { letter-spacing: -0.03em; }
+.slide[data-layout="quote"] { padding: 0 300px; }
+.slide[data-layout="quote"] .quote { font-weight: 700; font-size: 60px; line-height: 1.2; text-transform: uppercase; }
+.slide[data-layout="quote"] .cite { font-size: 30px; }
+
+</style>
+<style>
+/* ===========================================================
+   GEMINI.md deck: shared entrance effects (deck-only, sakura-chroma).
+   Every effect keeps its FINAL look as the element's normal style
+   (or the .slide.active state), so frozen screenshots show the end.
+   --d = extra delay in seconds after the slide's reveal base.
+   =========================================================== */
+.fx {
+  opacity: 0;
+  transition: opacity .5s ease, transform .9s var(--morph-ease), clip-path .9s ease, filter .7s ease;
+}
+.slide.active .fx {
+  opacity: 1; transform: rotate(var(--rot, 0deg)); clip-path: inset(-400px -400px -400px -400px); filter: none;
+  transition-delay: calc(var(--reveal-base) + var(--d, 0) * 1s);
+}
+.fx-up    { transform: translateY(50px) rotate(var(--rot, 0deg)); }
+.fx-left  { transform: translateX(-110px) rotate(var(--rot, 0deg)); }
+.fx-right { transform: translateX(110px) rotate(var(--rot, 0deg)); }
+.fx-drop  { transform: translateY(-90px) rotate(calc(var(--rot, 0deg) - 6deg)); }
+.fx-pop   { transform: scale(.55) rotate(var(--rot, 0deg)); }
+.slide.active .fx-pop { transition-timing-function: ease, cubic-bezier(.34, 1.56, .64, 1), ease, ease; }
+.fx-blur  { filter: blur(16px); transform: scale(1.06); }
+.fx-from  { transform: var(--from); }
+.fx-flip  { transform: perspective(1400px) rotateY(-92deg); transform-origin: 0 50%; }
+.slide.active .fx-flip { transition-duration: .5s, 1.1s; }
+/* clip effects reveal left-to-right (typing) or top-down (growing) */
+.fx-type  { opacity: 1; clip-path: inset(0 100% 0 0); transition: clip-path .9s steps(28, end); }
+.fx-growx { opacity: 1; clip-path: inset(0 100% 0 0); transition: clip-path .8s var(--morph-ease); }
+.fx-growy { opacity: 1; clip-path: inset(0 0 100% 0); transition: clip-path 1.1s var(--morph-ease); }
+
+/* rubber stamp slams down, then settles */
+@keyframes slam {
+  0%   { opacity: 0; transform: rotate(var(--rot, -10deg)) scale(2.6); }
+  65%  { opacity: 1; transform: rotate(var(--rot, -10deg)) scale(.9); }
+  82%  { transform: rotate(calc(var(--rot, -10deg) + 2deg)) scale(1.04); }
+  100% { opacity: 1; transform: rotate(var(--rot, -10deg)) scale(1); }
+}
+.slide.active .slam { animation: slam .7s ease-out both; animation-delay: calc(var(--reveal-base) + var(--d, 0) * 1s); }
+.slam { transform: rotate(var(--rot, -10deg)); }
+
+/* red strike line drawn through an element */
+.strike { position: relative; }
+.strike::after {
+  content: ""; position: absolute; left: -3%; right: -3%; top: 52%; height: 5px; background: var(--red);
+  transform: scaleX(0); transform-origin: left; transition: transform .45s ease;
+}
+.slide.active .strike::after { transform: scaleX(1); transition-delay: calc(var(--reveal-base) + var(--d, 0) * 1s); }
+
+/* highlighter sweep behind text */
+.mark {
+  background: linear-gradient(var(--yellow), var(--yellow)) 0 85% / 0% 42% no-repeat;
+  transition: background-size .7s ease;
+}
+.slide.active .mark { background-size: 100% 42%; transition-delay: calc(var(--reveal-base) + var(--d, 0) * 1s); }
+
+/* SVG strokes drawn on */
+.draw { stroke-dasharray: 1200; stroke-dashoffset: 1200; transition: stroke-dashoffset 1.2s ease; }
+.slide.active .draw { stroke-dashoffset: 0; transition-delay: calc(var(--reveal-base) + var(--d, 0) * 1s); }
+
+/* number counting up (stats slide) */
+@property --n { syntax: '<integer>'; inherits: false; initial-value: 0; }
+.count { --n: 0; counter-reset: n var(--n); transition: --n 1.6s cubic-bezier(.2, .7, .2, 1); }
+.count::before { content: counter(n); }
+.slide.active .count { --n: var(--to); transition-delay: calc(var(--reveal-base) + var(--d, 0) * 1s); }
+
+/* blinking caret after the last typed line */
+@keyframes blink { 50% { opacity: 0; } }
+.caret::after { content: ""; display: inline-block; width: 14px; height: 1em; margin-left: 8px; vertical-align: -.12em; background: var(--yellow); animation: blink 1s steps(1) infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fx, .fx-type, .fx-growx, .fx-growy { transition-duration: .35s !important; }
+  .slide.active .slam { animation-duration: .35s; }
+}
+
+/* audit mode (deck.audit) measures every slide in its finished state */
+.deck-stage.auditing .fx { opacity: 1; transform: rotate(var(--rot, 0deg)); clip-path: none; filter: none; transition: none; }
+
+</style>
+<style>
+/* ===========================================================
+   AutoCAD lesson deck, style long-table: custom actor poses.
+   Actors: cloth (tonal panel) table (outlined card) plate (circle)
+   amp (jumbo glyph) pill (capsule) rule (topbar) dash (dashed line).
+   =========================================================== */
+.deck-stage:where([data-pose]:not([data-pose=""])) [data-actor="rule"] { --x: 120px; --y: 214px; --w: 1680px; }
+.deck-stage:where([data-pose]:not([data-pose=""])) [data-actor="pill"] { --x: 960px; --y: 1180px; --w: 0px; --h: 60px; --pt: 0; }
+.deck-stage:where([data-pose]:not([data-pose=""])) [data-actor="dash"] { --x: 960px; --y: 1080px; --h: 0px; }
+.deck-stage:where([data-pose]:not([data-pose=""])) [data-actor="amp"]  { --x: 1600px; --y: -80px; --s: .16; }
+.deck-stage:where([data-pose]:not([data-pose=""])) [data-actor="plate"] { --x: 1724px; --y: 82px; --w: 96px; }
+
+/* cover: the plate carries the session number instead of the ampersand */
+[data-pose="cover2"] [data-actor="cloth"] { --x: 1040px; --y: 0px; --w: 880px; --h: 1080px; }
+[data-pose="cover2"] [data-actor="table"] { --x: 1140px; --y: 110px; --w: 680px; --h: 860px; }
+.deck-stage[data-pose="cover2"] [data-actor="plate"] { --x: 1230px; --y: 290px; --w: 500px; }
+.deck-stage[data-pose="cover2"] [data-actor="amp"]   { --x: 1600px; --y: -500px; --s: .2; }
+.deck-stage[data-pose="cover2"] [data-actor="pill"]  { --x: 1340px; --y: 160px; --w: 280px; --h: 56px; --pt: 1; }
+.deck-stage[data-pose="cover2"] [data-actor="rule"]  { --x: 120px; --y: 960px; --w: 820px; }
+.deck-stage[data-pose="cover2"] [data-actor="dash"]  { --x: 1000px; --y: 120px; --h: 840px; }
+
+/* frame: the outlined card frames a full-width menu, cloth is its header band */
+[data-pose="frame"] [data-actor="cloth"] { --x: 120px; --y: 276px; --w: 1680px; --h: 74px; }
+[data-pose="frame"] [data-actor="table"] { --x: 120px; --y: 276px; --w: 1680px; --h: 704px; --dl: 0; }
+
+/* split: menu card left, tonal side panel right, dashed seam between */
+[data-pose="split"] [data-actor="cloth"] { --x: 1260px; --y: 276px; --w: 540px; --h: 704px; }
+[data-pose="split"] [data-actor="table"] { --x: 120px; --y: 276px; --w: 1100px; --h: 704px; --dl: 0; }
+.deck-stage[data-pose="split"] [data-actor="dash"] { --x: 1240px; --y: 296px; --h: 664px; }
+
+/* ask: list card left, the pill stands up as a stadium around the question */
+[data-pose="ask"] [data-actor="cloth"] { --x: 1920px; --y: 276px; --w: 0px; --h: 704px; }
+[data-pose="ask"] [data-actor="table"] { --x: 120px; --y: 276px; --w: 1020px; --h: 704px; --dl: 0; }
+.deck-stage[data-pose="ask"] [data-actor="pill"] { --x: 1220px; --y: 276px; --w: 580px; --h: 704px; }
+
+/* trio: tonal band, outlined frame around three courses */
+[data-pose="trio"] [data-actor="cloth"] { --x: 0px; --y: 262px; --w: 1920px; --h: 736px; }
+[data-pose="trio"] [data-actor="table"] { --x: 80px; --y: 290px; --w: 1760px; --h: 680px; --dl: 0; }
+
+/* flow: tonal panel behind the command chain, card for the two modes */
+[data-pose="flow"] [data-actor="cloth"] { --x: 120px; --y: 276px; --w: 760px; --h: 704px; }
+[data-pose="flow"] [data-actor="table"] { --x: 940px; --y: 276px; --w: 860px; --h: 704px; }
+.deck-stage[data-pose="flow"] [data-actor="dash"] { --x: 910px; --y: 296px; --h: 664px; }
+
+/* image: card frames the drawing, plate rolls under the facts */
+[data-pose="image"] [data-actor="cloth"] { --x: 1180px; --y: 276px; --w: 620px; --h: 704px; }
+[data-pose="image"] [data-actor="table"] { --x: 120px; --y: 276px; --w: 1000px; --h: 704px; --dl: 0; }
+.deck-stage[data-pose="image"] [data-actor="plate"] { --x: 1620px; --y: 800px; --w: 260px; }
+
+/* code: tonal console panel left, outlined note card right */
+[data-pose="code"] [data-actor="cloth"] { --x: 120px; --y: 276px; --w: 1040px; --h: 704px; }
+[data-pose="code"] [data-actor="table"] { --x: 1220px; --y: 276px; --w: 580px; --h: 704px; }
+.deck-stage[data-pose="code"] [data-actor="plate"] { --x: 1640px; --y: 820px; --w: 220px; }
+.deck-stage[data-pose="code"] [data-actor="dash"] { --x: 1190px; --y: 296px; --h: 664px; }
+
+/* grid: tonal band, no frame (the cards are the frames) */
+[data-pose="grid"] [data-actor="cloth"] { --x: 0px; --y: 262px; --w: 1920px; --h: 736px; }
+[data-pose="grid"] [data-actor="table"] { --x: 960px; --y: 620px; --w: 0px; --h: 0px; }
+
+/* tiers: tonal spine left of a tall frame */
+[data-pose="tiers"] [data-actor="cloth"] { --x: 120px; --y: 276px; --w: 170px; --h: 704px; }
+[data-pose="tiers"] [data-actor="table"] { --x: 120px; --y: 276px; --w: 1680px; --h: 704px; --dl: 0; }
+.deck-stage[data-pose="tiers"] [data-actor="dash"] { --x: 290px; --y: 296px; --h: 664px; }
+
+/* score: tonal file list left, outlined score card right */
+[data-pose="score"] [data-actor="cloth"] { --x: 120px; --y: 276px; --w: 700px; --h: 704px; }
+[data-pose="score"] [data-actor="table"] { --x: 880px; --y: 276px; --w: 920px; --h: 704px; --dl: 0; }
+.deck-stage[data-pose="score"] [data-actor="dash"] { --x: 850px; --y: 296px; --h: 664px; }
+
+/* finale: big frame, the pill becomes the stadium holding the closing line */
+[data-pose="finale"] [data-actor="cloth"] { --x: 960px; --y: 540px; --w: 0px; --h: 0px; }
+[data-pose="finale"] [data-actor="table"] { --x: 40px; --y: 40px; --w: 1840px; --h: 1000px; --dl: 0; }
+.deck-stage[data-pose="finale"] [data-actor="pill"]  { --x: 260px; --y: 790px; --w: 1400px; --h: 170px; }
+.deck-stage[data-pose="finale"] [data-actor="plate"] { --x: 1700px; --y: 820px; --w: 160px; }
+.deck-stage[data-pose="finale"] [data-actor="amp"]   { --x: 1580px; --y: -110px; --s: .2; }
+
+/* frame2: like frame, but the header band sits lower (prompt box above the table) */
+[data-pose="frame2"] [data-actor="cloth"] { --x: 120px; --y: 440px; --w: 1680px; --h: 74px; }
+[data-pose="frame2"] [data-actor="table"] { --x: 120px; --y: 276px; --w: 1680px; --h: 704px; --dl: 0; }
+
+</style>
+<style>
+/* ===========================================================
+   AutoCAD lesson deck, style long-table: slide parts.
+   Supper-club menu language: hairline rows, italic serif body,
+   uppercase Bricolage labels, jumbo italic Fraunces numerals.
+   =========================================================== */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&display=swap');
+.deck-stage { --font-mono: 'JetBrains Mono', monospace; --red: #b53d2a; --yellow: rgba(181, 61, 42, .28); --hair: 1px solid rgba(181, 61, 42, .32); }
+
+.slide { --title-w: 1580px; }
+.slide code { font-family: var(--font-mono); font-size: .8em; font-style: normal; padding: 0 .22em; background: rgba(181, 61, 42, .08); white-space: nowrap; text-transform: none; }
+.slide .title code { font-family: inherit; font-size: 1em; background: none; padding: 0; }
+.lbl { font: 800 20px/1.1 var(--font-display); letter-spacing: .16em; text-transform: uppercase; }
+.it { font-style: italic; }
+.fr { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 400; }
+.abs { position: absolute; }
+.box { border: 1.5px solid var(--ink); background: var(--bg); }
+
+/* ---------- menu table (grid rows so each row can animate) ---------- */
+.mt { position: absolute; display: grid; align-content: start; }
+.mt .r { display: grid; grid-template-columns: var(--cols); column-gap: 30px; align-items: center; padding: 0 30px; border-top: var(--hair); min-height: var(--rh, 84px); }
+.mt .r.h { border-top: 0; min-height: 74px; }
+.mt .r.h > * { font: 800 20px/1.1 var(--font-display); letter-spacing: .14em; text-transform: uppercase; }
+.mt .r > * { font-size: var(--fs, 28px); line-height: 1.32; }
+.mt .r > :not(:first-child) { font-style: italic; }
+.mt .r > :first-child { font-weight: 600; }
+.mt .r.tot { border-top: 1.5px solid var(--ink); }
+.bar { height: 22px; border: 1.5px solid var(--ink); border-radius: 999px; position: relative; overflow: hidden; }
+.bar i { position: absolute; inset: 0 auto 0 0; width: var(--p); background: var(--ink); }
+
+/* ---------- courses (numbered menu items) ---------- */
+.courses { position: absolute; display: grid; gap: 0 60px; }
+.course { display: grid; grid-template-columns: 96px 1fr; gap: 18px; align-items: start; padding: 22px 0; border-top: 1px dashed rgba(181, 61, 42, .4); }
+.course .n { font: italic 400 84px/.9 'Fraunces', Georgia, serif; }
+.course p { font-size: var(--cfs, 30px); line-height: 1.38; font-style: italic; }
+.course p b { font-style: normal; }
+.lead { position: absolute; left: 160px; top: 296px; font-size: 32px; font-style: italic; }
+
+/* ---------- side panel text ---------- */
+.side { position: absolute; display: flex; flex-direction: column; gap: 22px; }
+.side h3 { font: 800 30px/1.15 var(--font-display); text-transform: uppercase; letter-spacing: .02em; }
+.side li { position: relative; padding-left: 34px; font-size: 28px; line-height: 1.4; font-style: italic; }
+.side li::before { content: ""; position: absolute; left: 0; top: 14px; width: 14px; height: 14px; border: 1.5px solid var(--ink); border-radius: 50%; }
+.side p { font-size: 28px; line-height: 1.4; font-style: italic; }
+
+/* ---------- rubber stamp ---------- */
+.stamp { position: absolute; padding: 10px 26px; border: 4px double var(--ink); border-radius: 12px; font: 800 40px/1 var(--font-display); letter-spacing: .08em; text-transform: uppercase; background: rgba(250, 241, 226, .9); --rot: -9deg; z-index: 3; }
+
+/* ---------- console / code ---------- */
+.con { position: absolute; padding: 26px 34px; background: var(--ink); color: #faf1e2; border-radius: 16px; display: flex; flex-direction: column; gap: 10px; }
+.con .lbl { color: rgba(250, 241, 226, .7); font-size: 17px; }
+.con .ln { font: 500 27px/1.5 var(--font-mono); white-space: pre-wrap; }
+.con .ln.tx { font: italic 400 31px/1.42 var(--font-body); }
+.con .k { color: #f4c9a8; }
+
+/* ---------- cards ---------- */
+.card { position: absolute; border: 1.5px solid var(--ink); background: var(--bg); padding: 32px 36px; display: flex; flex-direction: column; gap: 14px; }
+.card h3 { font: 800 34px/1.15 var(--font-display); text-transform: uppercase; }
+.card h3 code { font-size: .8em; }
+.card p { font-size: 26px; line-height: 1.4; font-style: italic; }
+.card .lbl { font-size: 17px; opacity: .75; }
+.card.solid { background: var(--ink); color: #faf1e2; }
+.card.round { border-radius: 999px; text-align: center; align-items: center; justify-content: center; }
+
+/* ---------- flow chain ---------- */
+.flow { position: absolute; left: 170px; top: 300px; width: 660px; bottom: 100px; display: flex; flex-direction: column; justify-content: space-between; align-items: stretch; }
+.flow .nd { padding: 14px 22px; border: 1.5px solid var(--ink); border-radius: 999px; background: var(--bg); text-align: center; font-size: 25px; line-height: 1.25; font-style: italic; }
+.flow .nd.end { background: var(--ink); color: #faf1e2; }
+.flow .ar { text-align: center; font: italic 400 30px/1 'Fraunces', serif; height: 30px; }
+
+/* ---------- formula ---------- */
+.formula { position: absolute; left: 160px; right: 160px; top: 330px; display: grid; grid-template-columns: 1fr 70px 1fr 70px 1fr; align-items: center; }
+.formula .term { aspect-ratio: 1; border: 1.5px solid var(--ink); border-radius: 50%; display: grid; place-content: center; text-align: center; padding: 30px; position: relative; }
+.formula .term::after { content: ""; position: absolute; inset: 9%; border: 1px dashed rgba(181, 61, 42, .4); border-radius: 50%; }
+.formula .term b { font: 800 40px/1.1 var(--font-display); text-transform: uppercase; }
+.formula .term span { font: italic 400 28px/1.3 var(--font-body); margin-top: 8px; }
+.formula .op { text-align: center; font: italic 400 90px/1 'Fraunces', serif; }
+
+/* ---------- figure ---------- */
+.figure { position: absolute; left: 150px; top: 306px; width: 940px; height: 644px; display: grid; place-items: center; }
+.figure img { max-width: 940px; max-height: 644px; object-fit: contain; }
+.fact { display: grid; gap: 4px; }
+.fact .big { font: italic 400 76px/1 'Fraunces', serif; }
+.fact .big small { font-size: .45em; }
+
+/* ---------- chips ---------- */
+.chips { display: flex; flex-wrap: wrap; gap: 12px; }
+.chip { padding: 10px 20px; border: 1.5px solid var(--ink); border-radius: 999px; font: 600 23px/1.1 var(--font-mono); background: var(--bg); }
+
+/* ---------- flip / tiers ---------- */
+.tier { position: absolute; left: 330px; width: 1440px; display: grid; grid-template-columns: 1fr 70px 1fr; align-items: center; gap: 20px; }
+.tier .t { font-size: 29px; line-height: 1.38; font-style: italic; }
+.tier .ar { font: italic 400 50px/1 'Fraunces', serif; text-align: center; }
+.tier .num { position: absolute; left: -175px; width: 130px; text-align: center; font: italic 400 110px/1 'Fraunces', serif; }
+
+/* ---------- ruler (measure with DIST) ---------- */
+.ruler { width: 100%; height: 90px; }
+.ruler line { stroke: var(--ink); stroke-width: 2; }
+
+/* ---------- bands ---------- */
+.band { position: absolute; left: 120px; right: 120px; padding: 18px 36px; border-top: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); display: flex; gap: 26px; align-items: baseline; }
+.band .lbl { flex: none; }
+.band p { font-size: 32px; line-height: 1.35; font-style: italic; }
+
+/* ---------- cover badge ---------- */
+.cover-badge { position: absolute; left: 1230px; top: 290px; width: 500px; height: 500px; display: grid; place-content: center; text-align: center; }
+.cover-badge .lbl { font-size: 24px; }
+.cover-badge .big { font: italic 400 230px/.95 'Fraunces', serif; }
+.cover-list { margin-top: 18px; display: grid; gap: 8px; }
+.cover-list li { font-size: 25px; line-height: 1.4; font-style: italic; }
+.cover-list li b { font-style: normal; }
+
+/* ---------- finale ---------- */
+.slide[data-layout="closing"].finale { display: block; padding: 0; text-align: left; }
+.slide[data-layout="closing"].finale .title { position: absolute; left: 120px; top: 110px; font-size: 76px; }
+.finale .courses { left: 120px; right: 120px; top: 300px; grid-template-columns: repeat(3, 1fr); }
+.finale .course { grid-template-columns: 1fr; border-top: 1.5px solid var(--ink); padding-top: 26px; }
+.finale .course p { font-size: 34px; }
+.finale .closer { position: absolute; left: 260px; width: 1400px; top: 790px; height: 170px; display: grid; place-content: center; text-align: center; font: italic 600 54px/1.2 var(--font-body); }
+
+/* ---------- speaker notes drawer (press N) ---------- */
+.slide aside.notes { display: none; }
+.notes-drawer { position: fixed; left: 0; right: 0; bottom: 0; max-height: 32vh; overflow: auto; z-index: 2000; padding: 16px 28px 20px; background: #fffaf0; color: #5a2116; border-top: 2px solid #b53d2a; font: 18px/1.55 Lora, Georgia, serif; transform: translateY(100%); transition: transform .3s ease; }
+.notes-drawer.on { transform: none; }
+.notes-drawer b { font: 700 12px/1 system-ui, sans-serif; letter-spacing: .14em; text-transform: uppercase; display: block; margin-bottom: 6px; color: #b53d2a; }
+
+/* small inline result stamp (sum check) */
+.mini { display: inline-block; padding: 8px 16px; border: 3px double var(--ink); border-radius: 10px; font: 800 22px/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase; font-style: normal; --rot: -6deg; }
+.mini.solid { background: var(--ink); color: #faf1e2; border-color: var(--ink); }
+
+</style>
+</head>
+<body>
+<div class="deck-viewport">
+<div class="deck-stage">
+
+  <!-- 1 -->
+  <section class="slide" data-layout="cover" data-pose="cover2">
+    <p class="kicker reveal">Khóa đào tạo thực chiến · CES Global</p>
+    <h1 class="title reveal" style="font-size:78px">AI Agent trong kỹ thuật &amp; xây dựng</h1>
+    <p class="subtitle reveal">Buổi 03: Điều khiển AutoCAD bằng AI qua MCP</p>
+    <ul class="cover-list">
+      <li class="fx fx-up" style="--d:.6"><b>Từ một tấm hình đến bản vẽ</b></li>
+      <li class="fx fx-up" style="--d:.75"><b>Đơn vị tổ chức:</b> CES Global</li>
+      <li class="fx fx-up" style="--d:.9"><b>Thời lượng:</b> 150 phút (30% lý thuyết, 70% thực hành)</li>
+      <li class="fx fx-up" style="--d:1.05"><b>Thông điệp của buổi:</b> "AI đứng bếp, kỹ sư nếm và duyệt"</li>
+    </ul>
+    <div class="cover-badge fx fx-pop" style="--d:.5"><span class="lbl">Buổi</span><span class="big">03</span><span class="lbl">150 phút</span></div>
+    <aside class="notes">Mở đầu bằng câu hỏi: "Anh chị đã bao giờ nhận một tấm hình mặt bằng qua Zalo và phải ngồi vẽ lại từ đầu chưa?" Hôm nay cả lớp sẽ để Claude làm việc đó, còn mình làm người duyệt.</aside>
+  </section>
+
+  <!-- 2 -->
+  <section class="slide" data-layout="content" data-pose="frame">
+    <h2 class="title reveal">Mục tiêu buổi 03</h2>
+    <p class="lead fx fx-blur" style="--d:.05">6 việc học viên làm được sau buổi hôm nay:</p>
+    <div class="courses" style="left:160px;right:160px;top:370px;bottom:110px;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);--cfs:33px">
+      <div class="course fx fx-up" style="--d:.2"><span class="n">1</span><p>Phân biệt cấp toàn máy và cấp dự án của <code>CLAUDE.md</code>, <code>SKILL.md</code>, MCP.</p></div>
+      <div class="course fx fx-up" style="--d:.35"><span class="n">2</span><p>Giải thích ba cách AI điều khiển AutoCAD: Script, AutoLISP, MCP.</p></div>
+      <div class="course fx fx-up" style="--d:.5"><span class="n">3</span><p>Tự cài và thiết lập MCP cho AutoCAD trên máy cá nhân.</p></div>
+      <div class="course fx fx-up" style="--d:.65"><span class="n">4</span><p><b>Đọc hình trước khi vẽ:</b> tách ba loại số liệu, cộng kiểm chuỗi kích thước.</p></div>
+      <div class="course fx fx-up" style="--d:.8"><span class="n">5</span><p>Ra lệnh bằng lời để Claude dựng lại mặt bằng từ một tấm hình.</p></div>
+      <div class="course fx fx-up" style="--d:.95"><span class="n">6</span><p><b>Kiểm soát chất lượng:</b> AI nêu giả định, người đo lại bằng DIST.</p></div>
+    </div>
+    <aside class="notes">Nhấn mạnh mục 4 và 6. Công cụ thì ai cũng cài được, giá trị của kỹ sư nằm ở khâu kiểm soát.</aside>
+  </section>
+
+  <!-- 3 -->
+  <section class="slide" data-layout="content" data-pose="frame">
+    <h2 class="title reveal">Lộ trình 150 phút</h2>
+    <div class="mt" style="left:120px;width:1680px;top:276px;--cols:250px 100px 1fr 420px;--rh:88px">
+      <div class="r h fx fx-blur" style="--d:.05"><span>Thời gian</span><span>Phút</span><span>Nội dung</span><span>Thời lượng</span></div>
+      <div class="r fx fx-left" style="--d:.15"><span>00:00 - 00:10</span><span>10</span><span>Ôn Buổi 02, nghiệm thu D2</span><span class="bar"><i class="fx fx-growx" style="--p:22.2%;--d:.9"></i></span></div>
+      <div class="r fx fx-left" style="--d:.25"><span>00:10 - 00:20</span><span>10</span><span>Hai cấp cấu hình: toàn máy và dự án</span><span class="bar"><i class="fx fx-growx" style="--p:22.2%;--d:1"></i></span></div>
+      <div class="r fx fx-left" style="--d:.35"><span>00:20 - 00:35</span><span>15</span><span>Ba cách AI điều khiển AutoCAD, MCP là gì</span><span class="bar"><i class="fx fx-growx" style="--p:33.3%;--d:1.1"></i></span></div>
+      <div class="r fx fx-left" style="--d:.45"><span>00:35 - 01:05</span><span>30</span><span>Cài đặt và thiết lập MCP</span><span class="bar"><i class="fx fx-growx" style="--p:66.7%;--d:1.2"></i></span></div>
+      <div class="r fx fx-left" style="--d:.55"><span>01:05 - 01:30</span><span>25</span><span>Demo: từ hình căn hộ đến bản vẽ</span><span class="bar"><i class="fx fx-growx" style="--p:55.6%;--d:1.3"></i></span></div>
+      <div class="r fx fx-left" style="--d:.65"><span>01:30 - 02:15</span><span>45</span><span>Lab 03</span><span class="bar"><i class="fx fx-growx" style="--p:100%;--d:1.4"></i></span></div>
+      <div class="r fx fx-left" style="--d:.75"><span>02:15 - 02:30</span><span>15</span><span>Nghiệm thu D3, giao việc Buổi 04</span><span class="bar"><i class="fx fx-growx" style="--p:33.3%;--d:1.5"></i></span></div>
+    </div>
+    <aside class="notes">Báo trước phần cài đặt 30 phút là phần dễ kẹt nhất. Ai đã làm checklist ở nhà thì hỗ trợ bạn bên cạnh.</aside>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide" data-layout="content" data-pose="ask">
+    <h2 class="title reveal">Ôn buổi 02 và nghiệm thu D2</h2>
+    <div class="side" style="left:180px;top:330px;bottom:120px;width:900px;justify-content:space-evenly">
+      <h3 class="fx fx-left" style="--d:.1">Buổi 02 chúng ta đã có:</h3>
+      <ul class="side" style="position:static;gap:52px">
+        <li class="fx fx-left" style="--d:.25;font-size:35px">Skill <code>soat-ho-so-ky-thuat</code> do chính học viên đóng gói.</li>
+        <li class="fx fx-left" style="--d:.4;font-size:35px">Ma trận yêu cầu kỹ thuật và Phiếu RFI.</li>
+        <li class="fx fx-left" style="--d:.55;font-size:35px">Đã xem plugin <code>vn-autocad-skill</code>, trong đó có bước xuất DWG qua AutoCAD MCP.</li>
+      </ul>
+    </div>
+    <div class="side" style="left:1270px;top:400px;width:480px;text-align:center;align-items:center">
+      <p class="lbl fx fx-up" style="--d:.8;font-style:normal">Câu hỏi nối sang hôm nay</p>
+      <p class="it fx fx-blur" style="--d:1;font-size:46px;line-height:1.3;font-weight:600">Skill của anh chị đang nằm ở đâu trên máy? Mở dự án khác thì nó còn dùng được không?</p>
+    </div>
+    <aside class="notes">Gọi 2 học viên trả lời câu hỏi. Đa số sẽ không chắc. Đó là lý do có phần 10 phút tiếp theo.</aside>
+  </section>
+
+  <!-- 5 -->
+  <section class="slide" data-layout="content" data-pose="frame">
+    <h2 class="title reveal">Hai cấp cấu hình: toàn máy và dự án</h2>
+    <div class="mt" style="left:120px;width:1680px;top:276px;--cols:1fr 1fr;--rh:84px;--fs:30px">
+      <div class="r h fx fx-blur" style="--d:.05"><span>Cấp toàn máy (global)</span><span>Cấp dự án (project)</span></div>
+      <div class="r" style="min-height:56px"><span class="lbl fx fx-up" style="--d:.15;grid-column:1/-1;font-size:17px;opacity:.75">Ví dụ đời thường</span></div>
+      <div class="r"><span class="fx fx-left" style="--d:.3">Thói quen làm việc của riêng anh</span><span class="fx fx-right" style="--d:.4">Nội quy của một công trường cụ thể</span></div>
+      <div class="r"><span class="fx fx-left" style="--d:.5">Đi công trình nào cũng mang theo</span><span class="fx fx-right" style="--d:.6">Ai vào công trường đó cũng phải theo</span></div>
+      <div class="r"><span class="fx fx-left" style="--d:.7">Nằm trong thư mục người dùng: <code>~/.claude/</code></span><span class="fx fx-right" style="--d:.8">Nằm ngay trong thư mục dự án</span></div>
+    </div>
+    <div class="band" style="top:690px;flex-direction:column;gap:12px;border-top:0;left:160px;right:160px">
+      <span class="lbl fx fx-up" style="--d:1">Quy tắc chọn cấp, một câu</span>
+      <p class="it fx fx-blur" style="--d:1.2;font-size:46px;line-height:1.25;font-weight:600">Thứ gì đi theo con người thì để cấp toàn máy. Thứ gì đi theo công trình thì để cấp dự án.</p>
+    </div>
+    <aside class="notes">Tài liệu chính thức của Claude Code gọi cấp toàn máy là "user" hoặc "personal". Trong lớp gọi là "global" cho dễ nhớ. Trên Windows, ~ là C:\Users\&lt;tên người dùng&gt;.</aside>
+  </section>
+
+  <!-- 6 -->
+  <section class="slide" data-layout="content" data-pose="split">
+    <h2 class="title reveal"><code>CLAUDE.md</code> ở hai cấp</h2>
+    <div class="mt" style="left:120px;width:1100px;top:276px;--cols:150px 1fr 1fr;--rh:118px;--fs:25px">
+      <div class="r h fx fx-blur" style="--d:.05"><span></span><span>Toàn máy</span><span>Dự án</span></div>
+      <div class="r fx fx-up" style="--d:.2"><span>Vị trí</span><span><code>~/.claude/CLAUDE.md</code></span><span><code>CLAUDE.md</code> ở gốc dự án, hoặc <code>.claude/CLAUDE.md</code></span></div>
+      <div class="r fx fx-up" style="--d:.35"><span>Áp dụng</span><span>Mọi dự án trên máy</span><span>Chỉ dự án đó</span></div>
+      <div class="r fx fx-up" style="--d:.5"><span>Dùng chung</span><span>Chỉ mình anh</span><span>Cả nhóm, qua Git</span></div>
+      <div class="r fx fx-up" style="--d:.65"><span>Nên ghi</span><span>Cách xưng hô, thói quen trình bày, quy tắc an toàn dữ liệu cá nhân</span><span>Thông số công trình, tiêu chuẩn áp dụng, thể thức văn bản</span></div>
+    </div>
+    <div class="side" style="left:1300px;top:320px;width:460px">
+      <h3 class="fx fx-right" style="--d:.8">Khi có cả hai:</h3>
+      <ul class="side" style="position:static">
+        <li class="fx fx-right" style="--d:.95;font-size:26px">Claude nạp cả hai: bản toàn máy trước, bản dự án sau.</li>
+        <li class="fx fx-right" style="--d:1.1;font-size:26px">Không bản nào xóa bản nào.</li>
+        <li class="fx fx-right" style="--d:1.25;font-size:26px">Hai bản nói ngược nhau thì Claude có thể theo bên nào cũng được. Việc của mình là giữ hai bản không mâu thuẫn.</li>
+      </ul>
+    </div>
+    <aside class="notes">Mở file CLAUDE.md dự án học viên tạo ở Buổi 01. Hỏi lớp: dòng "gọi tôi là anh, xưng em" nên nằm ở đâu? Đáp án: cấp toàn máy. Dòng "bê tông B35" nằm ở đâu? Đáp án: cấp dự án.</aside>
+  </section>
+
+  <!-- 7 -->
+  <section class="slide" data-layout="content" data-pose="split">
+    <h2 class="title reveal"><code>SKILL.md</code> ở hai cấp</h2>
+    <div class="mt" style="left:120px;width:1100px;top:276px;--cols:150px 1fr 1fr;--rh:118px;--fs:25px">
+      <div class="r h fx fx-blur" style="--d:.05"><span></span><span>Toàn máy</span><span>Dự án</span></div>
+      <div class="r fx fx-right" style="--d:.2"><span>Vị trí</span><span><code>~/.claude/skills/&lt;tên&gt;/SKILL.md</code></span><span><code>.claude/skills/&lt;tên&gt;/SKILL.md</code></span></div>
+      <div class="r fx fx-right" style="--d:.35"><span>Áp dụng</span><span>Mọi dự án trên máy</span><span>Chỉ dự án đó</span></div>
+      <div class="r fx fx-right" style="--d:.5"><span>Dùng chung</span><span>Chỉ mình anh</span><span>Cả nhóm, qua Git</span></div>
+      <div class="r fx fx-right" style="--d:.65"><span>Nên đặt</span><span>Kỹ năng ở đâu cũng cần: làm slide, tóm tắt tài liệu</span><span>Kỹ năng gắn với một dự án: <code>soat-ho-so-ky-thuat</code></span></div>
+    </div>
+    <div class="side" style="left:1300px;top:380px;width:460px;gap:30px">
+      <h3 class="fx fx-right" style="--d:.8">Điểm dễ nhầm:</h3>
+      <ul class="side" style="position:static;gap:26px">
+        <li class="fx fx-right" style="--d:.95;font-size:27px">Hai cấp có skill trùng tên thì bản toàn máy được dùng, bản dự án bị bỏ qua.</li>
+        <li class="fx fx-right" style="--d:1.1;font-size:27px">Quy tắc thực hành: đặt tên skill dự án khác hẳn tên skill toàn máy.</li>
+      </ul>
+    </div>
+    <p class="stamp slam" style="left:1490px;top:262px;--d:1.4">Dễ nhầm</p>
+    <aside class="notes">Trả lời câu hỏi ở Slide 04: skill Buổi 02 nằm ở cấp dự án, nên mở dự án khác sẽ không thấy. Muốn dùng mọi nơi thì chép thư mục skill sang ~/.claude/skills/.</aside>
+  </section>
+
+  <!-- 8 -->
+  <section class="slide" data-layout="content" data-pose="frame">
+    <h2 class="title reveal" style="font-size:48px"><code>CLAUDE.md</code> khác <code>SKILL.md</code> ở đâu, và MCP cũng có hai cấp</h2>
+    <div class="mt" style="left:120px;width:1680px;top:276px;--cols:300px 1fr 1fr;--rh:80px;--fs:28px">
+      <div class="r h fx fx-blur" style="--d:.05"><span></span><span>CLAUDE.md</span><span>SKILL.md</span></div>
+      <div class="r fx fx-up" style="--d:.2"><span>Khi nào được nạp</span><span>Mỗi phiên, luôn luôn</span><span>Chỉ khi việc đang làm cần tới, hoặc khi gọi <code>/tên-skill</code></span></div>
+      <div class="r fx fx-up" style="--d:.35"><span>Hợp với</span><span>Quy tắc ngắn cần nhớ mọi lúc</span><span>Quy trình nhiều bước, tài liệu dài</span></div>
+      <div class="r fx fx-up" style="--d:.5"><span>Độ dài</span><span>Nên dưới 200 dòng</span><span>Dài được</span></div>
+    </div>
+    <div class="mt" style="left:120px;width:1680px;top:640px;--cols:300px 1fr 1fr;--rh:80px;--fs:28px;border-top:1.5px solid var(--ink)">
+      <div class="r h fx fx-blur" style="--d:.75"><span>MCP cũng hai cấp</span><span>Toàn máy</span><span>Dự án</span></div>
+      <div class="r fx fx-up" style="--d:.9"><span>Nơi lưu</span><span><code>~/.claude.json</code></span><span><code>.mcp.json</code> ở gốc dự án</span></div>
+    </div>
+    <p class="abs it fx fx-blur" style="left:150px;top:878px;font-size:38px;font-weight:600;--d:1.2">Hôm nay cả lớp khai báo AutoCAD MCP ở cấp dự án.</p>
+    <aside class="notes">Ví dụ: CLAUDE.md giống tấm bảng nội quy treo ở cổng, ai vào cũng đọc. SKILL.md giống cuốn quy trình cất trong tủ, khi nào làm việc đó mới lấy ra. Dặn lớp không khai báo cùng một tên máy chủ MCP ở cả hai cấp.</aside>
+  </section>
+
+  <!-- 9 -->
+  <section class="slide" data-layout="content" data-pose="trio">
+    <h2 class="title reveal">Ba cách AI điều khiển AutoCAD</h2>
+    <div class="card fx fx-flip" style="left:150px;top:320px;width:520px;height:440px;--d:.1"><h3>Script <code>.scr</code></h3><span class="lbl">Hoạt động</span><p>Chuỗi lệnh AutoCAD chạy từ trên xuống</p><span class="lbl">Hạn chế</span><p>Không tính toán, không vòng lặp</p></div>
+    <div class="card fx fx-flip" style="left:700px;top:320px;width:520px;height:440px;--d:.35"><h3>AutoLISP <code>.lsp</code></h3><span class="lbl">Hoạt động</span><p>AI viết mã, người chép vào AutoCAD và chạy</p><span class="lbl">Hạn chế</span><p>Người phải chép tay; AI không thấy kết quả</p></div>
+    <div class="card solid fx fx-flip" style="left:1250px;top:320px;width:520px;height:440px;--d:.6"><h3>MCP</h3><span class="lbl">Hoạt động</span><p>Claude gửi lệnh thẳng vào AutoCAD đang mở, nhận kết quả về</p><span class="lbl">Hạn chế</span><p>Phải cài một lần; tốn hạn mức sử dụng hơn</p></div>
+    <div class="band" style="top:790px;left:150px;right:150px;flex-direction:column;gap:8px">
+      <span class="lbl fx fx-up" style="--d:1">Ví dụ đời thường</span>
+      <p class="fx fx-left" style="--d:1.15"><b>Script, AutoLISP:</b> AI viết công thức nấu ăn, mình tự nấu.</p>
+      <p class="fx fx-left" style="--d:1.35"><b>MCP:</b> AI đứng bếp nấu luôn, mình nếm và duyệt.</p>
+    </div>
+    <aside class="notes">Hỏi lớp ai đã từng dùng file .lsp. Nói rõ AutoLISP không bị bỏ: nó là phương án dự phòng và vẫn chạy được qua MCP bằng lệnh execute_lisp.</aside>
+  </section>
+
+  <!-- 10 -->
+  <section class="slide" data-layout="content" data-pose="flow">
+    <h2 class="title reveal">MCP hoạt động thế nào</h2>
+    <p class="abs lbl fx fx-up" style="left:170px;top:300px;--d:.05">Sơ đồ luồng lệnh</p>
+    <div class="flow" style="top:350px">
+      <span class="nd fx fx-pop" style="--d:.2">Anh gõ yêu cầu bằng lời</span><span class="ar fx fx-up" style="--d:.35">↓</span>
+      <span class="nd fx fx-pop" style="--d:.45">Claude chọn lệnh phù hợp</span><span class="ar fx fx-up" style="--d:.6">↓</span>
+      <span class="nd fx fx-pop" style="--d:.7">Máy chủ MCP (chương trình Python trên máy anh)</span><span class="ar fx fx-up" style="--d:.85">↓</span>
+      <span class="nd fx fx-pop" style="--d:.95">File trao đổi trong <code>C:/temp</code></span><span class="ar fx fx-up" style="--d:1.1">↓</span>
+      <span class="nd fx fx-pop" style="--d:1.2"><code>mcp_dispatch.lsp</code> (đã nạp sẵn trong AutoCAD)</span><span class="ar fx fx-up" style="--d:1.35">↓</span>
+      <span class="nd end fx fx-pop" style="--d:1.45">AutoCAD vẽ, trả kết quả ngược lại cho Claude</span>
+    </div>
+    <div class="side" style="left:990px;top:330px;width:760px;gap:30px">
+      <h3 class="fx fx-right" style="--d:1.6">Hai chế độ:</h3>
+      <div class="box fx fx-right" style="--d:1.75;padding:28px 32px;border-radius:18px"><p class="lbl" style="font-style:normal;margin-bottom:10px"><code style="font-size:26px">file_ipc</code></p><p>Nối AutoCAD thật, vẽ lên bản vẽ đang mở.</p></div>
+      <div class="box fx fx-right" style="--d:1.9;padding:28px 32px;border-radius:18px;border-style:dashed"><p class="lbl" style="font-style:normal;margin-bottom:10px"><code style="font-size:26px">ezdxf</code></p><p>Không cần AutoCAD, Claude tự sinh file DXF.</p></div>
+    </div>
+    <aside class="notes">Không cần học viên nhớ sơ đồ. Chỉ cần nhớ hai mắt xích hay đứt: AutoCAD chưa nạp mcp_dispatch.lsp, và Claude chưa được khai báo máy chủ MCP.</aside>
+  </section>
+
+  <!-- 11 -->
+  <section class="slide" data-layout="content" data-pose="grid">
+    <h2 class="title reveal">Tám nhóm lệnh Claude dùng được</h2>
+    <div class="card fx fx-drop" style="left:120px;top:300px;width:402px;height:320px;--rot:-1deg;--d:.05"><h3><code>drawing</code></h3><p>Tạo, mở, lưu bản vẽ, xuất DXF, in PDF</p></div>
+    <div class="card fx fx-drop" style="left:546px;top:300px;width:402px;height:320px;--rot:.8deg;--d:.15"><h3><code>layer</code></h3><p>Tạo layer, đặt màu, khóa, đóng băng</p></div>
+    <div class="card fx fx-drop" style="left:972px;top:300px;width:402px;height:320px;--rot:-.6deg;--d:.25"><h3><code>entity</code></h3><p>Vẽ và sửa: đường thẳng, chữ nhật, polyline, cung tròn, hatch, copy, move</p></div>
+    <div class="card fx fx-drop" style="left:1398px;top:300px;width:402px;height:320px;--rot:1deg;--d:.35"><h3><code>annotation</code></h3><p>Chữ, dim, đường dẫn ghi chú</p></div>
+    <div class="card fx fx-drop" style="left:120px;top:648px;width:402px;height:320px;--rot:.6deg;--d:.45"><h3><code>block</code></h3><p>Chèn block, đọc và sửa thuộc tính</p></div>
+    <div class="card fx fx-drop" style="left:546px;top:648px;width:402px;height:320px;--rot:-1deg;--d:.55"><h3><code>view</code></h3><p>Zoom, chụp màn hình bản vẽ</p></div>
+    <div class="card solid fx fx-drop" style="left:972px;top:648px;width:402px;height:320px;--rot:.8deg;--d:.65"><h3><code style="background:none;color:#faf1e2">system</code></h3><p>Kiểm tra kết nối, batch, <code style="color:#faf1e2;background:rgba(250,241,226,.12)">execute_lisp</code></p></div>
+    <div class="card fx fx-drop" style="left:1398px;top:648px;width:402px;height:320px;border-style:dashed;opacity:.8;--rot:-.6deg;--d:.75"><h3><code>pid</code></h3><p>Sơ đồ công nghệ đường ống (không dùng hôm nay)</p></div>
+    <aside class="notes">Học viên không cần gõ tên lệnh. Họ nói bằng lời, Claude tự chọn. Bảng này để họ hiểu Claude làm được gì và không làm được gì.</aside>
+  </section>
+
+  <!-- 12 -->
+  <section class="slide" data-layout="content" data-pose="trio">
+    <h2 class="title reveal">Hiệu quả không chỉ do model</h2>
+    <p class="abs lbl fx fx-up" style="left:0;right:0;text-align:center;top:318px;--d:.05">Tổ hợp quyết định kết quả</p>
+    <div class="formula" style="left:300px;right:300px;top:360px">
+      <div class="term fx fx-pop" style="--d:.2"><b>Model</b><span>Buổi 01</span></div>
+      <span class="op fx fx-blur" style="--d:.45">+</span>
+      <div class="term fx fx-pop" style="--d:.55"><b>Skill</b><span>Buổi 02</span></div>
+      <span class="op fx fx-blur" style="--d:.8">+</span>
+      <div class="term fx fx-pop" style="--d:.9"><b>MCP và công cụ</b><span>Buổi 03</span></div>
+    </div>
+    <div class="side" style="left:150px;top:760px;width:1000px;gap:12px">
+      <p class="fx fx-left" style="--d:1.2;font-style:normal;font-weight:600">Một lượt dựng bản vẽ gồm hàng chục đến hàng trăm lần gọi lệnh</p>
+      <p class="fx fx-left" style="--d:1.35">Mỗi lần gọi lệnh đều tiêu hạn mức sử dụng.</p>
+      <p class="fx fx-left" style="--d:1.5">Ra lệnh gọn thì tiết kiệm: vẽ 17 món nội thất bằng một lệnh <code>batch</code> thay vì 17 lệnh riêng.</p>
+    </div>
+    <div class="abs" style="left:1190px;top:790px;width:600px;display:grid;gap:16px">
+      <div class="strike" style="--d:1.9;display:flex;gap:6px;flex-wrap:wrap">
+        <i class="fx fx-pop" style="--d:1.6;width:24px;height:24px;border:1.5px solid var(--ink)"></i><i class="fx fx-pop" style="--d:1.62;width:24px;height:24px;border:1.5px solid var(--ink)"></i><i class="fx fx-pop" style="--d:1.64;width:24px;height:24px;border:1.5px solid var(--ink)"></i><i class="fx fx-pop" style="--d:1.66;width:24px;height:24px;border:1.5px solid var(--ink)"></i><i class="fx fx-pop" style="--d:1.68;width:24px;height:24px;border:1.5px solid var(--ink)"></i><i class="fx fx-pop" style="--d:1.7;width:24px;height:24px;border:1.5px solid var(--ink)"></i><i class="fx fx-pop" style="--d:1.72;width:24px;height:24px;border:1.5px solid var(--ink)"></i><i class="fx fx-pop" style="--d:1.74;width:24px;height:24px;border:1.5px solid var(--ink)"></i><i class="fx fx-pop" style="--d:1.76;width:24px;height:24px;border:1.5px solid var(--ink)"></i><i class="fx fx-pop" style="--d:1.78;width:24px;height:24px;border:1.5px solid var(--ink)"></i><i class="fx fx-pop" style="--d:1.8;width:24px;height:24px;border:1.5px solid var(--ink)"></i><i class="fx fx-pop" style="--d:1.82;width:24px;height:24px;border:1.5px solid var(--ink)"></i><i class="fx fx-pop" style="--d:1.84;width:24px;height:24px;border:1.5px solid var(--ink)"></i><i class="fx fx-pop" style="--d:1.86;width:24px;height:24px;border:1.5px solid var(--ink)"></i><i class="fx fx-pop" style="--d:1.88;width:24px;height:24px;border:1.5px solid var(--ink)"></i><i class="fx fx-pop" style="--d:1.9;width:24px;height:24px;border:1.5px solid var(--ink)"></i><i class="fx fx-pop" style="--d:1.92;width:24px;height:24px;border:1.5px solid var(--ink)"></i>
+      </div>
+      <span class="it fx fx-up" style="--d:2;font-size:24px">17 lệnh riêng</span>
+      <span class="chip fx fx-pop" style="--d:2.3;justify-self:start;background:var(--ink);color:#faf1e2">1 lệnh batch</span>
+    </div>
+    <aside class="notes">Nhắc lại phần Quota và Context Window của Buổi 01. Lệnh batch và hỗ trợ chữ tiếng Việt là hai điểm repo vn-autocad-claude bổ sung so với bản gốc.</aside>
+  </section>
+
+  <!-- 13 -->
+  <section class="slide" data-layout="content" data-pose="frame">
+    <h2 class="title reveal">Cài đặt MCP: 5 bước</h2>
+    <div class="mt" style="left:120px;width:1680px;top:276px;--cols:110px 1fr 1fr 70px;--rh:86px;--fs:29px">
+      <div class="r h fx fx-blur" style="--d:.05"><span>Bước</span><span>Việc làm</span><span>Dấu hiệu đã xong</span><span></span></div>
+      <div class="r fx fx-up" style="--d:.15"><span class="fr" style="font-size:44px;font-weight:400">1</span><span>Tải mã nguồn</span><span>Có thư mục <code>vn-autocad-claude</code></span><svg viewBox="0 0 40 40" width="40" height="40"><path class="draw" style="--d:.9;fill:none;stroke:var(--ink);stroke-width:4" d="M8 21l8 8 17-18"/></svg></div>
+      <div class="r fx fx-up" style="--d:.25"><span class="fr" style="font-size:44px;font-weight:400">2</span><span>Cài thư viện</span><span>Có thư mục con <code>.venv</code></span><svg viewBox="0 0 40 40" width="40" height="40"><path class="draw" style="--d:1.05;fill:none;stroke:var(--ink);stroke-width:4" d="M8 21l8 8 17-18"/></svg></div>
+      <div class="r fx fx-up" style="--d:.35"><span class="fr" style="font-size:44px;font-weight:400">3</span><span>Nạp <code>mcp_dispatch.lsp</code> vào AutoCAD</span><span>AutoCAD báo đã nạp MCP Dispatch</span><svg viewBox="0 0 40 40" width="40" height="40"><path class="draw" style="--d:1.2;fill:none;stroke:var(--ink);stroke-width:4" d="M8 21l8 8 17-18"/></svg></div>
+      <div class="r fx fx-up" style="--d:.45"><span class="fr" style="font-size:44px;font-weight:400">4</span><span>Khai báo MCP cho Claude</span><span>Claude liệt kê được <code>autocad-mcp</code></span><svg viewBox="0 0 40 40" width="40" height="40"><path class="draw" style="--d:1.35;fill:none;stroke:var(--ink);stroke-width:4" d="M8 21l8 8 17-18"/></svg></div>
+      <div class="r fx fx-up" style="--d:.55"><span class="fr" style="font-size:44px;font-weight:400">5</span><span>Kiểm tra kết nối</span><span>Claude báo <code>backend: file_ipc</code></span><svg viewBox="0 0 40 40" width="40" height="40"><path class="draw" style="--d:1.5;fill:none;stroke:var(--ink);stroke-width:4" d="M8 21l8 8 17-18"/></svg></div>
+    </div>
+    <div class="abs" style="left:150px;right:150px;top:820px;display:flex;gap:26px;align-items:center;flex-wrap:wrap">
+      <span class="lbl fx fx-up" style="--d:1.6">Cần có sẵn</span>
+      <div class="chips"><span class="chip fx fx-pop" style="--d:1.7">Windows 10/11</span><span class="chip fx fx-pop" style="--d:1.78">Python 3.10 trở lên</span><span class="chip fx fx-pop" style="--d:1.86">Git</span><span class="chip fx fx-pop" style="--d:1.94">uv</span><span class="chip fx fx-pop" style="--d:2.02">AutoCAD</span></div>
+    </div>
+    <aside class="notes">Kiểm tra nhanh bằng giơ tay: ai đã xong checklist ở nhà. Chia nhóm để người xong rồi kèm người chưa xong.</aside>
+  </section>
+
+  <!-- 14 -->
+  <section class="slide" data-layout="content" data-pose="code">
+    <h2 class="title reveal">Bước 1 và 2: tải về và cài</h2>
+    <div class="con fx fx-up" style="left:160px;top:320px;width:960px;--d:.05"><span class="lbl">bash</span><span class="ln fx fx-type" style="--d:.3">git clone https://github.com/andyluu98/vn-autocad-claude.git</span></div>
+    <div class="con fx fx-up" style="left:160px;top:500px;width:960px;--d:.6"><span class="lbl">bash</span><span class="ln fx fx-type" style="--d:.9">cd vn-autocad-claude</span></div>
+    <div class="con fx fx-up" style="left:160px;top:680px;width:960px;--d:1.1"><span class="lbl">bash</span><span class="ln fx fx-type caret" style="--d:1.4">uv sync</span></div>
+    <div class="side" style="left:1270px;top:330px;width:490px;gap:26px">
+      <h3 class="fx fx-right" style="--d:1.6">Lưu ý:</h3>
+      <p class="fx fx-right" style="--d:1.75;font-size:29px">README của repo còn ghi địa chỉ <code>puran-water/autocad-mcp</code>. Đó là bản gốc, không có hỗ trợ chữ tiếng Việt. Dùng đúng địa chỉ trên slide này.</p>
+    </div>
+    <aside class="notes">Có thể nhờ chính Claude chạy ba lệnh này. Prompt: "Tải repo andyluu98/vn-autocad-claude về thư mục C:\tools và chạy uv sync, báo tôi khi có thư mục .venv."</aside>
+  </section>
+
+  <!-- 15 -->
+  <section class="slide" data-layout="content" data-pose="split">
+    <h2 class="title reveal">Bước 3: nạp đoạn mã trung gian vào AutoCAD</h2>
+    <div class="courses" style="left:160px;width:1020px;top:296px">
+      <div class="course fx fx-left" style="--d:.1;border-top:0"><span class="n">1</span><p>Mở AutoCAD, tạo bản vẽ mới.</p></div>
+      <div class="course fx fx-left" style="--d:.3"><span class="n">2</span><p>Gõ <code>APPLOAD</code>.</p></div>
+      <div class="course fx fx-left" style="--d:.5"><span class="n">3</span><p>Tìm tới <code>vn-autocad-claude/lisp-code/mcp_dispatch.lsp</code>, bấm Load.</p></div>
+      <div class="course fx fx-left" style="--d:.7"><span class="n">4</span><p>Thêm file vào Startup Suite để lần sau AutoCAD tự nạp.</p></div>
+    </div>
+    <div class="side" style="left:1300px;top:340px;width:460px;gap:26px">
+      <h3 class="fx fx-right" style="--d:1">Dấu hiệu đã xong:</h3>
+      <div class="con fx fx-up" style="position:static;--d:1.15"><span class="lbl">Dòng lệnh AutoCAD</span><span class="ln tx fx fx-type caret" style="--d:1.4">Hiện thông báo đã nạp MCP Dispatch.</span></div>
+    </div>
+    <aside class="notes">Đây là bước hay bị quên nhất ở những lần mở máy sau. Startup Suite giải quyết việc đó.</aside>
+  </section>
+
+  <!-- 16 -->
+  <section class="slide" data-layout="content" data-pose="code">
+    <h2 class="title reveal">Bước 4: khai báo MCP cho Claude</h2>
+    <p class="abs it fx fx-up" style="left:160px;top:300px;font-size:30px;--d:.05">Tạo file <code>.mcp.json</code> ở thư mục gốc dự án:</p>
+    <div class="con fx fx-up" style="left:160px;top:370px;width:960px;--d:.2">
+      <span class="lbl">json</span>
+      <span class="ln fx fx-type" style="font-size:21px;--d:.4">{</span>
+      <span class="ln fx fx-type" style="font-size:21px;--d:.55">  "mcpServers": {</span>
+      <span class="ln fx fx-type" style="font-size:21px;--d:.7">    "autocad-mcp": {</span>
+      <span class="ln fx fx-type" style="font-size:21px;--d:.85">      <span class="k">"command"</span>: "C:\\path\\to\\vn-autocad-claude\\.venv\\Scripts\\python.exe",</span>
+      <span class="ln fx fx-type" style="font-size:21px;--d:1.1">      <span class="k">"args"</span>: ["-m", "autocad_mcp"],</span>
+      <span class="ln fx fx-type" style="font-size:21px;--d:1.25">      <span class="k">"env"</span>: { "AUTOCAD_MCP_BACKEND": "auto" }</span>
+      <span class="ln fx fx-type" style="font-size:21px;--d:1.4">    }</span>
+      <span class="ln fx fx-type" style="font-size:21px;--d:1.5">  }</span>
+      <span class="ln fx fx-type caret" style="font-size:21px;--d:1.6">}</span>
+    </div>
+    <ul class="side" style="left:1270px;top:360px;width:490px;gap:36px">
+      <li class="fx fx-right" style="--d:1.8;font-size:30px">Thay <code>C:\\path\\to</code> bằng đường dẫn thật.</li>
+      <li class="fx fx-right" style="--d:2;font-size:30px">Mở phiên Claude mới để nạp khai báo.</li>
+    </ul>
+    <aside class="notes">Nối lại Slide 08: đây là khai báo cấp dự án. Học viên có thể nhờ Claude tạo file. Prompt: "Tạo file .mcp.json ở gốc dự án khai báo máy chủ autocad-mcp, dùng python trong .venv của thư mục C:\tools\vn-autocad-claude."</aside>
+  </section>
+
+  <!-- 17 -->
+  <section class="slide" data-layout="content" data-pose="frame2">
+    <h2 class="title reveal">Bước 5: kiểm tra và xử lý lỗi</h2>
+    <div class="con fx fx-up" style="left:120px;top:276px;width:1680px;--d:.05"><span class="lbl">Prompt kiểm tra</span><span class="ln tx fx fx-type caret" style="--d:.3">Kiểm tra trạng thái kết nối AutoCAD MCP và cho tôi biết đang chạy ở chế độ nào.</span></div>
+    <div class="mt" style="left:120px;width:1680px;top:440px;--cols:520px 1fr;--rh:88px;--fs:25px">
+      <div class="r h fx fx-blur" style="--d:.6"><span>Hiện tượng</span><span>Hướng xử lý</span></div>
+      <div class="r fx fx-left" style="--d:.75"><span>Claude chờ rất lâu không trả lời</span><span>AutoCAD chưa mở, chưa nạp <code>mcp_dispatch.lsp</code>, hoặc đang có hộp thoại mở</span></div>
+      <div class="r fx fx-left" style="--d:.9"><span>Luôn ra <code>ezdxf</code> dù AutoCAD đang mở</span><span>Mở Claude trước, mở AutoCAD sau: yêu cầu Claude "khởi tạo lại kết nối AutoCAD MCP". Vẫn không được thì nạp lại <code>mcp_dispatch.lsp</code></span></div>
+      <div class="r fx fx-left" style="--d:1.05"><span>Ảnh chụp bản vẽ ra toàn màu đen</span><span>Cửa sổ AutoCAD đang thu nhỏ. Mở cửa sổ lên lại</span></div>
+      <div class="r fx fx-left" style="--d:1.2"><span>Hết thời gian chờ khi vẽ nhiều</span><span>Tăng <code>AUTOCAD_MCP_IPC_TIMEOUT</code></span></div>
+      <div class="r fx fx-left" style="--d:1.35"><span>Claude không thấy <code>autocad-mcp</code></span><span>Chưa mở phiên mới; hoặc <code>.mcp.json</code> đặt sai thư mục</span></div>
+    </div>
+    <aside class="notes">Học viên ra file_ipc thì chụp màn hình lại ngay, đó là sản phẩm nộp số 1 của D3. Ai ra ezdxf vẫn làm Lab được, chỉ khác là kết quả ra file DXF. Thứ tự mở đúng: AutoCAD trước, Claude sau. Hai lỗi ezdxf và ảnh đen đã gặp thật khi chạy thử trên AutoCAD 2027 ngày 30/09/2026.</aside>
+  </section>
+
+  <!-- 18 -->
+  <section class="slide" data-layout="content" data-pose="image">
+    <h2 class="title reveal">Bài toán: chỉ có một tấm hình</h2>
+    <div class="figure fx fx-growy" style="--d:.1"><img src="demo/01_mat-bang-can-ho-mau.png" alt="Mặt bằng bố trí nội thất căn hộ mẫu"></div>
+    <div class="side" style="left:1230px;top:320px;width:540px;gap:30px">
+      <p class="fx fx-right" style="--d:.6;font-size:30px">Mặt bằng bố trí nội thất một căn hộ.</p>
+      <div class="fact fx fx-right" style="--d:.8"><span class="lbl">Phủ bì</span><span class="big"><span class="count" style="--to:6805;--d:.9"></span> x <span class="count" style="--to:8631;--d:.9"></span> <small>mm</small></span></div>
+      <div class="fact fx fx-right" style="--d:1"><span class="big"><span class="count" style="--to:17;--d:1.1"></span> <small>món nội thất</small></span><span class="it" style="font-size:26px">có đánh số</span></div>
+      <p class="fx fx-right" style="--d:1.3;font-size:30px">Không có <span class="strike" style="--d:1.7;font-style:normal;font-weight:600">file DWG</span>.</p>
+    </div>
+    <aside class="notes">Cho lớp 30 giây nhìn hình. Hỏi: "Nếu vẽ tay lại bản này, anh chị mất bao lâu?" Ghi vài con số lên bảng để cuối buổi so lại.</aside>
+  </section>
+
+  <!-- 19 -->
+  <section class="slide" data-layout="content" data-pose="frame">
+    <h2 class="title reveal">Bước 0: đọc hình trước khi vẽ</h2>
+    <div class="mt" style="left:120px;width:1680px;top:276px;--cols:290px 1fr 1fr;--rh:112px;--fs:29px">
+      <div class="r h fx fx-blur" style="--d:.05"><span>Loại</span><span>Nghĩa</span><span>Ví dụ trên hình</span></div>
+      <div class="r" style="min-height:56px"><span class="it fx fx-up" style="--d:.15;grid-column:1/-1;font-size:24px">Yêu cầu Claude tách ba loại số liệu:</span></div>
+      <div class="r fx fx-up" style="--d:.3"><span>Đọc được</span><span>Số ghi rõ trên hình</span><span>Tường trái dày 320, bàn ăn 1200 x 761</span></div>
+      <div class="r fx fx-up" style="--d:.5"><span>Cần xác nhận lại</span><span>Có số nhưng mờ, hoặc chưa rõ ứng với cạnh nào</span><span>Đoạn 1625 hay 1626 ở cạnh phải</span></div>
+      <div class="r fx fx-up" style="--d:.7"><span>Hình không ghi</span><span>Hình không có thông tin này</span><span>Bề rộng cửa, kích thước bồn cầu</span></div>
+    </div>
+    <p class="stamp slam" style="left:300px;top:810px;font-size:38px;--rot:-2.5deg;--d:1.1">Chưa có bảng này thì chưa cho Claude vẽ.</p>
+    <aside class="notes">Đây là slide quan trọng nhất của buổi. Prompt: "Đọc hình demo/01_mat-bang-can-ho-mau.png. Chưa vẽ gì cả. Lập bảng số liệu chia ba loại: đọc được, cần xác nhận lại, hình không ghi."</aside>
+  </section>
+
+  <!-- 20 -->
+  <section class="slide" data-layout="content" data-pose="frame">
+    <h2 class="title reveal">Cộng kiểm bốn chuỗi kích thước</h2>
+    <div class="mt" style="left:120px;width:1680px;top:276px;--cols:180px 1fr 130px 140px 210px;--rh:104px;--fs:26px">
+      <div class="r h fx fx-blur" style="--d:.05"><span>Chuỗi</span><span>Các đoạn</span><span>Tự cộng</span><span>Trên hình</span><span>Kết quả</span></div>
+      <div class="r fx fx-up" style="--d:.2"><span>Cạnh trên</span><span>320 + 1900 + 1195 + 120 + 2980 + 290</span><span><span class="count" style="--to:6805;--d:.4"></span></span><span>6805</span><span><span class="mini slam" style="--d:1.2">Khớp</span></span></div>
+      <div class="r fx fx-up" style="--d:.35"><span>Cạnh dưới</span><span>320 + 3095 + 120 + 300 + 2100 + 580 + 290</span><span><span class="count" style="--to:6805;--d:.55"></span></span><span>6805</span><span><span class="mini slam" style="--d:1.4">Khớp</span></span></div>
+      <div class="r fx fx-up" style="--d:.5"><span>Cạnh trái</span><span>2595 + 2361 + 2504 + 115 + 1056</span><span><span class="count" style="--to:8631;--d:.7"></span></span><span>8631</span><span><span class="mini slam" style="--d:1.6">Khớp</span></span></div>
+      <div class="r fx fx-up" style="--d:.65"><span>Cạnh phải</span><span>145 + 1625 + 120 + 2160 + 120 + 4340 + 120</span><span><span class="count" style="--to:8630;--d:.85"></span></span><span>8631</span><span><span class="mini solid slam" style="--d:1.9">Lệch 1 mm</span></span></div>
+    </div>
+    <div class="band" style="top:850px;left:150px;right:150px">
+      <span class="lbl fx fx-up" style="--d:2.1">Kiểm chéo</span>
+      <p class="fx fx-left" style="--d:2.2">Cạnh trên và cạnh dưới cùng cho vách ngăn dọc ở mốc 3415 đến 3535</p>
+    </div>
+    <aside class="notes">Hỏi lớp: lệch 1 mm thì làm gì? Đáp án: không tự chọn số cho khớp. Báo lệch, ghi "cần xác nhận lại", hỏi người gửi hình. Có thể đoạn 1625 thực ra là 1626.</aside>
+  </section>
+
+  <!-- 21 -->
+  <section class="slide" data-layout="two-col">
+    <h2 class="title reveal">Hình không nói gì, và hình nói sai ở đâu</h2>
+    <div class="cols">
+      <div class="col reveal-left"><h3>Sai lệch trong chính tấm hình</h3><ul>
+        <li>Trên mặt bằng, bàn trà là số 17.</li>
+        <li>Trong bảng chú thích, dòng cuối ghi số 16, "BÀN TRÀ". Số 16 bị lặp, không có dòng 17.</li>
+      </ul></div>
+      <div class="col reveal-right"><h3>Hình không ghi</h3><ul>
+        <li>Bề rộng cửa chính, cửa vệ sinh, cửa phòng ngủ.</li>
+        <li>Kích thước lavabo, bồn cầu, bếp, tủ lạnh.</li>
+        <li>Bề dày tường trái đoạn dưới khu bếp.</li>
+        <li>Tên phòng, tỷ lệ bản vẽ, cao độ.</li>
+      </ul></div>
+    </div>
+    <p class="takeaway reveal">Thấy sai lệch thì báo, không tự sửa. Thiếu dữ liệu thì nêu giả định.</p>
+    <aside class="notes">Lưu ý cho lớp: "KỆ TIVI" có ở số 6 và 12, "TỦ ÁO" có ở số 11 và 16. Đó là hai món ở hai phòng khác nhau, không phải lỗi. Lỗi thật chỉ có số 16 bị lặp.</aside>
+  </section>
+
+  <!-- 22 -->
+  <section class="slide" data-layout="content" data-pose="split">
+    <h2 class="title reveal">Trình tự dựng bản vẽ: 7 bước</h2>
+    <div class="mt" style="left:120px;width:1100px;top:276px;--cols:90px 1fr 290px;--rh:84px;--fs:26px">
+      <div class="r h fx fx-blur" style="--d:.05"><span>Bước</span><span>Nội dung</span><span>Nhóm lệnh</span></div>
+      <div class="r fx fx-left" style="--d:.15"><span>1</span><span>Tạo 6 layer</span><span><code>layer</code></span></div>
+      <div class="r fx fx-left" style="--d:.3"><span>2</span><span>Tường bao 6805 x 8631</span><span><code>entity</code></span></div>
+      <div class="r fx fx-left" style="--d:.45"><span>3</span><span>Vách ngăn 120</span><span><code>entity</code></span></div>
+      <div class="r fx fx-left" style="--d:.6"><span>4</span><span>Hatch tường</span><span><code>entity</code></span></div>
+      <div class="r fx fx-left" style="--d:.75"><span>5</span><span>Cửa đi, cửa lùa, cửa sổ</span><span><code>entity</code></span></div>
+      <div class="r fx fx-left" style="--d:.9"><span>6</span><span>17 món nội thất và số ký hiệu</span><span><code>system</code> (batch), <code>annotation</code></span></div>
+      <div class="r fx fx-left" style="--d:1.05"><span>7</span><span>Dim, bảng chú thích, tên bản vẽ, chụp màn hình soát</span><span><code>annotation</code>, <code>view</code></span></div>
+    </div>
+    <div class="side" style="left:1300px;top:340px;width:460px;gap:24px">
+      <h3 class="fx fx-right" style="--d:1.2">Layer:</h3>
+      <div class="chips" style="flex-direction:column;align-items:flex-start;gap:14px">
+        <span class="chip fx fx-pop" style="--d:1.35">L_TUONG</span><span class="chip fx fx-pop" style="--d:1.45">L_CUA</span><span class="chip fx fx-pop" style="--d:1.55">L_NOITHAT</span><span class="chip fx fx-pop" style="--d:1.65">L_DIM</span><span class="chip fx fx-pop" style="--d:1.75">L_TEXT</span><span class="chip fx fx-pop" style="--d:1.85">L_HATCH</span>
+      </div>
+    </div>
+    <aside class="notes">Trình tự này đúng thứ tự người vẽ tay vẫn làm: khung trước, chi tiết sau, chữ và dim cuối cùng. Làm từng bước, dừng lại xem kết quả, không ra một lệnh "vẽ hết cho tôi".</aside>
+  </section>
+
+  <!-- 23 -->
+  <section class="slide" data-layout="content" data-pose="code">
+    <h2 class="title reveal">Prompt mẫu: vẽ tường và vách</h2>
+    <div class="con fx fx-up" style="left:160px;top:310px;bottom:110px;width:960px;--d:.05;justify-content:space-evenly">
+      <span class="lbl">Prompt</span>
+      <span class="ln tx fx fx-type" style="--d:.3">Dựa trên bảng số liệu vừa lập, vẽ tường bao và vách ngăn vào AutoCAD.</span>
+      <span class="ln tx fx fx-type" style="--d:.7">Gốc tọa độ đặt tại góc ngoài dưới bên trái. Đơn vị mm.</span>
+      <span class="ln tx fx fx-type" style="--d:1.05">Chỉ dùng số thuộc loại "đọc được".</span>
+      <span class="ln tx fx fx-type" style="--d:1.35">Kích thước nào thuộc loại "hình không ghi" thì dừng lại hỏi tôi trước khi vẽ.</span>
+      <span class="ln tx fx fx-type caret" style="--d:1.75">Vẽ xong hãy báo kích thước phủ bì thực tế của bản vẽ.</span>
+    </div>
+    <div class="side" style="left:1260px;top:320px;width:510px;gap:10px">
+      <h3 class="fx fx-right" style="--d:2">Ba thứ làm nên một prompt vẽ tốt:</h3>
+      <div class="course fx fx-right" style="--d:2.15;grid-template-columns:70px 1fr"><span class="n" style="font-size:64px">1</span><p style="font-size:27px">Chốt gốc tọa độ và đơn vị.</p></div>
+      <div class="course fx fx-right" style="--d:2.3;grid-template-columns:70px 1fr"><span class="n" style="font-size:64px">2</span><p style="font-size:27px">Nói rõ được dùng loại số liệu nào.</p></div>
+      <div class="course fx fx-right" style="--d:2.45;grid-template-columns:70px 1fr"><span class="n" style="font-size:64px">3</span><p style="font-size:27px">Bắt Claude báo lại một con số để mình đối chiếu.</p></div>
+    </div>
+    <aside class="notes">Thị phạm trực tiếp. Khi Claude hỏi lại về kích thước không ghi, chỉ cho lớp thấy: đó là hành vi đúng, không phải Claude kém.</aside>
+  </section>
+
+  <!-- 24 -->
+  <section class="slide" data-layout="content" data-pose="code">
+    <h2 class="title reveal">Claude tự soát, người đo lại</h2>
+    <div class="con fx fx-up" style="left:160px;top:300px;bottom:110px;width:960px;--d:.05;justify-content:space-evenly">
+      <span class="lbl">Prompt soát</span>
+      <span class="ln tx fx fx-type" style="font-size:27px;--d:.3">Zoom toàn bộ bản vẽ, chụp màn hình và tự kiểm tra:</span>
+      <span class="ln tx fx fx-type" style="font-size:27px;--d:.6"><span class="k">1.</span> Phủ bì đúng 6805 x 8631.</span>
+      <span class="ln tx fx fx-type" style="font-size:27px;--d:.85"><span class="k">2.</span> Vách ngăn dọc nằm ở mốc 3415 đến 3535 tính từ mép ngoài tường trái.</span>
+      <span class="ln tx fx fx-type" style="font-size:27px;--d:1.15"><span class="k">3.</span> Đủ 17 số ký hiệu nội thất.</span>
+      <span class="ln tx fx fx-type" style="font-size:27px;--d:1.4">Lập bảng: hạng mục, số trên hình, số trên bản vẽ, đạt hay không.</span>
+      <span class="ln tx fx fx-type caret" style="font-size:27px;--d:1.7">Điểm nào không chắc thì ghi "cần kỹ sư kiểm tra lại".</span>
+    </div>
+    <div class="side" style="left:1260px;top:380px;width:510px;gap:30px">
+      <p class="it fx fx-right" style="--d:2;font-size:42px;line-height:1.3;font-weight:600">Sau đó kỹ sư tự đo bằng <b style="font-family:var(--font-mono);font-style:normal">DIST</b>, ít nhất 3 kích thước.</p>
+      <svg class="ruler" viewBox="0 0 500 90"><line class="draw" style="--d:2.3" x1="10" y1="70" x2="490" y2="70"/><line class="draw" style="--d:2.4" x1="10" y1="70" x2="10" y2="20"/><line class="draw" style="--d:2.45" x1="90" y1="70" x2="90" y2="45"/><line class="draw" style="--d:2.5" x1="170" y1="70" x2="170" y2="30"/><line class="draw" style="--d:2.55" x1="250" y1="70" x2="250" y2="45"/><line class="draw" style="--d:2.6" x1="330" y1="70" x2="330" y2="30"/><line class="draw" style="--d:2.65" x1="410" y1="70" x2="410" y2="45"/><line class="draw" style="--d:2.7" x1="490" y1="70" x2="490" y2="20"/></svg>
+    </div>
+    <aside class="notes">Đo trước lớp hai kích thước do học viên chọn ngẫu nhiên. Nhấn mạnh: Claude tự soát là lớp kiểm tra thứ nhất, người đo là lớp thứ hai. Không có lớp thứ hai thì không dùng bản vẽ.</aside>
+  </section>
+
+  <!-- 25 -->
+  <section class="slide" data-layout="content" data-pose="frame">
+    <h2 class="title reveal">Lab 03: đề bài</h2>
+    <p class="abs it fx fx-blur" style="left:150px;top:290px;font-size:34px;font-weight:600;--d:.05">Tự dựng lại mặt bằng căn hộ trên máy mình (45 phút)</p>
+    <div class="mt" style="left:120px;width:1680px;top:352px;--cols:100px 100px 1fr 380px;--rh:80px;--fs:27px">
+      <div class="r h fx fx-blur" style="--d:.15"><span>Bước</span><span>Phút</span><span>Việc làm</span><span>Thời lượng</span></div>
+      <div class="r fx fx-right" style="--d:.25"><span>1</span><span>5</span><span>Lập bảng số liệu ba loại, cộng kiểm bốn chuỗi</span><span class="bar"><i class="fx fx-growx" style="--p:50%;--d:1"></i></span></div>
+      <div class="r fx fx-right" style="--d:.35"><span>2</span><span>5</span><span>Tạo 6 layer</span><span class="bar"><i class="fx fx-growx" style="--p:50%;--d:1.1"></i></span></div>
+      <div class="r fx fx-right" style="--d:.45"><span>3</span><span>10</span><span>Tường bao, vách ngăn, hatch</span><span class="bar"><i class="fx fx-growx" style="--p:100%;--d:1.2"></i></span></div>
+      <div class="r fx fx-right" style="--d:.55"><span>4</span><span>5</span><span>Cửa, ghi rõ giả định</span><span class="bar"><i class="fx fx-growx" style="--p:50%;--d:1.3"></i></span></div>
+      <div class="r fx fx-right" style="--d:.65"><span>5</span><span>10</span><span>17 món nội thất bằng batch</span><span class="bar"><i class="fx fx-growx" style="--p:100%;--d:1.4"></i></span></div>
+      <div class="r fx fx-right" style="--d:.75"><span>6</span><span>5</span><span>Dim, bảng chú thích, tên bản vẽ</span><span class="bar"><i class="fx fx-growx" style="--p:50%;--d:1.5"></i></span></div>
+      <div class="r fx fx-right" style="--d:.85"><span>7</span><span>5</span><span>Soát, đo DIST, lưu DWG, xuất PDF</span><span class="bar"><i class="fx fx-growx" style="--p:50%;--d:1.6"></i></span></div>
+    </div>
+    <aside class="notes">Trợ giảng đi vòng kiểm tra Bước 1 trước. Ai chưa có bảng số liệu thì chưa được sang Bước 2.</aside>
+  </section>
+
+  <!-- 26 -->
+  <section class="slide" data-layout="content" data-pose="tiers">
+    <h2 class="title reveal">Ba tầng dự phòng</h2>
+    <div class="tier fx fx-blur" style="top:300px;--d:.05"><span class="lbl">Tình huống</span><span></span><span class="lbl">Cách làm Lab</span></div>
+    <div class="tier fx fx-right" style="top:380px;--d:.2"><span class="num">1</span><span class="t">Có AutoCAD, MCP đã thông</span><span class="ar">→</span><span class="t">Vẽ trực tiếp qua MCP</span></div>
+    <div class="tier fx fx-right" style="top:540px;--d:.45"><span class="num">2</span><span class="t">Không có AutoCAD, hoặc AutoCAD không tương thích</span><span class="ar">→</span><span class="t">Chế độ <code>ezdxf</code>: Claude sinh file DXF</span></div>
+    <div class="tier fx fx-right" style="top:700px;--d:.7"><span class="num">3</span><span class="t">Không cài được MCP</span><span class="ar">→</span><span class="t">Vẫn làm Bước 1, rồi nhờ Claude viết file <code>.lsp</code> và APPLOAD như cách cũ</span></div>
+    <p class="abs it fx fx-up" style="left:330px;right:150px;top:860px;font-size:32px;line-height:1.3;font-weight:600;--d:1">Không ai bị bỏ lại. Bước 1 (đọc hình, kiểm số liệu) ai cũng làm được và chiếm 25 điểm.</p>
+    <aside class="notes">Chế độ ezdxf không có offset, fillet, chamfer, plot_pdf. Học viên dùng chế độ này nộp file DXF thay cho DWG.</aside>
+  </section>
+
+  <!-- 27 -->
+  <section class="slide" data-layout="content" data-pose="grid">
+    <h2 class="title reveal">Sáu quy tắc an toàn khi để AI vẽ</h2>
+    <div class="card fx fx-flip" style="left:120px;top:300px;width:544px;height:320px;--d:.05;flex-direction:row;gap:22px;align-items:flex-start"><span class="fr" style="font-size:96px;line-height:.9">1</span><p style="font-size:29px">Đọc trước, vẽ sau. Chưa có bảng số liệu thì chưa vẽ.</p></div>
+    <div class="card fx fx-flip" style="left:688px;top:300px;width:544px;height:320px;--d:.2;flex-direction:row;gap:22px;align-items:flex-start"><span class="fr" style="font-size:96px;line-height:.9">2</span><p style="font-size:29px">Thiếu dữ liệu thì nêu giả định. Giả định phải được đánh dấu trên bản vẽ.</p></div>
+    <div class="card fx fx-flip" style="left:1256px;top:300px;width:544px;height:320px;--d:.35;flex-direction:row;gap:22px;align-items:flex-start"><span class="fr" style="font-size:96px;line-height:.9">3</span><p style="font-size:29px">Thấy sai lệch thì báo, không tự sửa.</p></div>
+    <div class="card solid fx fx-flip" style="left:120px;top:648px;width:544px;height:320px;--d:.5;flex-direction:row;gap:22px;align-items:flex-start"><span class="fr" style="font-size:96px;line-height:.9">4</span><p style="font-size:29px">Chỉ vẽ trên bản vẽ nháp. Lệnh tạo bản vẽ mới sẽ xóa sạch bản đang mở.</p></div>
+    <div class="card fx fx-flip" style="left:688px;top:648px;width:544px;height:320px;--d:.65;flex-direction:row;gap:22px;align-items:flex-start"><span class="fr" style="font-size:96px;line-height:.9">5</span><p style="font-size:29px">Người đo lại bằng DIST trước khi dùng bản vẽ.</p></div>
+    <div class="card fx fx-flip" style="left:1256px;top:648px;width:544px;height:320px;--d:.8;flex-direction:row;gap:22px;align-items:flex-start"><span class="fr" style="font-size:96px;line-height:.9">6</span><p style="font-size:29px">Che thông tin chủ đầu tư trước khi đưa hình dự án thật vào AI.</p></div>
+    <aside class="notes">Bản vẽ AI dựng là bản sơ bộ. AI hỗ trợ dựng hình, kỹ sư chịu trách nhiệm kiểm tra và ký duyệt. Nối lại ranh giới an toàn đã nói ở Buổi 02.</aside>
+  </section>
+
+  <!-- 28 -->
+  <section class="slide" data-layout="content" data-pose="score">
+    <h2 class="title reveal">Nghiệm thu sản phẩm D3</h2>
+    <div class="side" style="left:160px;top:310px;width:620px;gap:18px">
+      <h3 class="fx fx-left" style="--d:.05">Hồ sơ nộp:</h3>
+      <div class="course fx fx-left" style="--d:.2;grid-template-columns:60px 1fr;border-top:0"><svg viewBox="0 0 50 50" width="50" height="50"><rect x="3" y="3" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2"/><path class="draw" style="--d:1;fill:none;stroke:currentColor;stroke-width:5" d="M12 26l9 9 17-20"/></svg><p style="font-size:27px">Ảnh chụp Claude báo kết nối MCP thành công.</p></div>
+      <div class="course fx fx-left" style="--d:.35;grid-template-columns:60px 1fr"><svg viewBox="0 0 50 50" width="50" height="50"><rect x="3" y="3" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2"/><path class="draw" style="--d:1.15;fill:none;stroke:currentColor;stroke-width:5" d="M12 26l9 9 17-20"/></svg><p style="font-size:27px">Bảng số liệu ba loại, có phép cộng kiểm.</p></div>
+      <div class="course fx fx-left" style="--d:.5;grid-template-columns:60px 1fr"><svg viewBox="0 0 50 50" width="50" height="50"><rect x="3" y="3" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2"/><path class="draw" style="--d:1.3;fill:none;stroke:currentColor;stroke-width:5" d="M12 26l9 9 17-20"/></svg><p style="font-size:27px">File <code>.dwg</code> (hoặc <code>.dxf</code>) và PDF.</p></div>
+      <div class="course fx fx-left" style="--d:.65;grid-template-columns:60px 1fr"><svg viewBox="0 0 50 50" width="50" height="50"><rect x="3" y="3" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2"/><path class="draw" style="--d:1.45;fill:none;stroke:currentColor;stroke-width:5" d="M12 26l9 9 17-20"/></svg><p style="font-size:27px">Danh sách giả định và kết quả đo DIST.</p></div>
+    </div>
+    <div class="mt" style="left:880px;width:920px;top:276px;--cols:1fr 90px 240px;--rh:92px;--fs:27px">
+      <div class="r h fx fx-blur" style="--d:.7"><span>Tiêu chí</span><span>Điểm</span><span></span></div>
+      <div class="r fx fx-right" style="--d:.8"><span>Thiết lập MCP</span><span>25</span><span class="bar"><i class="fx fx-growx" style="--p:100%;--d:1.4"></i></span></div>
+      <div class="r fx fx-right" style="--d:.9"><span>Đọc hình và kiểm soát số liệu</span><span>25</span><span class="bar"><i class="fx fx-growx" style="--p:100%;--d:1.5"></i></span></div>
+      <div class="r fx fx-right" style="--d:1"><span>Độ chính xác hình học</span><span>25</span><span class="bar"><i class="fx fx-growx" style="--p:100%;--d:1.6"></i></span></div>
+      <div class="r fx fx-right" style="--d:1.1"><span>Hoàn thiện bản vẽ</span><span>15</span><span class="bar"><i class="fx fx-growx" style="--p:60%;--d:1.7"></i></span></div>
+      <div class="r fx fx-right" style="--d:1.2"><span>Giả định và đo kiểm</span><span>10</span><span class="bar"><i class="fx fx-growx" style="--p:40%;--d:1.8"></i></span></div>
+      <div class="r tot fx fx-up" style="--d:1.9"><span>Tổng</span><span class="fr" style="font-size:44px;font-weight:400"><span class="count" style="--to:100;--d:2"></span></span><span></span></div>
+    </div>
+    <aside class="notes">Mời 3 học viên chiếu bản vẽ. Cả lớp cùng soát theo đáp án tại demo/02_bang-so-lieu-doc-tu-hinh.md.</aside>
+  </section>
+
+  <!-- 29 -->
+  <section class="slide" data-layout="two-col">
+    <h2 class="title reveal">Giao việc cho buổi 04</h2>
+    <div class="cols">
+      <div class="col reveal-left"><h3>Buổi 04 bóc khối lượng</h3><p class="it" style="margin-bottom:10px">Từ bản vẽ căn hộ vừa dựng, Buổi 04 sẽ bóc khối lượng:</p><ul>
+        <li>Chiều dài tường và vách ngăn.</li>
+        <li>Diện tích sàn.</li>
+        <li>Danh mục 17 món nội thất.</li>
+      </ul></div>
+      <div class="col reveal-right"><h3>Việc làm trước ở nhà</h3><ul>
+        <li>Hoàn thiện bản vẽ nếu chưa xong.</li>
+        <li>Lưu file <code>.dwg</code> vào thư mục <code>03_Thiet_Ke_Va_AutoCAD/</code> của dự án.</li>
+        <li>Chép skill đang dùng thường xuyên sang cấp toàn máy nếu muốn dùng ở mọi dự án.</li>
+      </ul></div>
+    </div>
+    <aside class="notes">Nhắc học viên chưa cài xong MCP liên hệ trợ giảng trước Buổi 04.</aside>
+  </section>
+
+  <!-- 30 -->
+  <section class="slide finale" data-layout="closing" data-pose="finale">
+    <h2 class="title reveal">Tổng kết buổi 03</h2>
+    <p class="abs lbl fx fx-up" style="left:120px;top:250px;--d:.1">Ba điều mang về</p>
+    <div class="courses">
+      <div class="course fx fx-up" style="--d:.3"><span class="n">1</span><p><b>Đặt đúng chỗ:</b> thứ đi theo người để cấp toàn máy, thứ đi theo công trình để cấp dự án.</p></div>
+      <div class="course fx fx-up" style="--d:.5"><span class="n">2</span><p><b>MCP cho AI đôi tay:</b> Claude vẽ thẳng vào AutoCAD và tự nhìn lại kết quả.</p></div>
+      <div class="course fx fx-up" style="--d:.7"><span class="n">3</span><p><b>Kỹ sư giữ quyền duyệt:</b> đọc trước vẽ sau, giả định phải nói ra, người đo lại.</p></div>
+    </div>
+    <p class="closer fx fx-blur" style="--d:1.1">"AI đứng bếp, kỹ sư nếm và duyệt."</p>
+    <aside class="notes">Quay lại con số thời gian vẽ tay lớp ước lượng ở Slide 18, so với thời gian thực tế của Lab. Để học viên tự rút kết luận.</aside>
+  </section>
+
+</div>
+</div>
+<script>
+/* ===========================================================
+   MORPH-SLIDES ENGINE (no dependencies)
+   - Scales the 1920x1080 stage to the window (letterbox)
+   - Builds actors from the style's --actors list
+   - Sets data-layout / data-pose / data-parity on .deck-stage
+     -> style CSS moves actors, CSS transitions do the "morph"
+   - FLIP for elements sharing data-morph-id across two slides
+   Input (keys, click, swipe, wheel, #hash) lives in morph-nav.js.
+   =========================================================== */
+(() => {
+  const stage = document.querySelector('.deck-stage');
+  const slides = stage ? [...stage.querySelectorAll(':scope > .slide')] : [];
+  if (!slides.length) return;
+  const REVEAL = '.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-blur';
+  let cur = -1;
+  let scale = 1;
+
+  /* ---------- fit stage to window ---------- */
+  function fit() {
+    scale = Math.min(innerWidth / 1920, innerHeight / 1080);
+    const x = (innerWidth - 1920 * scale) / 2;
+    const y = (innerHeight - 1080 * scale) / 2;
+    stage.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+  }
+
+  /* Actors: if the deck has no .actors markup, build them from the style's
+     --actors list (DOM order = z-order), so switching style = swapping one CSS link. */
+  if (!stage.querySelector('.actors')) {
+    const names = getComputedStyle(stage).getPropertyValue('--actors').replace(/["']/g, '').trim().split(/\s+/).filter(Boolean);
+    const layer = Object.assign(document.createElement('div'), { className: 'actors back' });
+    layer.setAttribute('aria-hidden', 'true');
+    names.forEach((name) => {
+      const el = Object.assign(document.createElement('div'), { className: 'actor' });
+      el.dataset.actor = name;
+      layer.append(el);
+    });
+    stage.prepend(layer);
+  }
+
+  /* item count -> type size step. Agenda/timeline/stats tiles are bigger, so they allow more items. */
+  function densityOf(slide) {
+    const cols = [...slide.querySelectorAll('.col')];
+    const n = cols.length
+      ? Math.max(...cols.map((c) => c.querySelectorAll('li, p').length))
+      : slide.querySelectorAll('.bullets > li, .agenda-list > li, .stats > .stat, .timeline > .step').length;
+    const [lg, md] = slide.querySelector('.agenda-list, .timeline, .stats') ? [4, 6] : [3, 5];
+    return n <= lg ? 'lg' : n <= md ? 'md' : 'sm';
+  }
+
+  /* ---------- one-time prep per slide ---------- */
+  const seen = {};
+  slides.forEach((slide, k) => {
+    // stagger order for reveal items (author may override with style="--i:n")
+    slide.querySelectorAll(REVEAL).forEach((el, i) => {
+      if (!el.style.getPropertyValue('--i')) el.style.setProperty('--i', i);
+    });
+    if (!slide.dataset.density) slide.dataset.density = densityOf(slide);
+    // parity of the slide itself: content tweaks must not follow the *current* slide
+    slide.dataset.parity = k % 2 ? 'even' : 'odd';
+    // variant 1..3: Nth time this layout appears (styles may give repeats a different pose)
+    const lay = slide.dataset.layout || 'content';
+    seen[lay] = (seen[lay] || 0) + 1;
+    if (!slide.dataset.variant) slide.dataset.variant = String(((seen[lay] - 1) % 3) + 1);
+    slide.querySelectorAll('.agenda-list').forEach((list) => {
+      const items = [...list.children];
+      const rows = Math.ceil(items.length / 2);
+      list.style.setProperty('--rows', rows);
+      items.forEach((li, i) => li.classList.toggle('is-right', i >= rows));
+    });
+  });
+
+  /* ---------- UI chrome ---------- */
+  const progress = Object.assign(document.createElement('div'), { className: 'deck-progress' });
+  const counter = Object.assign(document.createElement('div'), { className: 'deck-counter' });
+  counter.setAttribute('aria-live', 'polite');
+  document.body.append(progress, counter);
+
+  function morphMs() {
+    const v = getComputedStyle(stage).getPropertyValue('--morph-dur').trim();
+    const ms = v.endsWith('ms') ? parseFloat(v) : parseFloat(v) * 1000;
+    return Number.isFinite(ms) ? ms : 1200;
+  }
+
+  /* rect in stage coordinates (only differences are used) */
+  function rectOf(el) {
+    const r = el.getBoundingClientRect();
+    return { x: r.left / scale, y: r.top / scale, w: r.width / scale, h: r.height / scale };
+  }
+
+  /* ---------- FLIP: First, Last, Invert, Play ---------- */
+  function flip(a, b, ra, fontA) {
+    a._flipDone?.();             // finish any flight still running on either element
+    b._flipDone?.();
+    b.classList.remove('flip-src');
+    b.style.transition = 'none';
+    b.style.transformOrigin = '0 0';
+    b.style.transform = 'none';
+    const rb = rectOf(b);
+    if (!rb.w || !rb.h) { b.style.transition = ''; b.style.transform = ''; b.style.transformOrigin = ''; return; }
+    const isText = b.textContent.trim() && !b.querySelector('img, svg, video');
+    const fontB = parseFloat(getComputedStyle(b).fontSize);
+    // text: uniform scale by font-size ratio (avoids squashed letters)
+    const sx = isText ? fontA / fontB : ra.w / rb.w;
+    const sy = isText ? fontA / fontB : ra.h / rb.h;
+    b.style.transform = `translate(${ra.x - rb.x}px, ${ra.y - rb.y}px) scale(${sx}, ${sy})`;
+    a.classList.add('flip-src');
+    void b.offsetWidth; // commit the inverted position
+    b.style.transition = '';
+    b.classList.add('flip-run');
+    b.style.transform = 'none';
+
+    let timer = 0;
+    const onEnd = (e) => { if (e.target === b && e.propertyName === 'transform') done(); };
+    const done = () => {
+      clearTimeout(timer);
+      b.removeEventListener('transitionend', onEnd);
+      b.classList.remove('flip-run');
+      b.style.transform = '';
+      b.style.transformOrigin = '';
+      a.classList.remove('flip-src');
+      a._flipDone = b._flipDone = null;
+    };
+    a._flipDone = b._flipDone = done;
+    b.addEventListener('transitionend', onEnd);
+    timer = setTimeout(done, morphMs() + 150);
+  }
+
+  /* ---------- go to slide n ---------- */
+  function go(n) {
+    n = Math.max(0, Math.min(slides.length - 1, Number(n) || 0));
+    if (n === cur) return;
+    const from = slides[cur];
+    const to = slides[n];
+
+    // FIRST: measure shared elements on the outgoing slide
+    const pairs = [];
+    if (from) {
+      from.querySelectorAll('[data-morph-id]').forEach((a) => {
+        const b = to.querySelector(`[data-morph-id="${CSS.escape(a.dataset.morphId)}"]`);
+        if (b) pairs.push([a, b, rectOf(a), parseFloat(getComputedStyle(a).fontSize)]);
+      });
+    }
+
+    // switch: actors re-pose via CSS, content cross-fades.
+    // A slide with its own data-pose gets parity "none" so the pose is never fought by parity rules.
+    stage.dataset.dir = n > cur ? 'fwd' : 'back';
+    stage.dataset.layout = to.dataset.layout || 'content';
+    stage.dataset.pose = to.dataset.pose || '';
+    stage.dataset.parity = to.dataset.pose ? 'none' : to.dataset.parity;
+    stage.dataset.variant = to.dataset.variant;
+    stage.dataset.slide = String(n + 1);
+    from?.classList.remove('active');
+    to.classList.add('active');
+    cur = n;
+
+    pairs.forEach(([a, b, ra, fa]) => flip(a, b, ra, fa));
+
+    progress.style.width = `${((n + 1) / slides.length) * 100}%`;
+    progress.style.background = getComputedStyle(stage).getPropertyValue('--accent'); // bar lives outside the stage
+    counter.textContent = `${n + 1} / ${slides.length}`;
+    history.replaceState(null, '', `#${n + 1}`);
+  }
+
+  addEventListener('resize', fit);
+
+  /* ---------- start: actors fly in from off-stage defaults ---------- */
+  fit();
+  const start = Math.max(0, (parseInt(location.hash.slice(1), 10) || 1) - 1);
+  requestAnimationFrame(() => requestAnimationFrame(() => go(start)));
+
+  window.deck = {
+    go,
+    next: () => go(cur + 1),
+    prev: () => go(cur - 1),
+    get index() { return cur; },
+    get count() { return slides.length; },
+  };
+})();
+
+</script>
+<script>
+/* ===========================================================
+   MORPH-SLIDES NAVIGATION (load after morph-engine.js)
+   Keys: Right/Down/PageDown/Space/Enter = next,
+         Left/Up/PageUp/Backspace = back, Home/End, F = fullscreen.
+   Click: left quarter = back, elsewhere = next. One-finger swipe.
+   Mouse wheel (throttled). Editing the #hash jumps to that slide.
+   =========================================================== */
+(() => {
+  const deck = window.deck;
+  if (!deck) return;
+  const isEditable = (t) => t.closest?.('a, button, input, textarea, select, [contenteditable]');
+  let wheelLock = 0;
+
+  addEventListener('keydown', (e) => {
+    // leave browser shortcuts alone (Ctrl+F, Alt+Left, ...)
+    if (e.ctrlKey || e.metaKey || e.altKey || isEditable(e.target)) return;
+    const k = e.key;
+    if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(k)) { e.preventDefault(); deck.next(); }
+    else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(k)) { e.preventDefault(); deck.prev(); }
+    else if (k === 'Home') deck.go(0);
+    else if (k === 'End') deck.go(deck.count - 1);
+    else if (k === 'f' || k === 'F') {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen?.();
+    }
+  });
+
+  addEventListener('click', (e) => {
+    if (isEditable(e.target)) return;
+    (e.clientX < innerWidth * 0.25 ? deck.prev : deck.next)();
+  });
+
+  let touch = null;
+  addEventListener('touchstart', (e) => {
+    touch = e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null;
+  }, { passive: true });
+  addEventListener('touchend', (e) => {
+    if (!touch || e.touches.length) { touch = null; return; } // pinch / multi-finger: ignore
+    const dx = e.changedTouches[0].clientX - touch.x;
+    const dy = e.changedTouches[0].clientY - touch.y;
+    touch = null;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 50) return;
+    const forward = Math.abs(dx) > Math.abs(dy) ? dx < 0 : dy < 0;
+    (forward ? deck.next : deck.prev)();
+  });
+
+  addEventListener('wheel', (e) => {
+    const now = Date.now();
+    if (e.ctrlKey || now < wheelLock || Math.abs(e.deltaY) < 20) return; // ctrl+wheel = zoom
+    wheelLock = now + 900;
+    (e.deltaY > 0 ? deck.next : deck.prev)();
+  }, { passive: true });
+
+  addEventListener('hashchange', () => {
+    const n = parseInt(location.hash.slice(1), 10);
+    if (n) deck.go(n - 1);
+  });
+})();
+
+</script>
+<script>
+/* ===========================================================
+   MORPH-SLIDES AUDIT: measures how well each slide fills space.
+   Run in the browser console (or via a test tool): deck.audit()
+   - Collects "ink" (text line boxes + media) per slide.
+   - maxGapY / maxGapX = biggest empty band inside the safe area.
+   - overflow = ink outside the slide or past the safe margins.
+   Display slides (cover, section, quote, closing) are only
+   checked for overflow: their emptiness is intentional.
+   =========================================================== */
+(() => {
+  const stage = document.querySelector('.deck-stage');
+  if (!stage || !window.deck) return;
+  const SAFE = { x0: 80, x1: 1840, y0: 60, y1: 1020 };
+  const LIMIT = { gapY: 0.28, gapX: 0.3 };
+  // big-number slides are meant to breathe around the figures
+  const LIMIT_Y_BY_LAYOUT = { stats: 0.34 };
+  const DISPLAY = ['cover', 'section', 'quote', 'closing'];
+
+  /* text line boxes + images/svg, in stage coordinates */
+  function inkRects(slide) {
+    const s = stage.getBoundingClientRect();
+    const k = s.width / 1920;
+    const out = [];
+    const push = (r) => {
+      if (r.width < 1 || r.height < 1) return;
+      out.push({ x0: (r.left - s.left) / k, x1: (r.right - s.left) / k, y0: (r.top - s.top) / k, y1: (r.bottom - s.top) / k });
+    };
+    const walker = document.createTreeWalker(slide, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      if (!node.textContent.trim()) continue;
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      [...range.getClientRects()].forEach(push);
+    }
+    slide.querySelectorAll('img, svg, video, canvas').forEach((el) => push(el.getBoundingClientRect()));
+    return out;
+  }
+
+  /* biggest uncovered interval of [lo, hi] given covered spans */
+  function maxGap(spans, lo, hi) {
+    const sorted = spans.map(([a, b]) => [Math.max(a, lo), Math.min(b, hi)]).filter(([a, b]) => b > a).sort((p, q) => p[0] - q[0]);
+    let gap = 0;
+    let cursor = lo;
+    for (const [a, b] of sorted) {
+      gap = Math.max(gap, a - cursor);
+      cursor = Math.max(cursor, b);
+    }
+    return Math.max(gap, hi - cursor);
+  }
+
+  function auditSlide(slide, i) {
+    const layout = slide.dataset.layout || 'content';
+    const ink = inkRects(slide);
+    const issues = [];
+    const out = ink.filter((r) => r.x0 < SAFE.x0 - 40 || r.x1 > SAFE.x1 + 40 || r.y0 < SAFE.y0 - 30 || r.y1 > SAFE.y1 + 30);
+    if (out.length) issues.push(`tràn khung (${out.length} dòng)`);
+    // text overflow = a text line box past its container (decorative pseudo-elements are ignored)
+    slide.querySelectorAll('.col, .takeaway, .highlight').forEach((box) => {
+      const b = box.getBoundingClientRect();
+      const range = document.createRange();
+      range.selectNodeContents(box);
+      const past = [...range.getClientRects()].some((r) => r.height && (r.bottom > b.bottom + 2 || r.right > b.right + 2));
+      if (past) issues.push(`chữ tràn hộp .${box.className.split(' ')[0]}`);
+    });
+    const gapY = maxGap(ink.map((r) => [r.y0, r.y1]), SAFE.y0, SAFE.y1) / (SAFE.y1 - SAFE.y0);
+    const gapX = maxGap(ink.map((r) => [r.x0, r.x1]), SAFE.x0, SAFE.x1) / (SAFE.x1 - SAFE.x0);
+    const display = DISPLAY.includes(layout);
+    if (!display && gapY > (LIMIT_Y_BY_LAYOUT[layout] || LIMIT.gapY)) issues.push(`trống dọc ${Math.round(gapY * 100)}%`);
+    if (!display && gapX > LIMIT.gapX) issues.push(`trống ngang ${Math.round(gapX * 100)}%`);
+    return {
+      slide: i + 1, layout, density: slide.dataset.density || '',
+      gapY: `${Math.round(gapY * 100)}%`, gapX: `${Math.round(gapX * 100)}%`,
+      status: issues.length ? 'SỬA' : 'OK', issues: issues.join('; '),
+    };
+  }
+
+  window.deck.audit = () => {
+    stage.classList.add('auditing');
+    const slides = [...stage.querySelectorAll(':scope > .slide')];
+    const report = slides.map(auditSlide);
+    stage.classList.remove('auditing');
+    console.table(report);
+    return report;
+  };
+})();
+
+</script>
+<script>
+/* Speaker notes drawer: press N to show the active slide's <aside class="notes">. */
+(() => {
+  const stage = document.querySelector('.deck-stage');
+  if (!stage) return;
+  const drawer = document.createElement('div');
+  drawer.className = 'notes-drawer';
+  document.body.appendChild(drawer);
+  let open = false;
+  const render = () => {
+    const note = stage.querySelector('.slide.active aside.notes');
+    drawer.innerHTML = '<b>Ghi chú giảng viên (phím N để ẩn)</b>';
+    drawer.appendChild(document.createTextNode(note ? note.textContent.trim() : 'Slide này không có ghi chú.'));
+    drawer.classList.toggle('on', open);
+  };
+  addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey || e.target.closest?.('input, textarea, [contenteditable]')) return;
+    if (e.key === 'n' || e.key === 'N') { open = !open; render(); }
+  });
+  new MutationObserver(() => { if (open) render(); }).observe(stage, { attributes: true, attributeFilter: ['data-slide'] });
+})();
+
+</script>
+</body>
+</html>

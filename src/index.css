@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --paper-bg: #F7F5F0;
+    --paper-grid: rgba(227, 223, 213, 0.6);
+    --paper-text: #1B242A;
+    --paper-border: #D8D4C8;
+    --blueprint-bg: #0B1E33;
+    --blueprint-grid: rgba(20, 50, 79, 0.7);
+    --blueprint-text: #E8F1F5;
+    --blueprint-border: #1C3B5E;
+    --accent-orange: #F26B1D;
+    --accent-blue: #0284C7;
+    --accent-green: #10B981;
+  }
+
+  body {
+    font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--paper-bg);
+    color: var(--paper-text);
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  .dark body {
+    background-color: var(--blueprint-bg);
+    color: var(--blueprint-text);
+  }
+
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+}
+
+/* Background blueprint grid */
+.bg-grid-pattern {
+  background-size: 24px 24px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+}
+
+.dark .bg-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+}
+
+/* Blueprint dimension lines */
+.dim-line {
+  position: relative;
+  border-bottom: 1px dashed #F26B1D;
+}

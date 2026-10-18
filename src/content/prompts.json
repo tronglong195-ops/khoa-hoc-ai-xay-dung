@@ -1,0 +1,386 @@
+[
+  {
+    "id": "p-3-1",
+    "sourceFile": "01_Buoi_01_Hieu_Dung_AI_Xay_Dung_Bo_Nao_Du_An/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_01.md",
+    "title": "Prompt 1 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 01",
+    "role": "Buổi 01",
+    "content": "# VAI TRÒ VÀ NGUYÊN TẮC HOẠT ĐỘNG\r\nBạn là \"AGENT 01 — ĐIỀU PHỐI THÔNG TIN DỰ ÁN\" (Project Orchestrator AI) thuộc Ban Quản lý Dự án Công trình Xây dựng. Bạn đóng vai trò là \"Bộ não trung tâm\", nắm giữ toàn bộ bối cảnh dự án, chịu trách nhiệm tiếp nhận yêu cầu từ Giám đốc dự án / Kỹ sư trưởng, phân loại công việc và điều phối thông tin tới các Agent chuyên môn.\r\n\r\n# KHO TRI THỨC VÀ BỐI CẢNH DỰ ÁN (PROJECT CONTEXT)\r\nBạn tuân thủ tuyệt đối các thông tin được khai báo trong tài liệu \"00_Project_Context_Profile.md\" đính kèm. Mọi câu trả lời của bạn phải lấy dữ liệu từ tài liệu này làm căn cứ chuẩn (Ground Truth).\r\n\r\n# MẠNG LƯỚI 5 AGENT CHUYÊN MÔN TIẾP NHẬN BÀN GIAO:\r\n1. AGENT 02 (Hồ sơ kỹ thuật): Chuyên rà soát spec, HSMT, tiêu chuẩn, soạn RFI.\r\n2. AGENT 03 (Hỗ trợ thiết kế & CAD): Chuyên Design brief, phương án mặt bằng, sinh mã AutoLISP/Script.\r\n3. AGENT 04 (QS & Chi phí): Chuyên đo bóc khối lượng, chuẩn hóa BOQ, so sánh báo giá.\r\n4. AGENT 05 (Tiến độ & Báo cáo): Chuyên WBS, tiến độ Lookahead, nhật ký công trình, biên bản họp.\r\n5. AGENT 06 (QA/QC & HSE): Chuyên rà soát chất lượng, theo dõi lỗi hiện trường, an toàn lao động.\r\n\r\n# RÀNG BUỘC KỸ THUẬT VÀ NGUYÊN TẮC BẢO MẬT BẮT BUỘC (CONSTRAINTS)\r\n1. NGUYÊN TẮC ZERO-HALLUCINATION:\r\n   - CHỈ ĐƯỢC PHÉP cung cấp thông tin có căn cứ rõ ràng trong hồ sơ dự án.\r\n   - Nếu câu hỏi đề cập đến thông số kỹ thuật, quy mô hoặc tiến độ chưa có trong tài liệu: Bạn BẮT BUỘC phải nói rõ: \"Hồ sơ dự án hiện tại chưa có thông số [Tên thông số]. Vui lòng cung cấp bổ sung tài liệu kỹ thuật hoặc phát hành RFI.\"\r\n   - TUYỆT ĐỐI KHÔNG tự tiện đoán mò, không suy diễn số liệu kích thước, khối lượng hoặc chi phí.\r\n2. QUY CHUẨN XƯNG HÔ & VĂN PHONG DOANH NGHIỆP:\r\n   - Xưng hô lịch sự, chuyên nghiệp: \"Tôi\" và \"Quý Anh/Chị\" hoặc \"Kỹ sư\".\r\n   - Ngôn ngữ hành chính kỹ thuật chuẩn mực, gãy gọn, logic; không dùng tiếng lóng mạng xã hội hoặc từ ngữ suồng sã.\r\n3. QUY TRÌNH TIẾP NHẬN YÊU CẦU:\r\n   - Khi nhận một yêu cầu phức tạp từ người dùng: Đầu tiên hãy phân tích xem yêu cầu đó thuộc thẩm quyền xử lý của Agent nào (từ Agent 02 đến Agent 06).\r\n   - Tóm tắt lại yêu cầu cốt lõi, chỉ rõ dữ liệu đầu vào cần chuẩn bị và đề xuất kịch bản chuyển giao (Handoff) cho Agent chuyên trách.\r\n\r\n# ĐỊNH DẠNG ĐẦU RA MẶC ĐỊNH\r\nMỗi phản hồi cần có cấu trúc:\r\n1. [TIẾP NHẬN VÀ XÁC ĐỊNH PHẠM VI]: Phân loại nghiệp vụ và chỉ định Agent chuyên trách.\r\n2. [NỘI DUNG XỬ LÝ / GIẢI ĐÁP]: Trích dẫn trực tiếp từ Context Profile (có ghi rõ mục tham chiếu).\r\n3. [CẢNH BÁO RỦI RO / THIẾU HỒ SƠ]: Liệt kê các điểm chưa rõ ràng cần người dùng xác nhận.\r\n4. [BƯỚC HÀNH ĐỘNG TIẾP THEO]: Hướng dẫn cụ thể để kỹ sư tiếp tục tác nghiệp.",
+    "category": "Buổi 01"
+  },
+  {
+    "id": "p-3-2",
+    "sourceFile": "01_Buoi_01_Hieu_Dung_AI_Xay_Dung_Bo_Nao_Du_An/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_01.md",
+    "title": "Prompt 2 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 01",
+    "role": "Buổi 01",
+    "content": "[VAI TRÒ]: Chuyên viên Quản trị Dự án và Kiến trúc thông tin kỹ thuật xây dựng.\r\n[BỐI CẢNH]: Tôi vừa tiếp nhận một dự án mới và có các thông tin sơ bộ đính kèm dưới đây.\r\n[DỮ LIỆU ĐẦU VÀO]: {Dán toàn bộ ghi chú sơ bộ hoặc quyết định phê duyệt dự án vào đây}\r\n[NHIỆM VỤ]: Hãy chuẩn hóa các thông tin trên thành một bản \"Hồ sơ Bối cảnh Dự án (Project Context Profile)\" hoàn chỉnh theo định dạng Markdown chuẩn hành chính.\r\n[RÀNG BUỘC KỸ THUẬT]:\r\n- Trích xuất đầy đủ 8 mục: (1) Thông tin chung, (2) Quy mô công trình, (3) Các bên tham gia dự án, (4) Tiêu chuẩn kỹ thuật áp dụng, (5) Các mốc tiến độ chính (Milestones), (6) Ranh giới phạm vi công việc (Scope Boundaries), (7) Yêu cầu pháp lý & An toàn, (8) Danh mục tài liệu hiện có.\r\n- Nếu thông tin nào trong 8 mục trên chưa có trong dữ liệu đầu vào, hãy ghi rõ: \"[CHƯA CÓ DỮ LIỆU - CẦN BỔ SUNG]\". Tuyệt đối không tự bịa số liệu.\r\n[ĐỊNH DẠNG]: Xuất ra dạng bảng hoặc danh mục gạch đầu dòng rõ ràng, chuẩn phong cách tư vấn chuyên nghiệp.",
+    "category": "Buổi 01"
+  },
+  {
+    "id": "p-3-3",
+    "sourceFile": "01_Buoi_01_Hieu_Dung_AI_Xay_Dung_Bo_Nao_Du_An/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_01.md",
+    "title": "Prompt 3 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 01",
+    "role": "Buổi 01",
+    "content": "[VAI TRÒ]: Agent 01 — Điều phối dự án.\r\n[BỐI CẢNH]: Ban Quản lý dự án vừa nhận được một yêu cầu phát sinh từ Chủ đầu tư như sau:\r\n\"{Nội dung yêu cầu từ Chủ đầu tư, ví dụ: Muốn thay đổi vật liệu ốp lát mặt ngoài tầng 1 sang đá Granite tự nhiên và đề nghị báo cáo ảnh hưởng tiến độ, chi phí trước thứ Sáu}\".\r\n[NHIỆM VỤ]:\r\n1. Phân tích tác động đa chiều của yêu cầu này (Pháp lý hồ sơ, Thiết kế, Chi phí/BOQ, Tiến độ, Chất lượng).\r\n2. Lập kịch bản phân công công việc cho các Agent chuyên môn (Agent 02, 03, 04, 05, 06).\r\n3. Đề xuất quy trình các bước kỹ sư cần thực hiện để hoàn thành báo cáo đúng hạn.\r\n[RÀNG BUỘC]:\r\n- Áp dụng nguyên tắc Human-in-the-loop: Chỉ rõ bước nào AI có thể soạn nháp và bước nào Kỹ sư trưởng bắt buộc phải thẩm định và ký duyệt.\r\n[ĐỊNH DẠNG]: Bảng phân công ma trận RACI rõ ràng.",
+    "category": "Buổi 01"
+  },
+  {
+    "id": "p-11-1",
+    "sourceFile": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_02.md",
+    "title": "Prompt 1 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 02",
+    "role": "Buổi 02",
+    "content": "Tóm tắt giúp tôi các yêu cầu kỹ thuật đối với hệ thống cửa chống cháy trong tệp tài liệu:\r\ndemo/01_Chi_Dan_Ky_Thuat_PCCC_GreenTech_Tower.pdf",
+    "category": "Buổi 02"
+  },
+  {
+    "id": "p-11-2",
+    "sourceFile": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_02.md",
+    "title": "Prompt 2 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 02",
+    "role": "Buổi 02",
+    "content": "Chưa đủ chi tiết. Hãy đọc kỹ Mục 5 (Điều 5.3) và bóc tách cụ thể:\r\n1. Độ dày thép khung và thép cánh.\r\n2. Quy cách lõi cách nhiệt (loại vật liệu, tỷ trọng kg/m³, tấm chống cháy bổ sung).\r\n3. Các phụ kiện kim khí bắt buộc (bản lề, tay co thủy lực, thanh thoát hiểm).\r\n4. Tiêu chuẩn thử nghiệm chịu lửa viện dẫn áp dụng.",
+    "category": "Buổi 02"
+  },
+  {
+    "id": "p-11-3",
+    "sourceFile": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_02.md",
+    "title": "Prompt 3 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 02",
+    "role": "Buổi 02",
+    "content": "Hãy lập \"Ma trận Yêu cầu Kỹ thuật và Nghiệm thu Vật tư\" cho hệ cửa chống cháy thành bảng gồm 6 cột:\r\n1. STT\r\n2. Hạng mục / Cấu phần\r\n3. Quy cách kỹ thuật yêu cầu\r\n4. Tiêu chuẩn viện dẫn (TCVN / QCVN)\r\n5. Hồ sơ / Chứng chỉ thí nghiệm nghiệm thu bắt buộc phải có\r\n6. Vị trí trích dẫn số trang trong tài liệu gốc (Tên file, Mục, Số trang)\r\n[RÀNG BUỘC]: Bóc tách chính xác các chỉ số kỹ thuật, không tóm tắt chung chung.",
+    "category": "Buổi 02"
+  },
+  {
+    "id": "p-11-4",
+    "sourceFile": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_02.md",
+    "title": "Prompt 4 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 02",
+    "role": "Buổi 02",
+    "content": "Tôi nạp thêm tệp: demo/02_Thuyet_Minh_Ban_Ve_KT102.pdf.\r\nHãy thực hiện đối chiếu chéo giữa file 01 (Chỉ dẫn PCCC) và file 02 (Bản vẽ KT-102) đối với cửa thoát nạn buồng thang ký hiệu D-08:\r\n1. Chỉ ra điểm mâu thuẫn về Giới hạn chịu lửa (EI), tỷ trọng bông cách nhiệt và cấu tạo lõi.\r\n2. Đánh giá mức độ rủi ro: Nếu Nhà thầu thi công theo bản vẽ KT-102 (EI 60) thì công trình có nguy cơ bị đình chỉ nghiệm thu PCCC khi bàn giao không?\r\n3. Đánh giá chênh lệch chi phí giữa hai phương án.",
+    "category": "Buổi 02"
+  },
+  {
+    "id": "p-11-5",
+    "sourceFile": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_02.md",
+    "title": "Prompt 5 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 02",
+    "role": "Buổi 02",
+    "content": "Câu hỏi kiểm tra: Trong hai tài liệu trên, mức phạt tiền nếu nhà thầu giao chậm cửa chống cháy là bao nhiêu?\r\n[QUY TẮC]: Chỉ dùng thông tin có trong tài liệu. Nếu tài liệu không nói, BẮT BUỘC ghi \"Tài liệu không đề cập\", tuyệt đối KHÔNG suy đoán.\r\nSau đó, hãy soạn thảo 01 \"PHIẾU YÊU CẦU LÀM RÕ THÔNG TIN (RFI-ARC-001)\" gửi Tư vấn thiết kế V-Design và Ban QLDA đề xuất thống nhất phương án xử lý cửa D-08 theo chuẩn EI 90 để đảm bảo nghiệm thu công trình.",
+    "category": "Buổi 02"
+  },
+  {
+    "id": "p-11-6",
+    "sourceFile": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_02.md",
+    "title": "Prompt 6 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 02",
+    "role": "Buổi 02",
+    "content": "Tôi thấy kết quả rà soát vừa rồi rất chuẩn xác. Bây giờ hãy đóng gói toàn bộ quy trình này thành một Skill cho tôi, để sau này khi tôi đưa bất kỳ hồ sơ kỹ thuật nào vào, bạn đều tự động chạy ra kết quả chuẩn mà tôi không cần phải chat nhiều lượt nữa.\r\n\r\nHãy tạo file tại: .claude/skills/soat-ho-so-ky-thuat/SKILL.md\r\nNội dung gồm:\r\n1. YAML Frontmatter:\r\n   name: soat-ho-so-ky-thuat\r\n   description: Dùng khi cần rà soát chỉ dẫn kỹ thuật, đối chiếu mâu thuẫn giữa bản vẽ và thuyết minh, lập ma trận nghiệm thu vật tư và sinh phiếu RFI.\r\n\r\n2. Cấu trúc xuất kết quả chuẩn 5 phần:\r\n   - PHẦN 1: TÓM TẮT QUY CÁCH VẬT TƯ & THÔNG SỐ CỐT LÕI\r\n   - PHẦN 2: MA TRẬN YÊU CẦU NGHIỆM THU (bảng 6 cột kèm TCVN và chứng chỉ)\r\n   - PHẦN 3: BẢNG ĐỐI CHIẾU MÂU THUẪN (nêu rõ tài liệu, số trang, điểm sai lệch)\r\n   - PHẦN 4: DỰ THẢO PHIẾU RFI LÀM RÕ (chuẩn thể thức hành chính kỹ thuật)\r\n   - PHẦN 5: QUY TẮC CHỐNG BỊA (thông tin không có ghi 'tài liệu không đề cập', trích dẫn số trang đầy đủ).",
+    "category": "Buổi 02"
+  },
+  {
+    "id": "p-11-7",
+    "sourceFile": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_02.md",
+    "title": "Prompt 7 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 02",
+    "role": "Buổi 02",
+    "content": "Rà soát và đối chiếu mâu thuẫn kỹ thuật giữa:\r\n1. demo/03_Chi_Dan_Thi_Cong_Be_Tong_Vach_Ham.pdf\r\n2. demo/04_Thuyet_Minh_Ban_Ve_Vach_Ham_KC02.pdf\r\n\r\nYêu cầu xuất ra:\r\n- Ma trận so sánh mác bê tông B35 vs B30, chống thấm W10 vs W8, lớp bảo vệ cốt thép 40mm vs 25mm.\r\n- Đánh giá rủi ro thấm nứt công trình ngầm và phát sinh chi phí vật tư dự toán.\r\n- Soạn thảo Phiếu RFI số RFI-STR-002 gửi Tư vấn Thiết kế Kết cấu.",
+    "category": "Buổi 02"
+  },
+  {
+    "id": "p-11-8",
+    "sourceFile": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_02.md",
+    "title": "Prompt 8 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 02",
+    "role": "Buổi 02",
+    "content": "Rà soát và đối chiếu mâu thuẫn kỹ thuật giữa:\r\n1. demo/05_Chi_Dan_Ky_Thuat_Son_Chong_Chay_Ket_Cau_Thep.pdf\r\n2. demo/06_Thuyet_Minh_Ban_Ve_Ket_Cau_Thep_KC105.pdf\r\n\r\nYêu cầu xuất ra:\r\n- Đối chiếu giới hạn chịu lửa R120 (Chỉ dẫn kỹ thuật) vs R60 (Bản vẽ KC-105).\r\n- Cảnh báo rủi ro cơ quan Cảnh sát PCCC từ chối nghiệm thu công trình.\r\n- Tính toán chênh lệch ngân sách phát sinh cho diện tích 1.450 m² thép sảnh.\r\n- Xuất dự thảo Phiếu RFI số RFI-PCCC-003 gửi Chủ đầu tư và Tư vấn Giám sát.",
+    "category": "Buổi 02"
+  },
+  {
+    "id": "p-11-9",
+    "sourceFile": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_02.md",
+    "title": "Prompt 9 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 02",
+    "role": "Buổi 02",
+    "content": "bash\r\n/plugin marketplace add andyluu98/vn-autocad-skill\r\n/plugin install vn-autocad-skill@vn-autocad",
+    "category": "Buổi 02"
+  },
+  {
+    "id": "p-11-10",
+    "sourceFile": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_02.md",
+    "title": "Prompt 10 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 02",
+    "role": "Buổi 02",
+    "content": "/ho-so-moi nhà phố 4x16m, 3 tầng, 3 phòng ngủ, có gara ô tô",
+    "category": "Buổi 02"
+  },
+  {
+    "id": "p-11-11",
+    "sourceFile": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_02.md",
+    "title": "Prompt 11 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 02",
+    "role": "Buổi 02",
+    "content": "/soat-ban-ve",
+    "category": "Buổi 02"
+  },
+  {
+    "id": "p-11-12",
+    "sourceFile": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_02.md",
+    "title": "Prompt 12 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 02",
+    "role": "Buổi 02",
+    "content": "/xuat-dwg",
+    "category": "Buổi 02"
+  },
+  {
+    "id": "p-24-1",
+    "sourceFile": "03_Buoi_03_Thiet_Ke_Va_Dieu_Khien_AutoCAD/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_03.md",
+    "title": "Prompt 1 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 03",
+    "role": "Buổi 03",
+    "content": "# VAI TRÒ VÀ NĂNG LỰC CHUYÊN MÔN\r\nBạn là \"AGENT 03 — TRỢ LÝ HỖ TRỢ THIẾT KẾ KIẾN TRÚC & TỰ ĐỘNG HÓA CAD\" (Design & CAD Assistant AI). Bạn hỗ trợ các Kiến trúc sư, Kỹ sư kết cấu và Chủ nhiệm đồ án chuyển hóa các yêu cầu công năng thành Nhiệm vụ thiết kế (Design Brief), lập phương án mặt bằng sơ bộ và biên dịch các thông số hình học thành các đoạn mã lập trình AutoCAD (AutoLISP .lsp hoặc AutoCAD Script .scr) để tự động hóa bản vẽ.\r\n\r\n# QUY TẮC SINH MÃ AUTOCAD (LISP / SCRIPT) CHUẨN KỸ THUẬT:\r\n1. ĐẢM BẢO TÍNH ĐỘC LẬP VÀ AN TOÀN HỆ THỐNG:\r\n   - Mọi hàm AutoLISP sinh ra bắt buộc phải có tiền tố `c:` để người dùng gọi trực tiếp từ dòng lệnh AutoCAD.\r\n   - Đầu hàm luôn lưu giá trị biến hệ thống (OSMODE, CMDECHO, CLAYER) và tắt bắt điểm (`(setvar \"OSMODE\" 0)`) để tọa độ không bị nhảy sai lệch.\r\n   - Cuối hàm bắt buộc phải khôi phục lại các biến hệ thống này về trạng thái ban đầu.\r\n2. QUY CHUẨN TÊN LAYER VÀ MÀU SẮC:\r\n   - Sử dụng chuẩn Layer kỹ thuật: `L_TRUC` (Trục - Màu 1 Đỏ), `L_COT` (Cột - Màu 4 Xanh cyan), `L_TUONG` (Tường - Màu 7 Trắng/Đen), `L_DIM` (Kích thước - Màu 2 Vàng), `L_TEXT` (Chữ ghi chú - Màu 3 Xanh lá).\r\n3. ĐƠN VỊ ĐO BẮT BUỘC:\r\n   - 100% bản vẽ xây dựng tại Việt Nam sử dụng đơn vị Milimét (mm). Mọi phép tính tọa độ phải nhân đúng tỷ lệ mm (Ví dụ: 8.4m = 8400mm).\r\n\r\n# CƠ CHẾ HUMAN-IN-THE-LOOP CHO BẢN VẼ:\r\n- Luôn nhắc nhở người dùng: \"Mã lệnh này phục vụ dựng hình sơ bộ. Kỹ sư cần kiểm tra lại khoảng cách an toàn chịu lực và tiêu chuẩn thoát nạn trước khi phát hành hồ sơ thi công.\"",
+    "category": "Buổi 03"
+  },
+  {
+    "id": "p-24-2",
+    "sourceFile": "03_Buoi_03_Thiet_Ke_Va_Dieu_Khien_AutoCAD/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_03.md",
+    "title": "Prompt 2 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 03",
+    "role": "Buổi 03",
+    "content": "[VAI TRÒ]: Agent 03 — Hỗ trợ thiết kế kiến trúc.\r\n[BỐI CẢNH]: Dự án GreenTech Tower đang chuẩn bị phương án thiết kế khu vực Sảnh chính và Không gian thương mại Tầng 1.\r\n[DỮ LIỆU ĐẦU VÀO]:\r\n- Diện tích sàn tầng 1: 1.625 m² (Kích thước phủ bì: 42m x 38.7m).\r\n- Chiều cao thông thủy tầng 1: 5.4m.\r\n- Yêu cầu của Chủ đầu tư:\r\n  + Sảnh đón sang trọng chuẩn tòa nhà hạng A, có bàn lễ tân, khu vực tiếp khách chờ.\r\n  + Cụm 4 thang máy tốc độ cao kết nối các tầng văn phòng, 2 thang máy riêng cho tầng hầm và thương mại.\r\n  + Khu thương mại cho thuê (bán lẻ/cafe cao cấp) chiếm tối thiểu 60% diện tích sàn.\r\n  + Đảm bảo 2 lối thoát hiểm độc lập theo QCVN 06:2022/BXD.\r\n[NHIỆM VỤ]:\r\n1. Soạn thảo bản \"NHIỆM VỤ THIẾT KẾ KIẾN TRÚC (DESIGN BRIEF)\" chuẩn mực.\r\n2. Lập bảng cân đối cơ cấu diện tích (diện tích sàn, diện tích hữu dụng, diện tích giao thông & kỹ thuật).\r\n3. Đề xuất sơ đồ dây chuyền luồng người: Luồng khách văn phòng, luồng khách thương mại, luồng vận chuyển rác/hàng hóa tách biệt.\r\n[ĐỊNH DẠNG]: Bản tài liệu kỹ thuật có tiêu đề, bảng biểu rõ ràng.",
+    "category": "Buổi 03"
+  },
+  {
+    "id": "p-24-3",
+    "sourceFile": "03_Buoi_03_Thiet_Ke_Va_Dieu_Khien_AutoCAD/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_03.md",
+    "title": "Prompt 3 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 03",
+    "role": "Buổi 03",
+    "content": "[VAI TRÒ]: Agent 03 — Chuyên gia AutoCAD Script.\r\n[BỐI CẢNH]: Thiết lập môi trường vẽ chuẩn cho hồ sơ thiết kế công trình GreenTech Tower.\r\n[NHIỆM VỤ]:\r\nHãy tạo một tập lệnh AutoCAD Script (tệp văn bản .scr) để tự động khởi tạo hệ thống Layer chuẩn ngành xây dựng Việt Nam.\r\n[CÁC LAYER CẦN TẠO]:\r\n1. L_TRUC: Nét trục tim, màu Đỏ (Color 1), kiểu nét Center, nét in 0.15mm.\r\n2. L_COT: Cột kết cấu bê tông, màu Cyan (Color 4), kiểu nét Continuous, nét in 0.50mm.\r\n3. L_VACH: Vách thang máy/bể nước, màu Magenta (Color 6), kiểu nét Continuous, nét in 0.50mm.\r\n4. L_TUONG: Tường ngăn gạch/thạch cao, màu Trắng (Color 7), kiểu nét Continuous, nét in 0.35mm.\r\n5. L_CUA: Cửa đi, cửa sổ, màu Xanh lá (Color 3), kiểu nét Continuous, nét in 0.20mm.\r\n6. L_DIM: Kích thước, màu Vàng (Color 2), kiểu nét Continuous, nét in 0.18mm.\r\n7. L_TEXT: Ghi chú văn bản, màu Xanh lá nhạt, nét in 0.25mm.\r\n8. L_HATCH: Mặt cắt vật liệu, màu Xám (Color 8), nét in 0.13mm.\r\n[RÀNG BUỘC CÚ PHÁP]:\r\n- Đúng chuẩn cú pháp dòng lệnh AutoCAD (sử dụng lệnh `-LAYER`). Các dấu cách hoặc dòng trống tương ứng với phím Enter.\r\n- Kèm hướng dẫn cách chạy file script trên AutoCAD.",
+    "category": "Buổi 03"
+  },
+  {
+    "id": "p-24-4",
+    "sourceFile": "03_Buoi_03_Thiet_Ke_Va_Dieu_Khien_AutoCAD/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_03.md",
+    "title": "Prompt 4 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 03",
+    "role": "Buổi 03",
+    "content": "[VAI TRÒ]: Chuyên gia lập trình AutoLISP & Kỹ sư kết cấu.\r\n[BỐI CẢNH]: Dựng hệ kết cấu chịu lực tầng điển hình công trình GreenTech Tower trên AutoCAD.\r\n[THÔNG SỐ HÌNH HỌC]:\r\n- Lưới trục phương X (trục số 1, 2, 3, 4, 5): Gồm 5 trục, khoảng cách giữa các trục là 8400mm (Tổng chiều dài: 33.600mm).\r\n- Lưới trục phương Y (trục chữ A, B, C, D, E, F): Gồm 6 trục, khoảng cách giữa các trục là 8400mm (Tổng chiều rộng: 42.000mm).\r\n- Tiết diện cột bê tông: 800 x 800 mm.\r\n- Vị trí cột: Đặt tại tâm tất cả các giao điểm giữa trục số và trục chữ (Tổng cộng: 5 x 6 = 30 cột).\r\n[NHIỆM VỤ]:\r\nHãy viết một đoạn mã AutoLISP hoàn chỉnh (lưu dạng file `.lsp`) có lệnh tắt là `VE_HETRUC_COT` thực hiện:\r\n1. Tự động tạo Layer `L_TRUC` (màu đỏ) và `L_COT` (màu Cyan).\r\n2. Vẽ các đường trục chính, kéo dài quá điểm giao 2000mm mỗi đầu.\r\n3. Vẽ hình tròn ký hiệu trục ở hai đầu đường trục và điền đúng tên trục (1,2,3,4,5 theo phương X; A,B,C,D,E,F theo phương Y).\r\n4. Vẽ hình chữ nhật tiết diện 800x800mm tại tâm mỗi nút giao lưới trục trên Layer `L_COT`.\r\n5. Đóng gói hàm an toàn: Tắt bắt điểm trước khi vẽ, khôi phục bắt điểm sau khi hoàn thành.\r\n[ĐỊNH DẠNG]: Đoạn mã AutoLISP chuẩn, chú thích tiếng Việt có dấu, sẵn sàng load vào AutoCAD.",
+    "category": "Buổi 03"
+  },
+  {
+    "id": "p-24-5",
+    "sourceFile": "03_Buoi_03_Thiet_Ke_Va_Dieu_Khien_AutoCAD/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_03.md",
+    "title": "Prompt 5 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 03",
+    "role": "Buổi 03",
+    "content": "[VAI TRÒ]: Chủ nhiệm đồ án kiến trúc / Kỹ sư thẩm tra.\r\n[BỐI CẢNH]: Bản vẽ mặt bằng kết cấu sơ bộ vừa được dựng xong bằng script AutoCAD.\r\n[NHIỆM VỤ]:\r\nHãy lập một \"Checklist 10 Điểm Rà Soát Bản Vẽ Mặt Bằng Kết Cấu\" trước khi bàn giao cho bộ phận QS đo bóc khối lượng.\r\n[YÊU CẦU NỘI DUNG CHECKLIST]:\r\nGồm các tiêu chí kiểm tra:\r\n1. Sự đồng nhất giữa lưới trục kiến trúc và kết cấu.\r\n2. Cao độ hoàn thiện vs cao độ kết cấu sàn.\r\n3. Kích thước tiết diện cột, dầm chính, dầm phụ.\r\n4. Vị trí và kích thước lỗ mở kỹ thuật (hộp gen, thang máy, ram dốc).\r\n5. Ký hiệu và quy chuẩn layer, tỷ lệ nét in.\r\n6. Tính đầy đủ của các đường kích thước (Dimension chain 3 lớp).\r\n[ĐỊNH DẠNG]: Bảng kiểm tra có cột Tiêu chí, Phương pháp kiểm tra, Trạng thái (Đạt/Không đạt/Cần giải trình).",
+    "category": "Buổi 03"
+  },
+  {
+    "id": "p-28-1",
+    "sourceFile": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 1 — THƯ VIỆN PROMPT THỰC CHIẾN: BUỔI 04",
+    "role": "Buổi 04 (Chính thức)",
+    "content": "---\r\nname: soat-ho-so\r\ndescription: >-\r\n  Soát một cặp hồ sơ kỹ thuật (chỉ dẫn kỹ thuật và thuyết minh bản vẽ), tìm chỗ hai tài liệu\r\n  nói khác nhau về cùng một thông số. Giao cho agent này khi cần soát nhiều cặp hồ sơ cùng lúc.\r\n  Agent này chỉ đọc và báo cáo, không sửa file nào.\r\ntools: Read, Glob, Grep\r\n---\r\n\r\nBạn là kỹ sư soát hồ sơ. Được giao đúng một cặp tài liệu.\r\n\r\nViệc phải làm:\r\n1. Đọc cả hai tài liệu (ưu tiên bản .md nếu có cạnh file PDF).\r\n2. Bóc các thông số định lượng: vật liệu, độ dày, mác, giới hạn chịu lửa, tiêu chuẩn viện dẫn.\r\n3. So từng thông số giữa hai tài liệu. Chỉ ghi chỗ lệch hoặc chỗ một bên có, một bên bỏ trống.\r\n\r\nQuy tắc:\r\n- Mỗi con số ghi nguồn: tên file, mục hoặc trang.\r\n- Tài liệu không nói thì ghi \"Tài liệu không đề cập\". Không suy đoán.\r\n- Nêu sai lệch, không đoán nguyên nhân.\r\n\r\nTrả về đúng một bảng: | Thông số | Tài liệu A (nguồn) | Tài liệu B (nguồn) | Mức độ |\r\nvà tối đa 3 câu kết luận.",
+    "category": "Buổi 04 (Chính thức)"
+  },
+  {
+    "id": "p-28-2",
+    "sourceFile": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 2 — THƯ VIỆN PROMPT THỰC CHIẾN: BUỔI 04",
+    "role": "Buổi 04 (Chính thức)",
+    "content": "Dùng 3 subagent soat-ho-so chạy SONG SONG, mỗi subagent một cặp hồ sơ trong\r\n<THU_MUC_KHOA_HOC>\\02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat\\demo\\ :\r\n- Cặp 1: file 01 (chỉ dẫn PCCC) và file 02 (thuyết minh KT102)\r\n- Cặp 2: file 03 (chỉ dẫn bê tông vách hầm) và file 04 (thuyết minh KC02)\r\n- Cặp 3: file 05 (chỉ dẫn sơn chống cháy) và file 06 (thuyết minh KC105)\r\nMỗi subagent chỉ đọc, không sửa file.\r\nKhi cả 3 xong, gom thành MỘT bảng tổng, xếp theo mức độ nghiêm trọng, cột đầu ghi cặp hồ sơ.",
+    "category": "Buổi 04 (Chính thức)"
+  },
+  {
+    "id": "p-28-3",
+    "sourceFile": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 3 — THƯ VIỆN PROMPT THỰC CHIẾN: BUỔI 04",
+    "role": "Buổi 04 (Chính thức)",
+    "content": "Hỏi subagent soat-ho-so: \"Trước đó tôi đã nói với anh điều gì?\"",
+    "category": "Buổi 04 (Chính thức)"
+  },
+  {
+    "id": "p-28-4",
+    "sourceFile": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 4 — THƯ VIỆN PROMPT THỰC CHIẾN: BUỔI 04",
+    "role": "Buổi 04 (Chính thức)",
+    "content": "Mở file CLAUDE.md Global của tôi (~/.claude/CLAUDE.md). Nếu đã có, đọc nội dung hiện tại trước,\r\nchép bản cũ vào ~/.claude/_backup/ với tên CLAUDE_yymmdd-HHmm.md rồi mới sửa.\r\nThêm 6 nguyên tắc an toàn theo file mẫu\r\n<THU_MUC_KHOA_HOC>\\04_Buoi_04_Agent_ClaudeMD_Blender_3D\\05_Mau_CLAUDE_md_Global_Cho_Ky_Su.md.\r\nKhông xóa phần tôi đã viết. Chỗ nào trùng hoặc mâu thuẫn thì hỏi tôi trước.\r\nXong báo đường dẫn file và bản sao lưu.",
+    "category": "Buổi 04 (Chính thức)"
+  },
+  {
+    "id": "p-28-5",
+    "sourceFile": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 5 — THƯ VIỆN PROMPT THỰC CHIẾN: BUỔI 04",
+    "role": "Buổi 04 (Chính thức)",
+    "content": "Thử 1: Xóa giúp tôi các file cũ trong thư mục demo cho gọn.",
+    "category": "Buổi 04 (Chính thức)"
+  },
+  {
+    "id": "p-28-6",
+    "sourceFile": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 6 — THƯ VIỆN PROMPT THỰC CHIẾN: BUỔI 04",
+    "role": "Buổi 04 (Chính thức)",
+    "content": "Thử 2: Trong file <DEMO>\\14_bang-thong-ke-cua-nha-7x20m.xlsx, ô A2 đang ghi tên dự án.\r\nĐổi \"NHA PHO MAU LO 7X20M\" thành \"NHA PHO ANH TUAN\", giữ nguyên phần còn lại của ô.",
+    "category": "Buổi 04 (Chính thức)"
+  },
+  {
+    "id": "p-28-7",
+    "sourceFile": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 7 — THƯ VIỆN PROMPT THỰC CHIẾN: BUỔI 04",
+    "role": "Buổi 04 (Chính thức)",
+    "content": "Thử 3: Đơn giá bê tông thương phẩm B20 tại TP.HCM tháng này là bao nhiêu?",
+    "category": "Buổi 04 (Chính thức)"
+  },
+  {
+    "id": "p-28-8",
+    "sourceFile": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 8 — THƯ VIỆN PROMPT THỰC CHIẾN: BUỔI 04",
+    "role": "Buổi 04 (Chính thức)",
+    "content": "Kiểm tra giúp tôi:\r\n1. Kết nối AutoCAD (autocad-mcp): trạng thái, đang mở bản vẽ nào.\r\n2. Kết nối Blender (vn-blender): phiên bản Blender, phiên bản addon, số đối tượng trong cảnh.\r\nChưa làm gì khác.",
+    "category": "Buổi 04 (Chính thức)"
+  },
+  {
+    "id": "p-28-9",
+    "sourceFile": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 9 — THƯ VIỆN PROMPT THỰC CHIẾN: BUỔI 04",
+    "role": "Buổi 04 (Chính thức)",
+    "content": "Đây là ảnh mẫu căn nhà khách muốn (đính kèm). Chưa vẽ gì.\r\n1. Đọc ảnh, lập bảng các bộ phận nhìn thấy: số tầng, mái, ban công, cửa mặt tiền, mặt hông,\r\n   nhà xe, sân thượng, vật liệu hoàn thiện.\r\n2. Ảnh không ghi kích thước nào, nên mọi kích thước em đề xuất phải ghi rõ \"đề xuất, cần duyệt\".\r\n3. Hỏi tôi TỪNG CÂU MỘT, mỗi câu 2 đến 4 phương án, phương án nên chọn đặt đầu:\r\n   kích thước lô và nhà, chiều cao tầng, công năng từng tầng.\r\n4. Xong lập bảng thông số đầy đủ (gốc tọa độ, lưới trục, cốt cao độ, tường, cửa, mái, thang)\r\n   để tôi duyệt. Tôi duyệt rồi mới vẽ.",
+    "category": "Buổi 04 (Chính thức)"
+  },
+  {
+    "id": "p-28-10",
+    "sourceFile": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 10 — THƯ VIỆN PROMPT THỰC CHIẾN: BUỔI 04",
+    "role": "Buổi 04 (Chính thức)",
+    "content": "Theo bảng thông số đã duyệt, viết script Python <DEMO_CUA_TOI>\\scripts\\ve-ban-ve-autocad.py:\r\n- Đầu script là MỘT khối dữ liệu: cao độ, lưới trục, tường từng tầng (hình chữ nhật, kèm danh sách\r\n  lỗ cửa), cột, sàn và lỗ sàn, mái (đỉnh, mép, áp cho tầng nào), cửa (mã, rộng, cao, cao bệ), thang.\r\n- Script sinh ra một file .lsp, vẽ bằng ActiveX (vla-add...), chữ tiếng Việt viết dạng \\U+XXXX.\r\n- Theo quy chuẩn bản vẽ trong CLAUDE.md dự án: đơn vị mm, layer tiếng Việt không dấu (TRUC, TUONG,\r\n  COT, CUA, CAU-THANG, KICH-THUOC, CHU...), chữ Arial, kích thước 3 lớp, đầu kích thước gạch chéo.\r\n- Gốc tọa độ: góc ngoài trước bên trái của nhà.\r\nChưa nạp vào AutoCAD, cho tôi xem cấu trúc khối dữ liệu trước.",
+    "category": "Buổi 04 (Chính thức)"
+  },
+  {
+    "id": "p-28-11",
+    "sourceFile": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 11 — THƯ VIỆN PROMPT THỰC CHIẾN: BUỔI 04",
+    "role": "Buổi 04 (Chính thức)",
+    "content": "Bổ sung script để vẽ trong Model:\r\n1. Mặt bằng tầng 1 (kèm sân, rào, pergola, cục nóng, ống xối), tầng 2, tầng 3, mặt bằng mái.\r\n   Tường cắt theo cột và lỗ cửa thành từng đoạn, mỗi đoạn một hình chữ nhật kín có hatch.\r\n   Mỗi lỗ cửa là một hình kín trên layer CUA, mã cửa đặt ngoài tường trên layer KY-HIEU-CUA.\r\n2. Mặt đứng chính, mặt đứng bên, mặt cắt dọc sinh từ cùng khối dữ liệu.\r\n3. Bốn bảng đặt trong Model, mỗi bảng một layer riêng để máy đọc lại được:\r\n   BẢNG THỐNG KÊ CỬA (BANG-CUA), BẢNG CAO ĐỘ (BANG-CAO-DO), BẢNG MÁI (BANG-MAI),\r\n   BẢNG THÔNG SỐ DỰNG HÌNH (BANG-THONG-SO). Cột số lượng cửa đếm từ dữ liệu, không gõ tay.\r\nRồi chạy script, nạp file .lsp qua autocad-mcp (execute_lisp, lệnh load), lưu bản vẽ.\r\nXuất ảnh để soát, chỉ ra chỗ chữ đè chữ, kích thước chồng nhau, rồi sửa.",
+    "category": "Buổi 04 (Chính thức)"
+  },
+  {
+    "id": "p-28-12",
+    "sourceFile": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 12 — THƯ VIỆN PROMPT THỰC CHIẾN: BUỔI 04",
+    "role": "Buổi 04 (Chính thức)",
+    "content": "Thêm nội thất vào các mặt bằng, layer NOI-THAT (tủ treo vẽ nét đứt trên NOI-THAT-TREN):\r\nmỗi món một hình chữ nhật đúng kích thước, tên món đặt trong hình (layer NOI-THAT-TEN).\r\nDùng đúng bộ tên: SOFA, BÀN TRÀ, KỆ TV, THẢM, BÀN ĂN, GHẾ, TỦ BẾP DƯỚI, TỦ BẾP TRÊN, TỦ LẠNH,\r\nBỒN CẦU, LAVABO, SEN TẮM, GIƯỜNG ĐÔI, GIƯỜNG ĐƠN, TAB, TỦ ÁO, BÀN TRANG ĐIỂM, BÀN LÀM VIỆC,\r\nBÀN HỌC, KỆ SÁCH, BÀN THỜ, MÁY GIẶT, GIÀN PHƠI, BÀN NHỎ, CHẬU CÂY, Ô TÔ.\r\nBố trí theo công năng đã duyệt; tủ, giường, bồn cầu đặt sát tường; không chắn cửa đi, không\r\nnằm trong vùng cánh cửa mở. Dời tên phòng ra chỗ trống nếu bị đè.",
+    "category": "Buổi 04 (Chính thức)"
+  },
+  {
+    "id": "p-28-13",
+    "sourceFile": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 13 — THƯ VIỆN PROMPT THỰC CHIẾN: BUỔI 04",
+    "role": "Buổi 04 (Chính thức)",
+    "content": "Tạo 4 layout A3 tỷ lệ 1/100: KT-01 mặt bằng 3 tầng, KT-02 mặt bằng mái và các bảng,\r\nKT-03 hai mặt đứng, KT-04 mặt cắt. Khung tên ghi Công ty Ces AI, tên công trình, tên tờ,\r\nmã tờ, tỷ lệ, ngày. Mỗi tờ một viewport 1/100.\r\nCách đặt viewport cho chắc, làm từng tờ một:\r\n- Lệnh 1: chuyển sang tab layout (CTAB).\r\n- Lệnh 2: ở không gian giấy ZOOM toàn tờ rồi REGEN (viewport nằm ngoài màn hình thì không vào được\r\n  MSPACE); vào MSPACE, ZoomCenter về tâm vùng hình, ra PSPACE, đặt CustomScale 0.01, khóa viewport.\r\nXong đóng mở lại file DWG, kiểm tra mỗi tờ chỉ còn 1 viewport tỷ lệ 0.01, không có viewport thừa.\r\nIn 4 tờ ra MỘT file PDF gộp, đánh số tiếp theo trong thư mục. Mở PDF ra xem từng tờ:\r\ntờ nào trống hoặc lệch thì sửa trước khi báo xong.",
+    "category": "Buổi 04 (Chính thức)"
+  },
+  {
+    "id": "p-28-14",
+    "sourceFile": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 14 — THƯ VIỆN PROMPT THỰC CHIẾN: BUỔI 04",
+    "role": "Buổi 04 (Chính thức)",
+    "content": "Lưu bản vẽ ra DXF (đánh số tiếp theo). Lưu ý: Save As DXF làm AutoCAD chuyển sang mở file DXF,\r\nnên xong phải mở lại file DWG. Báo cho tôi:\r\n- Số đối tượng theo từng layer chính.\r\n- Số cửa đếm trên mặt bằng theo từng mã, so với cột số lượng của bảng thống kê.\r\n- Các file AutoCAD tự sinh (.bak, .tmp) thì chuyển vào _backup/ và báo, không xóa.",
+    "category": "Buổi 04 (Chính thức)"
+  },
+  {
+    "id": "p-28-15",
+    "sourceFile": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 15 — THƯ VIỆN PROMPT THỰC CHIẾN: BUỔI 04",
+    "role": "Buổi 04 (Chính thức)",
+    "content": "Dùng công cụ doc_layer_dxf đọc file <DEMO>\\02_ban-ve-nha-pho-lo-7x20m.dxf.\r\nLiệt kê layer và số đối tượng mỗi layer, chỉ ra layer nào là tường, cột, cửa, mái, nội thất,\r\nvà 4 bảng thông số nằm ở layer nào. Chưa dựng gì.",
+    "category": "Buổi 04 (Chính thức)"
+  },
+  {
+    "id": "p-28-16",
+    "sourceFile": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 16 — THƯ VIỆN PROMPT THỰC CHIẾN: BUỔI 04",
+    "role": "Buổi 04 (Chính thức)",
+    "content": "Chạy script <DEMO>\\scripts\\doc-ban-ve-ra-mo-ta.py với đầu vào là file DXF trên,\r\nđầu ra là <DEMO>\\03_mo-ta-tu-ban-ve.json (đã có thì sao lưu bản cũ trước).\r\nĐọc kết quả và báo tôi bằng bảng:\r\n- Cao độ 6 mốc, 4 mái (đỉnh, mép, áp cho tầng nào), số dòng thông số.\r\n- Mỗi tầng: số tường, cửa, cột, lan can, nội thất, số bậc thang mỗi vế.\r\n- Số cửa theo mã so với bảng thống kê, và toàn bộ cảnh báo.\r\nCó cảnh báo thì dừng lại hỏi tôi, chưa dựng.",
+    "category": "Buổi 04 (Chính thức)"
+  },
+  {
+    "id": "p-28-17",
+    "sourceFile": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 17 — THƯ VIỆN PROMPT THỰC CHIẾN: BUỔI 04",
+    "role": "Buổi 04 (Chính thức)",
+    "content": "Đọc toàn bộ nội dung file <DEMO>\\scripts\\dung-nha-blender.py. Thêm vào ĐẦU đoạn code một dòng:\r\nTHAM_SO = {\"mo_ta\": r\"<DEMO>\\03_mo-ta-tu-ban-ve.json\", \"ra\": r\"<DEMO>\", \"render\": False,\r\n           \"blend\": \"04_nha-pho-lo-7x20m.blend\"}\r\nrồi gửi cả đoạn vào công cụ chay_python của vn-blender.\r\nXong gọi công cụ nhin để xem ảnh, tự soát: đủ 3 tầng và tum chưa, có khối bay lơ lửng không,\r\ncửa có đúng chỗ không. Báo số tường, lỗ cửa, cột, nội thất đã dựng, so với kết quả Prompt 5.2.",
+    "category": "Buổi 04 (Chính thức)"
+  },
+  {
+    "id": "p-28-18",
+    "sourceFile": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 18 — THƯ VIỆN PROMPT THỰC CHIẾN: BUỔI 04",
+    "role": "Buổi 04 (Chính thức)",
+    "content": "Qua chay_python:\r\n1. Liệt kê các collection tầng và cho tôi biết cách ẩn hiện từng tầng.\r\n2. Đặt thuộc tính tach_m của đối tượng \"DIEU KHIEN TACH TANG\" bằng 3 (nhớ gọi update_tag),\r\n   rồi dùng nhin xem ảnh bung tầng.\r\n3. Đặt lại tach_m bằng 0.\r\nSau đó chạy lại Prompt 5.3 với \"render\": True để xuất đủ bộ ảnh: 3 phối cảnh, mặt bằng nội thất\r\ntầng 1, 2, 3 (nhìn thẳng xuống, cắt ở cao 1,4 m), tum sân thượng, ảnh bung tầng.",
+    "category": "Buổi 04 (Chính thức)"
+  },
+  {
+    "id": "p-28-19",
+    "sourceFile": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 19 — THƯ VIỆN PROMPT THỰC CHIẾN: BUỔI 04",
+    "role": "Buổi 04 (Chính thức)",
+    "content": "Trong AutoCAD, ở BẢNG THỐNG KÊ CỬA (layer BANG-CUA), đổi chiều cao cửa S1 từ 2200 thành 2400.\r\nKhông sửa gì khác. Lưu bản vẽ (sao lưu trước), xuất lại DXF, mở lại DWG.\r\nChạy lại Prompt 5.2 và 5.3. Chụp ảnh mặt đứng hông trước và sau, chỉ ra các cửa S1 đã cao lên,\r\nvà xác nhận số cửa vẫn khớp bảng thống kê.",
+    "category": "Buổi 04 (Chính thức)"
+  },
+  {
+    "id": "p-28-20",
+    "sourceFile": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 20 — THƯ VIỆN PROMPT THỰC CHIẾN: BUỔI 04",
+    "role": "Buổi 04 (Chính thức)",
+    "content": "Chạy Blender ở chế độ nền:\r\n\"<đường dẫn blender.exe>\" --background --factory-startup --python <DEMO>\\scripts\\dung-nha-blender.py -- <DEMO>\\03_mo-ta-tu-ban-ve.json <DEMO>\r\nBáo các ảnh đã render và file .blend đã lưu. Mở từng ảnh ra xem trước khi báo xong.",
+    "category": "Buổi 04 (Chính thức)"
+  },
+  {
+    "id": "p-36-1",
+    "sourceFile": "04_Buoi_04_Boc_Tach_Khoi_Luong_BOQ_Du_Toan/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 1 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 04",
+    "role": "Chuyên đề: BOQ & Dự toán",
+    "content": "# VAI TRÒ VÀ TRÁCH NHIỆM NGHỀ NGHIỆP\r\nBạn là \"AGENT 04 — KỸ SƯ QS & CHUYÊN GIA QUẢN TRỊ CHI PHÍ DỰ ÁN\" (Cost & Quantity Surveying Specialist AI). Bạn chịu trách nhiệm hỗ trợ Kỹ sư QS, Ban Đấu thầu và Ban Giám đốc quản lý toàn diện khía cạnh tiên lượng khối lượng, dự toán chi phí, lập bảng BOQ và phân tích đối soát báo giá thầu phụ/nhà cung cấp.\r\n\r\n# NGUYÊN TẮC BẤT DI BẤT DỊCH VỀ SỐ LIỆU (ANTI-GUESSWORK MANDATE):\r\n1. TUYỆT ĐỐI KHÔNG ĐƯỢC TỰ SUY ĐOÁN KHỐI LƯỢNG:\r\n   - Mọi con số khối lượng bạn tính toán bắt buộc phải dựa trên công thức hình học minh bạch (Dài x Rộng x Cao x Số lượng) có kích thước cụ thể lấy từ bản vẽ hoặc thuyết minh.\r\n   - Nếu bản vẽ thiếu thông số kích thước (Ví dụ: chưa rõ chiều dày sàn vệ sinh, chưa có chiều cao dầm chính): Bạn BẮT BUỘC phải ghi chú: \"[THIẾU KÍCH THƯỚC TRÊN BẢN VẼ - CẦN KỸ SƯ XÁC MINH]\". TUYỆT ĐỐI CẤM tự ý giả định số đo.\r\n2. MINH BẠCH CÔNG THỨC DIỄN GIẢI:\r\n   - Trong bảng BOQ, cột \"Diễn giải phép tính\" phải ghi tường minh từng thừa số (Ví dụ: 30 * 0.8 * 0.8 * 5.4 = 103.68 m3), không được ghi thẳng kết quả cuối cùng mà không có diễn giải.\r\n3. CHUẨN MỰC TỪ NGỮ QUẢN TRỊ CHI PHÍ DOANH NGHIỆP:\r\n   - Sử dụng thuật ngữ tài chính xây dựng chuẩn xác: \"Hạch toán chi phí\", \"Quyết toán theo phân kỳ nghiệm thu\", \"Dự phòng phí\", \"Ngân sách đầu tư được duyệt\", \"Phân tích chênh lệch đơn giá\".\r\n   - Tuyệt đối tránh các từ ngữ bình dân, suồng sã (\"tính tiền\", \"tiền tươi\", \"ôm cục tiền\").\r\n\r\n# ĐỊNH DẠNG ĐẦU RA MẶC ĐỊNH\r\nMọi bảng tính phải được xuất theo cấu trúc bảng Markdown rõ ràng, dễ dàng sao chép dán trực tiếp vào Microsoft Excel mà không bị lỗi dồn dòng.",
+    "category": "Chuyên đề: BOQ & Dự toán"
+  },
+  {
+    "id": "p-36-2",
+    "sourceFile": "04_Buoi_04_Boc_Tach_Khoi_Luong_BOQ_Du_Toan/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 2 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 04",
+    "role": "Chuyên đề: BOQ & Dự toán",
+    "content": "[VAI TRÒ]: Agent 04 — Kỹ sư QS.\r\n[BỐI CẢNH]: Dự án GreenTech Tower đang hoàn thành bản vẽ kết cấu hệ cột Tầng 1.\r\n[DỮ LIỆU ĐẦU VÀO]:\r\n- Số lượng cột bê tông tầng 1: 30 cột.\r\n- Tiết diện cột: 800 x 800 mm (0.8m x 0.8m).\r\n- Chiều cao tầng 1: 5.40 m.\r\n- Chiều cao dầm chính giao đỉnh cột (dầm trung bình): 800 mm (0.8m).\r\n- Bê tông cột mác: B35 (M450). Ván khuôn cột: Ván phủ phim 18mm, hệ xà gồ thép hộp.\r\n[NHIỆM VỤ]:\r\n1. Tính toán khối lượng bê tông hình học cột tầng 1 (lưu ý trừ phần dầm sàn giao đỉnh cột theo quy chuẩn đo bóc).\r\n2. Tính toán diện tích ván khuôn bao quanh cột tầng 1 (trừ phần tiếp giáp đáy dầm chính).\r\n3. Lập Bảng tính Tiên lượng Khối lượng (BOQ) chi tiết có cột diễn giải công thức từng bước.\r\n[RÀNG BUỘC KỸ THUẬT]:\r\n- Ghi rõ công thức hình học minh bạch.\r\n- Ghi chú riêng phần hao hụt thi công (tính 1.5% cho bê tông và 3% cho ván khuôn) ở mục ghi chú để kỹ sư thẩm tra.\r\n[ĐỊNH DẠNG]: Bảng Markdown tương thích 100% với Excel.",
+    "category": "Chuyên đề: BOQ & Dự toán"
+  },
+  {
+    "id": "p-36-3",
+    "sourceFile": "04_Buoi_04_Boc_Tach_Khoi_Luong_BOQ_Du_Toan/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 3 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 04",
+    "role": "Chuyên đề: BOQ & Dự toán",
+    "content": "[VAI TRÒ]: Chuyên viên QS & Quản lý hợp đồng xây dựng.\r\n[BỐI CẢNH]: Cần xuất bảng BOQ chuẩn hóa để gửi mời thầu gói thầu Bê tông thương phẩm Tầng 1 GreenTech Tower.\r\n[DỮ LIỆU ĐẦU VÀO]: {Khối lượng bê tông B35 từ Prompt 4.1}.\r\n[NHIỆM VỤ]:\r\nHãy tạo một Bảng Tiên lượng Khối lượng (BOQ) hoàn chỉnh chuẩn format doanh nghiệp.\r\n[CẤU TRÚC BẢNG BẮT BUỘC]:\r\n- Cột 1: STT (Số thứ tự ngắn gọn: 1, 2, 3...).\r\n- Cột 2: Mã hiệu công tác (Theo định mức dự toán xây dựng).\r\n- Cột 3: Mô tả công tác kỹ thuật (Quy cách chi tiết: Bê tông thương phẩm B35, độ sụt 12±2cm, phụ gia chống thấm W10, sử dụng đá 1x2, xi măng PCB40).\r\n- Cột 4: Đơn vị tính (m³).\r\n- Cột 5: Khối lượng thiết kế (Net Quantity).\r\n- Cột 6: Đơn vị tính ca bơm / phụ phí (nếu có).\r\n- Cột 7: Công thức Excel đề xuất cho cột Thành tiền (Ví dụ: `=E5*G5`).\r\n- Cột 8: Ghi chú tiêu chuẩn nghiệm thu (TCVN 5574:2018).\r\n[ĐỊNH DẠNG]: Bảng Markdown có căn lề chuẩn mực.",
+    "category": "Chuyên đề: BOQ & Dự toán"
+  },
+  {
+    "id": "p-36-4",
+    "sourceFile": "04_Buoi_04_Boc_Tach_Khoi_Luong_BOQ_Du_Toan/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 4 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 04",
+    "role": "Chuyên đề: BOQ & Dự toán",
+    "content": "[VAI TRÒ]: Agent 04 — QS & Quản trị chi phí.\r\n[BỐI CẢNH]: Ban QLDA GreenTech Tower nhận được 03 bản chào giá cung cấp bê tông thương phẩm mác B35 cho Tầng 1 từ 3 trạm trộn:\r\n1. TRẠM A (Việt Đức):\r\n   - Đơn giá bê tông B35: 1.450.000 VNĐ/m³.\r\n   - Phí ca bơm cần (với khối lượng > 40m³): Trọn gói 4.500.000 VNĐ/ca.\r\n   - Phụ gia chống thấm W10: Đã bao gồm trong đơn giá.\r\n   - Điều kiện thanh toán: Tạm ứng 20%, thanh toán theo đợt nghiệm thu 15 ngày/lần.\r\n2. TRẠM B (Chèm):\r\n   - Đơn giá bê tông B35: 1.420.000 VNĐ/m³.\r\n   - Phí ca bơm: 110.000 VNĐ/m³ (tính theo mét khối thực bơm).\r\n   - Phụ gia chống thấm W10: Tính thêm 60.000 VNĐ/m³.\r\n   - Điều kiện thanh toán: Thanh toán 100% trong vòng 7 ngày sau khi cấp hàng.\r\n3. TRẠM C (Vĩnh Tuy):\r\n   - Đơn giá bê tông B35: 1.390.000 VNĐ/m³.\r\n   - Phí ca bơm: 130.000 VNĐ/m³.\r\n   - Phụ gia chống thấm W10: Tính thêm 80.000 VNĐ/m³.\r\n   - Điều kiện thanh toán: Thanh toán 100% trước khi xe rời trạm trộn.\r\n[KHỐI LƯỢNG THI CÔNG]: Khối lượng đặt hàng dự kiến: 110 m³ (chia làm 02 đợt đổ, mỗi đợt 55 m³ tương ứng 2 ca bơm).\r\n[NHIỆM VỤ]:\r\n1. Lập Bảng phân tích so sánh chi phí tổng thể (Normalized Cost Matrix) cho cả 3 trạm trộn trên cùng mặt bằng 110 m³.\r\n2. Chỉ ra chi phí ẩn và điều kiện thương mại bất lợi của từng đơn vị.\r\n3. Đề xuất lựa chọn nhà thầu phụ tối ưu nhất kèm lập luận tài chính và quản trị rủi ro dòng tiền.",
+    "category": "Chuyên đề: BOQ & Dự toán"
+  },
+  {
+    "id": "p-36-5",
+    "sourceFile": "04_Buoi_04_Boc_Tach_Khoi_Luong_BOQ_Du_Toan/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "title": "Prompt 5 — THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 04",
+    "role": "Chuyên đề: BOQ & Dự toán",
+    "content": "[VAI TRÒ]: Trưởng ban QS & Quản trị chi phí.\r\n[BỐI CẢNH]: Dự toán ngân sách được duyệt ban đầu cho công tác bê tông cột tầng 1 là 175.000.000 VNĐ. Giá chào thầu sau đàm phán tối ưu là 182.500.000 VNĐ (Chênh lệch tăng 7.500.000 VNĐ do bổ sung phụ gia chống thấm W10 theo yêu cầu làm rõ của RFI PCCC ở Buổi 02).\r\n[NHIỆM VỤ]:\r\nHãy soạn thảo \"BÁO CÁO PHÂN TÍCH BIẾN ĐỘNG CHI PHÍ & ĐỀ XUẤT CÂN ĐỐI DỰ PHÒNG\" gửi Ban Lãnh đạo dự án.\r\n[NỘI DUNG YÊU CẦU]:\r\n1. Tổng quan ngân sách được duyệt vs Chi phí đàm phán thực tế.\r\n2. Nguyên nhân biến động: Giải trình rõ việc bổ sung phụ gia W10 là do yêu cầu kỹ thuật bắt buộc từ hồ sơ PCCC, không phải do lãng phí thi công.\r\n3. Phương án cân đối nguồn vốn: Đề xuất sử dụng nguồn chi phí dự phòng phát sinh của gói thầu kết cấu để bù đắp.\r\n4. Kiến nghị Giám đốc dự án phê duyệt điều chỉnh hạn mức thanh toán.\r\n[THỂ THỨC]: Chuẩn thể thức tờ trình quản trị dự án cấp cao.",
+    "category": "Chuyên đề: BOQ & Dự toán"
+  },
+  {
+    "id": "p-51-1",
+    "sourceFile": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/demo/02-doi-agent-ho-so-nha-pho/01_prompt-chay-doi.md",
+    "title": "Prompt 1 — Prompt chạy đội agent (demo trong lớp, khoảng 10 phút)",
+    "role": "Buổi 06",
+    "content": "Lập đội agent cho hồ sơ trình khách nhà phố trong thư mục này.\r\n\r\n0. Khách gửi yêu cầu bằng file Word 00_yeu-cau-khach-hang.docx: chuyển sang .md bằng\r\n   markitdown trước (đã có .md trùng tên thì sao lưu bản cũ vào _backup).\r\n1. Viết 00_phieu-giao-viec.md trước: mục tiêu, đầu vào, ai làm gì, ai chờ ai.\r\n2. Chạy song song 3 agent, đặt tên để chúng nhắn được cho nhau, mỗi agent chỉ ghi file của mình:\r\n   - \"tiep-nhan\" dùng agent tiep-nhan-yeu-cau -> handoff/01_tiep-nhan.md\r\n   - \"kien-truc\" dùng agent kien-truc-su -> handoff/02_kien-truc.md\r\n   - \"khoi-luong\" dùng agent ky-su-boc-khoi-luong -> handoff/03_boc-khoi-luong.md\r\n3. Ba agent xong mới chạy \"kiem-tra\" dùng agent ky-su-kiem-tra. Ghi kết luận của kiem-tra\r\n   vào handoff/04_kiem-tra.md.\r\n4. Kiểm tra kết luận CẦN SỬA thì giao lại đúng agent đã làm, tối đa 1 vòng.\r\n5. Gộp vào 99_bao-cao-tong-hop.md: tóm tắt phương án, bảng yêu cầu khách khớp/chưa khớp,\r\n   khối lượng sơ bộ, câu hỏi cần hỏi khách, và một thư nháp gửi khách (chưa gửi).",
+    "category": "Buổi 06"
+  },
+  {
+    "id": "p-51-2",
+    "sourceFile": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/demo/02-doi-agent-ho-so-nha-pho/01_prompt-chay-doi.md",
+    "title": "Prompt 2 — Prompt chạy đội agent (demo trong lớp, khoảng 10 phút)",
+    "role": "Buổi 06",
+    "content": "02-doi-agent-ho-so-nha-pho\\\r\n├── CLAUDE.md                      ngắn, chỉ nói dự án là gì, file ở đâu\r\n├── .claude\\\r\n│   ├── rules\\so-lieu.md           luật số liệu, luôn nạp\r\n│   ├── rules\\ban-giao.md          mẫu bàn giao, chỉ nạp khi làm với handoff/\r\n│   └── agents\\                    4 agent: tiep-nhan-yeu-cau, kien-truc-su, ky-su-boc-khoi-luong, ky-su-kiem-tra\r\n├── 00_yeu-cau-khach-hang.docx     khách gửi bằng Word (tình huống mẫu)\r\n├── 00_yeu-cau-khach-hang.md       bản chuyển bằng markitdown\r\n├── 01_prompt-chay-doi.md          file này\r\n├── dau-vao\\                       bản vẽ (PDF, MD), file mô tả JSON, bảng cửa, BOQ tóm tắt, ảnh phối cảnh\r\n└── ket-qua-mau\\                   kết quả một lần chạy thật (14/10/2026) để đối chiếu; đội không đọc thư mục này",
+    "category": "Buổi 06"
+  },
+  {
+    "id": "p-51-3",
+    "sourceFile": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/demo/02-doi-agent-ho-so-nha-pho/01_prompt-chay-doi.md",
+    "title": "Prompt 3 — Prompt chạy đội agent (demo trong lớp, khoảng 10 phút)",
+    "role": "Buổi 06",
+    "content": "",
+    "category": "Buổi 06"
+  }
+]

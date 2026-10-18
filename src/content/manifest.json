@@ -1,0 +1,682 @@
+[
+  {
+    "id": "00_Tong_Quan_Chuong_Trinh___01_De_Cuong_Chi_Tiet_Khoa_Hoc.md",
+    "sourcePath": "00_Tong_Quan_Chuong_Trinh/01_De_Cuong_Chi_Tiet_Khoa_Hoc.md",
+    "category": "Tổng quan",
+    "route": "/tong-quan/de-cuong",
+    "title": "ĐỀ CƯƠNG CHI TIẾT CHƯƠNG TRÌNH ĐÀO TẠO",
+    "headings": [],
+    "wordCount": 2502,
+    "promptsCount": 0
+  },
+  {
+    "id": "00_Tong_Quan_Chuong_Trinh___02_Kien_Truc_He_Thong_6_AI_Agent.md",
+    "sourcePath": "00_Tong_Quan_Chuong_Trinh/02_Kien_Truc_He_Thong_6_AI_Agent.md",
+    "category": "Tổng quan",
+    "route": "/tong-quan/kien-truc-agent",
+    "title": "BẢN MÔ TẢ KIẾN TRÚC HỆ THỐNG 6 AI AGENT DỰ ÁN XÂY DỰNG",
+    "headings": [],
+    "wordCount": 2059,
+    "promptsCount": 0
+  },
+  {
+    "id": "01_Buoi_01_Hieu_Dung_AI_Xay_Dung_Bo_Nao_Du_An___01_Giao_Trinh_Chi_Tiet_Buoi_01.md",
+    "sourcePath": "01_Buoi_01_Hieu_Dung_AI_Xay_Dung_Bo_Nao_Du_An/01_Giao_Trinh_Chi_Tiet_Buoi_01.md",
+    "category": "Buổi 01",
+    "route": "/buoi/01/ly-thuyet",
+    "title": "GIÁO TRÌNH CHI TIẾT — BUỔI 01",
+    "headings": [],
+    "wordCount": 1290,
+    "promptsCount": 0
+  },
+  {
+    "id": "01_Buoi_01_Hieu_Dung_AI_Xay_Dung_Bo_Nao_Du_An___02_Thu_Vien_Prompt_Thuc_Chien_Buoi_01.md",
+    "sourcePath": "01_Buoi_01_Hieu_Dung_AI_Xay_Dung_Bo_Nao_Du_An/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_01.md",
+    "category": "Buổi 01",
+    "route": "/buoi/01/prompt",
+    "title": "THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 01",
+    "headings": [],
+    "wordCount": 1429,
+    "promptsCount": 3
+  },
+  {
+    "id": "01_Buoi_01_Hieu_Dung_AI_Xay_Dung_Bo_Nao_Du_An___03_Huong_Dan_Thuc_Hanh_Lab_01.md",
+    "sourcePath": "01_Buoi_01_Hieu_Dung_AI_Xay_Dung_Bo_Nao_Du_An/03_Huong_Dan_Thuc_Hanh_Lab_01.md",
+    "category": "Buổi 01",
+    "route": "/buoi/01/lab",
+    "title": "TÀI LIỆU HƯỚNG DẪN BÀI THỰC HÀNH LAB 01",
+    "headings": [],
+    "wordCount": 1059,
+    "promptsCount": 0
+  },
+  {
+    "id": "01_Buoi_01_Hieu_Dung_AI_Xay_Dung_Bo_Nao_Du_An___04_Tieu_Chi_Nghiem_Thu_San_Pham_D1.md",
+    "sourcePath": "01_Buoi_01_Hieu_Dung_AI_Xay_Dung_Bo_Nao_Du_An/04_Tieu_Chi_Nghiem_Thu_San_Pham_D1.md",
+    "category": "Buổi 01",
+    "route": "/buoi/01/nghiem-thu",
+    "title": "TIÊU CHÍ NGHIỆM THU SẢN PHẨM ĐẦU RA — DELIVERABLE D1",
+    "headings": [],
+    "wordCount": 621,
+    "promptsCount": 0
+  },
+  {
+    "id": "01_Buoi_01_Hieu_Dung_AI_Xay_Dung_Bo_Nao_Du_An___demo___CLAUDE.md",
+    "sourcePath": "01_Buoi_01_Hieu_Dung_AI_Xay_Dung_Bo_Nao_Du_An/demo/CLAUDE.md",
+    "category": "Buổi 01",
+    "route": "/buoi/01/demo/claude",
+    "title": "HỆ THỐNG QUY TẮC LÀM VIỆC & QUẢN TRỊ AI WORKSPACE (CLAUDE.md)",
+    "headings": [],
+    "wordCount": 1505,
+    "promptsCount": 0
+  },
+  {
+    "id": "01_Buoi_01_Hieu_Dung_AI_Xay_Dung_Bo_Nao_Du_An___demo___du-an-mau-greentech-tower.md",
+    "sourcePath": "01_Buoi_01_Hieu_Dung_AI_Xay_Dung_Bo_Nao_Du_An/demo/du-an-mau-greentech-tower.md",
+    "category": "Buổi 01",
+    "route": "/buoi/01/demo/du-an-mau-greentech-tower",
+    "title": "THÔNG TIN DỰ ÁN GREENTECH TOWER (DỮ LIỆU THÔ CHỦ ĐẦU TƯ CUNG CẤP)",
+    "headings": [],
+    "wordCount": 400,
+    "promptsCount": 0
+  },
+  {
+    "id": "01_Buoi_01_Hieu_Dung_AI_Xay_Dung_Bo_Nao_Du_An___giao-an-buoi-01.md",
+    "sourcePath": "01_Buoi_01_Hieu_Dung_AI_Xay_Dung_Bo_Nao_Du_An/giao-an-buoi-01.md",
+    "category": "Buổi 01",
+    "route": "/buoi/01/giao-an-buoi-01",
+    "title": "Giáo án Buổi 01: Xây Dựng AI Workspace Dự Án, Làm Chủ Claude Code & GitHub Nền Tảng",
+    "headings": [],
+    "wordCount": 5991,
+    "promptsCount": 0
+  },
+  {
+    "id": "01_Buoi_01_Hieu_Dung_AI_Xay_Dung_Bo_Nao_Du_An___slide-buoi-01.md",
+    "sourcePath": "01_Buoi_01_Hieu_Dung_AI_Xay_Dung_Bo_Nao_Du_An/slide-buoi-01.md",
+    "category": "Buổi 01",
+    "route": "/buoi/01/slide-buoi-01",
+    "title": "BỘ SLIDE BÀI GIẢNG BUỔI 01: XÂY DỰNG AI WORKSPACE DỰ ÁN, LÀM CHỦ CLAUDE CODE & GITHUB NỀN TẢNG",
+    "headings": [],
+    "wordCount": 2517,
+    "promptsCount": 0
+  },
+  {
+    "id": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat___01_Giao_Trinh_Chi_Tiet_Buoi_02.md",
+    "sourcePath": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/01_Giao_Trinh_Chi_Tiet_Buoi_02.md",
+    "category": "Buổi 02",
+    "route": "/buoi/02/ly-thuyet",
+    "title": "GIÁO TRÌNH CHI TIẾT — BUỔI 02",
+    "headings": [],
+    "wordCount": 2627,
+    "promptsCount": 0
+  },
+  {
+    "id": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat___02_Thu_Vien_Prompt_Thuc_Chien_Buoi_02.md",
+    "sourcePath": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_02.md",
+    "category": "Buổi 02",
+    "route": "/buoi/02/prompt",
+    "title": "THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 02",
+    "headings": [],
+    "wordCount": 1066,
+    "promptsCount": 12
+  },
+  {
+    "id": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat___03_Huong_Dan_Thuc_Hanh_Lab_02.md",
+    "sourcePath": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/03_Huong_Dan_Thuc_Hanh_Lab_02.md",
+    "category": "Buổi 02",
+    "route": "/buoi/02/lab",
+    "title": "TÀI LIỆU HƯỚNG DẪN BÀI THỰC HÀNH LAB 02",
+    "headings": [],
+    "wordCount": 659,
+    "promptsCount": 0
+  },
+  {
+    "id": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat___04_Tieu_Chi_Nghiem_Thu_San_Pham_D2.md",
+    "sourcePath": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/04_Tieu_Chi_Nghiem_Thu_San_Pham_D2.md",
+    "category": "Buổi 02",
+    "route": "/buoi/02/nghiem-thu",
+    "title": "TIÊU CHÍ NGHIỆM THU SẢN PHẨM ĐẦU RA — DELIVERABLE D2",
+    "headings": [],
+    "wordCount": 650,
+    "promptsCount": 0
+  },
+  {
+    "id": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat___demo___01-chi-dan-ky-thuat-pccc-greentech-tower.md",
+    "sourcePath": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/demo/01-chi-dan-ky-thuat-pccc-greentech-tower.md",
+    "category": "Buổi 02",
+    "route": "/buoi/02/demo/01-chi-dan-ky-thuat-pccc-greentech-tower",
+    "title": "01-chi-dan-ky-thuat-pccc-greentech-tower",
+    "headings": [],
+    "wordCount": 944,
+    "promptsCount": 0
+  },
+  {
+    "id": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat___demo___02-thuyet-minh-ban-ve-kt102.md",
+    "sourcePath": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/demo/02-thuyet-minh-ban-ve-kt102.md",
+    "category": "Buổi 02",
+    "route": "/buoi/02/demo/02-thuyet-minh-ban-ve-kt102",
+    "title": "02-thuyet-minh-ban-ve-kt102",
+    "headings": [],
+    "wordCount": 366,
+    "promptsCount": 0
+  },
+  {
+    "id": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat___demo___03-chi-dan-thi-cong-be-tong-vach-ham.md",
+    "sourcePath": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/demo/03-chi-dan-thi-cong-be-tong-vach-ham.md",
+    "category": "Buổi 02",
+    "route": "/buoi/02/demo/03-chi-dan-thi-cong-be-tong-vach-ham",
+    "title": "03-chi-dan-thi-cong-be-tong-vach-ham",
+    "headings": [],
+    "wordCount": 277,
+    "promptsCount": 0
+  },
+  {
+    "id": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat___demo___04-thuyet-minh-ban-ve-vach-ham-kc02.md",
+    "sourcePath": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/demo/04-thuyet-minh-ban-ve-vach-ham-kc02.md",
+    "category": "Buổi 02",
+    "route": "/buoi/02/demo/04-thuyet-minh-ban-ve-vach-ham-kc02",
+    "title": "04-thuyet-minh-ban-ve-vach-ham-kc02",
+    "headings": [],
+    "wordCount": 393,
+    "promptsCount": 0
+  },
+  {
+    "id": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat___demo___05-chi-dan-ky-thuat-son-chong-chay-ket-cau-thep.md",
+    "sourcePath": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/demo/05-chi-dan-ky-thuat-son-chong-chay-ket-cau-thep.md",
+    "category": "Buổi 02",
+    "route": "/buoi/02/demo/05-chi-dan-ky-thuat-son-chong-chay-ket-cau-thep",
+    "title": "05-chi-dan-ky-thuat-son-chong-chay-ket-cau-thep",
+    "headings": [],
+    "wordCount": 451,
+    "promptsCount": 0
+  },
+  {
+    "id": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat___demo___06-thuyet-minh-ban-ve-ket-cau-thep-kc105.md",
+    "sourcePath": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/demo/06-thuyet-minh-ban-ve-ket-cau-thep-kc105.md",
+    "category": "Buổi 02",
+    "route": "/buoi/02/demo/06-thuyet-minh-ban-ve-ket-cau-thep-kc105",
+    "title": "06-thuyet-minh-ban-ve-ket-cau-thep-kc105",
+    "headings": [],
+    "wordCount": 390,
+    "promptsCount": 0
+  },
+  {
+    "id": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat___demo___chi-dan-ky-thuat-pccc.md",
+    "sourcePath": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/demo/chi-dan-ky-thuat-pccc.md",
+    "category": "Buổi 02",
+    "route": "/buoi/02/demo/chi-dan-ky-thuat-pccc",
+    "title": "CHỈ DẪN KỸ THUẬT PHÒNG CHÁY CHỮA CHÁY & VẬT LIỆU NGĂN CHÁY",
+    "headings": [],
+    "wordCount": 975,
+    "promptsCount": 0
+  },
+  {
+    "id": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat___demo___skill-mau___SKILL.md",
+    "sourcePath": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/demo/skill-mau/SKILL.md",
+    "category": "Buổi 02",
+    "route": "/buoi/02/demo/skill-mau/skill",
+    "title": "Quy trình Rà soát Hồ sơ Kỹ thuật & Đối soát Mâu thuẫn Xây dựng",
+    "headings": [],
+    "wordCount": 747,
+    "promptsCount": 0
+  },
+  {
+    "id": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat___demo___thuyet-minh-ban-ve-kt102.md",
+    "sourcePath": "02_Buoi_02_Khai_Thac_Ho_So_Ky_Thuat/demo/thuyet-minh-ban-ve-kt102.md",
+    "category": "Buổi 02",
+    "route": "/buoi/02/demo/thuyet-minh-ban-ve-kt102",
+    "title": "BẢN VẼ MẶT BẰNG & BẢNG THỐNG KÊ CỬA ĐI TẦNG 1 ĐẾN TẦNG 5",
+    "headings": [],
+    "wordCount": 556,
+    "promptsCount": 0
+  },
+  {
+    "id": "03_Buoi_03_Thiet_Ke_Va_Dieu_Khien_AutoCAD___01_Giao_Trinh_Chi_Tiet_Buoi_03.md",
+    "sourcePath": "03_Buoi_03_Thiet_Ke_Va_Dieu_Khien_AutoCAD/01_Giao_Trinh_Chi_Tiet_Buoi_03.md",
+    "category": "Buổi 03",
+    "route": "/buoi/03/ly-thuyet",
+    "title": "GIÁO TRÌNH CHI TIẾT — BUỔI 03",
+    "headings": [],
+    "wordCount": 1262,
+    "promptsCount": 0
+  },
+  {
+    "id": "03_Buoi_03_Thiet_Ke_Va_Dieu_Khien_AutoCAD___02_Thu_Vien_Prompt_Thuc_Chien_Buoi_03.md",
+    "sourcePath": "03_Buoi_03_Thiet_Ke_Va_Dieu_Khien_AutoCAD/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_03.md",
+    "category": "Buổi 03",
+    "route": "/buoi/03/prompt",
+    "title": "THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 03",
+    "headings": [],
+    "wordCount": 1397,
+    "promptsCount": 5
+  },
+  {
+    "id": "03_Buoi_03_Thiet_Ke_Va_Dieu_Khien_AutoCAD___03_Huong_Dan_Thuc_Hanh_Lab_03_AutoCAD.md",
+    "sourcePath": "03_Buoi_03_Thiet_Ke_Va_Dieu_Khien_AutoCAD/03_Huong_Dan_Thuc_Hanh_Lab_03_AutoCAD.md",
+    "category": "Buổi 03",
+    "route": "/buoi/03/lab",
+    "title": "TÀI LIỆU HƯỚNG DẪN BÀI THỰC HÀNH LAB 03",
+    "headings": [],
+    "wordCount": 1183,
+    "promptsCount": 0
+  },
+  {
+    "id": "03_Buoi_03_Thiet_Ke_Va_Dieu_Khien_AutoCAD___04_Tieu_Chi_Nghiem_Thu_San_Pham_D3.md",
+    "sourcePath": "03_Buoi_03_Thiet_Ke_Va_Dieu_Khien_AutoCAD/04_Tieu_Chi_Nghiem_Thu_San_Pham_D3.md",
+    "category": "Buổi 03",
+    "route": "/buoi/03/nghiem-thu",
+    "title": "TIÊU CHÍ NGHIỆM THU SẢN PHẨM ĐẦU RA — DELIVERABLE D3",
+    "headings": [],
+    "wordCount": 610,
+    "promptsCount": 0
+  },
+  {
+    "id": "04_Buoi_04_Agent_ClaudeMD_Blender_3D___01_Giao_Trinh_Chi_Tiet_Buoi_04.md",
+    "sourcePath": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/01_Giao_Trinh_Chi_Tiet_Buoi_04.md",
+    "category": "Buổi 04 (Chính thức)",
+    "route": "/buoi/04/ly-thuyet",
+    "title": "GIÁO TRÌNH CHI TIẾT: BUỔI 04",
+    "headings": [],
+    "wordCount": 2490,
+    "promptsCount": 0
+  },
+  {
+    "id": "04_Buoi_04_Agent_ClaudeMD_Blender_3D___02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "sourcePath": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "category": "Buổi 04 (Chính thức)",
+    "route": "/buoi/04/prompt",
+    "title": "THƯ VIỆN PROMPT THỰC CHIẾN: BUỔI 04",
+    "headings": [],
+    "wordCount": 2313,
+    "promptsCount": 20
+  },
+  {
+    "id": "04_Buoi_04_Agent_ClaudeMD_Blender_3D___03_Huong_Dan_Thuc_Hanh_Lab_04_Blender.md",
+    "sourcePath": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/03_Huong_Dan_Thuc_Hanh_Lab_04_Blender.md",
+    "category": "Buổi 04 (Chính thức)",
+    "route": "/buoi/04/lab",
+    "title": "HƯỚNG DẪN THỰC HÀNH LAB 04",
+    "headings": [],
+    "wordCount": 802,
+    "promptsCount": 0
+  },
+  {
+    "id": "04_Buoi_04_Agent_ClaudeMD_Blender_3D___04_Tieu_Chi_Nghiem_Thu_San_Pham_D4.md",
+    "sourcePath": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/04_Tieu_Chi_Nghiem_Thu_San_Pham_D4.md",
+    "category": "Buổi 04 (Chính thức)",
+    "route": "/buoi/04/nghiem-thu",
+    "title": "TIÊU CHÍ NGHIỆM THU SẢN PHẨM: DELIVERABLE D4",
+    "headings": [],
+    "wordCount": 459,
+    "promptsCount": 0
+  },
+  {
+    "id": "04_Buoi_04_Agent_ClaudeMD_Blender_3D___05_Mau_CLAUDE_md_Global_Cho_Ky_Su.md",
+    "sourcePath": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/05_Mau_CLAUDE_md_Global_Cho_Ky_Su.md",
+    "category": "Buổi 04 (Chính thức)",
+    "route": "/buoi/04/05-mau-claude-md-global-cho-ky-su",
+    "title": "MẪU CLAUDE.MD GLOBAL CHO KỸ SƯ XÂY DỰNG",
+    "headings": [],
+    "wordCount": 664,
+    "promptsCount": 0
+  },
+  {
+    "id": "04_Buoi_04_Agent_ClaudeMD_Blender_3D___06_Checklist_Cai_Dat_Truoc_Buoi_Hoc.md",
+    "sourcePath": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/06_Checklist_Cai_Dat_Truoc_Buoi_Hoc.md",
+    "category": "Buổi 04 (Chính thức)",
+    "route": "/buoi/04/06-checklist-cai-dat-truoc-buoi-hoc",
+    "title": "CHECKLIST CÀI ĐẶT TRƯỚC BUỔI 04",
+    "headings": [],
+    "wordCount": 361,
+    "promptsCount": 0
+  },
+  {
+    "id": "04_Buoi_04_Agent_ClaudeMD_Blender_3D___07_Huong_Dan_Cai_Dat_Blender_MCP.md",
+    "sourcePath": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/07_Huong_Dan_Cai_Dat_Blender_MCP.md",
+    "category": "Buổi 04 (Chính thức)",
+    "route": "/buoi/04/07-huong-dan-cai-dat-blender-mcp",
+    "title": "HƯỚNG DẪN CÀI ĐẶT BLENDER MCP (vn-mcp-blender)",
+    "headings": [],
+    "wordCount": 1645,
+    "promptsCount": 0
+  },
+  {
+    "id": "04_Buoi_04_Agent_ClaudeMD_Blender_3D___08_Noi_Dung_Slide_Buoi_04.md",
+    "sourcePath": "04_Buoi_04_Agent_ClaudeMD_Blender_3D/08_Noi_Dung_Slide_Buoi_04.md",
+    "category": "Buổi 04 (Chính thức)",
+    "route": "/buoi/04/08-noi-dung-slide-buoi-04",
+    "title": "BỘ SLIDE BÀI GIẢNG BUỔI 04: AGENT, CLAUDE.MD AN TOÀN, TỪ BẢN VẼ AUTOCAD ĐẾN MÔ HÌNH 3D BLENDER",
+    "headings": [],
+    "wordCount": 5642,
+    "promptsCount": 0
+  },
+  {
+    "id": "04_Buoi_04_Boc_Tach_Khoi_Luong_BOQ_Du_Toan___01_Giao_Trinh_Chi_Tiet_Buoi_04.md",
+    "sourcePath": "04_Buoi_04_Boc_Tach_Khoi_Luong_BOQ_Du_Toan/01_Giao_Trinh_Chi_Tiet_Buoi_04.md",
+    "category": "Chuyên đề: BOQ & Dự toán",
+    "route": "/chuyen-de/boq-du-toan/ly-thuyet",
+    "title": "GIÁO TRÌNH CHI TIẾT — BUỔI 04",
+    "headings": [],
+    "wordCount": 1307,
+    "promptsCount": 0
+  },
+  {
+    "id": "04_Buoi_04_Boc_Tach_Khoi_Luong_BOQ_Du_Toan___02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "sourcePath": "04_Buoi_04_Boc_Tach_Khoi_Luong_BOQ_Du_Toan/02_Thu_Vien_Prompt_Thuc_Chien_Buoi_04.md",
+    "category": "Chuyên đề: BOQ & Dự toán",
+    "route": "/chuyen-de/boq-du-toan/prompt",
+    "title": "THƯ VIỆN PROMPT THỰC CHIẾN — BUỔI 04",
+    "headings": [],
+    "wordCount": 1430,
+    "promptsCount": 5
+  },
+  {
+    "id": "04_Buoi_04_Boc_Tach_Khoi_Luong_BOQ_Du_Toan___03_Huong_Dan_Thuc_Hanh_Lab_04_BOQ.md",
+    "sourcePath": "04_Buoi_04_Boc_Tach_Khoi_Luong_BOQ_Du_Toan/03_Huong_Dan_Thuc_Hanh_Lab_04_BOQ.md",
+    "category": "Chuyên đề: BOQ & Dự toán",
+    "route": "/chuyen-de/boq-du-toan/lab",
+    "title": "TÀI LIỆU HƯỚNG DẪN BÀI THỰC HÀNH LAB 04",
+    "headings": [],
+    "wordCount": 862,
+    "promptsCount": 0
+  },
+  {
+    "id": "04_Buoi_04_Boc_Tach_Khoi_Luong_BOQ_Du_Toan___04_Tieu_Chi_Nghiem_Thu_San_Pham_D4.md",
+    "sourcePath": "04_Buoi_04_Boc_Tach_Khoi_Luong_BOQ_Du_Toan/04_Tieu_Chi_Nghiem_Thu_San_Pham_D4.md",
+    "category": "Chuyên đề: BOQ & Dự toán",
+    "route": "/chuyen-de/boq-du-toan/nghiem-thu",
+    "title": "TIÊU CHÍ NGHIỆM THU SẢN PHẨM ĐẦU RA — DELIVERABLE D4",
+    "headings": [],
+    "wordCount": 646,
+    "promptsCount": 0
+  },
+  {
+    "id": "05_Buoi_05_Agent_Chuyen_Trach_Render_AI_Boc_Khoi_Luong___01_Giao_Trinh_Chi_Tiet_Buoi_05.md",
+    "sourcePath": "05_Buoi_05_Agent_Chuyen_Trach_Render_AI_Boc_Khoi_Luong/01_Giao_Trinh_Chi_Tiet_Buoi_05.md",
+    "category": "Buổi 05",
+    "route": "/buoi/05/ly-thuyet",
+    "title": "GIÁO TRÌNH CHI TIẾT: BUỔI 05",
+    "headings": [],
+    "wordCount": 6001,
+    "promptsCount": 0
+  },
+  {
+    "id": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho___01_Giao_Trinh_Chi_Tiet_Buoi_06.md",
+    "sourcePath": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/01_Giao_Trinh_Chi_Tiet_Buoi_06.md",
+    "category": "Buổi 06",
+    "route": "/buoi/06/ly-thuyet",
+    "title": "GIÁO TRÌNH CHI TIẾT: BUỔI 06",
+    "headings": [],
+    "wordCount": 5364,
+    "promptsCount": 0
+  },
+  {
+    "id": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho___02_Noi_Dung_Slide_Buoi_06.md",
+    "sourcePath": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/02_Noi_Dung_Slide_Buoi_06.md",
+    "category": "Buổi 06",
+    "route": "/buoi/06/02-noi-dung-slide-buoi-06",
+    "title": "NỘI DUNG SLIDE BUỔI 06: RÁP TRỌN QUY TRÌNH HỒ SƠ NHÀ PHỐ (ĐỒ ÁN CUỐI KHÓA)",
+    "headings": [],
+    "wordCount": 810,
+    "promptsCount": 0
+  },
+  {
+    "id": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho___04_Huong_Dan_Bo_Sung_Buoi_06_Agent_Team_Va_Cai_Dat.md",
+    "sourcePath": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/04_Huong_Dan_Bo_Sung_Buoi_06_Agent_Team_Va_Cai_Dat.md",
+    "category": "Buổi 06",
+    "route": "/buoi/06/04-huong-dan-bo-sung-buoi-06-agent-team-va-cai-dat",
+    "title": "HƯỚNG DẪN BỔ SUNG BUỔI 06: ĐỘI AI AGENT VÀ BỘ ĐỒ NGHỀ CÀI BẰNG PROMPT",
+    "headings": [],
+    "wordCount": 1777,
+    "promptsCount": 0
+  },
+  {
+    "id": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho___demo___01-thu-nghiem-pascal___14_bao-cao-dung-pascal.md",
+    "sourcePath": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/demo/01-thu-nghiem-pascal/14_bao-cao-dung-pascal.md",
+    "category": "Buổi 06",
+    "route": "/buoi/06/demo/01-thu-nghiem-pascal/14-bao-cao-dung-pascal",
+    "title": "Báo cáo dựng mô hình Pascal: Nhà phố lô 7x20m, Buổi 04 CES",
+    "headings": [],
+    "wordCount": 2858,
+    "promptsCount": 0
+  },
+  {
+    "id": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho___demo___02-doi-agent-ho-so-nha-pho___.claude___agents___kien-truc-su.md",
+    "sourcePath": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/demo/02-doi-agent-ho-so-nha-pho/.claude/agents/kien-truc-su.md",
+    "category": "Buổi 06",
+    "route": "/buoi/06/demo/02-doi-agent-ho-so-nha-pho/.claude/agents/kien-truc-su",
+    "title": "kien-truc-su",
+    "headings": [],
+    "wordCount": 363,
+    "promptsCount": 0
+  },
+  {
+    "id": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho___demo___02-doi-agent-ho-so-nha-pho___.claude___agents___ky-su-boc-khoi-luong.md",
+    "sourcePath": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/demo/02-doi-agent-ho-so-nha-pho/.claude/agents/ky-su-boc-khoi-luong.md",
+    "category": "Buổi 06",
+    "route": "/buoi/06/demo/02-doi-agent-ho-so-nha-pho/.claude/agents/ky-su-boc-khoi-luong",
+    "title": "ky-su-boc-khoi-luong",
+    "headings": [],
+    "wordCount": 457,
+    "promptsCount": 0
+  },
+  {
+    "id": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho___demo___02-doi-agent-ho-so-nha-pho___.claude___agents___ky-su-kiem-tra.md",
+    "sourcePath": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/demo/02-doi-agent-ho-so-nha-pho/.claude/agents/ky-su-kiem-tra.md",
+    "category": "Buổi 06",
+    "route": "/buoi/06/demo/02-doi-agent-ho-so-nha-pho/.claude/agents/ky-su-kiem-tra",
+    "title": "ky-su-kiem-tra",
+    "headings": [],
+    "wordCount": 336,
+    "promptsCount": 0
+  },
+  {
+    "id": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho___demo___02-doi-agent-ho-so-nha-pho___.claude___agents___tiep-nhan-yeu-cau.md",
+    "sourcePath": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/demo/02-doi-agent-ho-so-nha-pho/.claude/agents/tiep-nhan-yeu-cau.md",
+    "category": "Buổi 06",
+    "route": "/buoi/06/demo/02-doi-agent-ho-so-nha-pho/.claude/agents/tiep-nhan-yeu-cau",
+    "title": "tiep-nhan-yeu-cau",
+    "headings": [],
+    "wordCount": 137,
+    "promptsCount": 0
+  },
+  {
+    "id": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho___demo___02-doi-agent-ho-so-nha-pho___.claude___rules___ban-giao.md",
+    "sourcePath": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/demo/02-doi-agent-ho-so-nha-pho/.claude/rules/ban-giao.md",
+    "category": "Buổi 06",
+    "route": "/buoi/06/demo/02-doi-agent-ho-so-nha-pho/.claude/rules/ban-giao",
+    "title": "Mẫu file bàn giao (chỉ nạp khi làm việc với thư mục handoff)",
+    "headings": [],
+    "wordCount": 69,
+    "promptsCount": 0
+  },
+  {
+    "id": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho___demo___02-doi-agent-ho-so-nha-pho___.claude___rules___so-lieu.md",
+    "sourcePath": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/demo/02-doi-agent-ho-so-nha-pho/.claude/rules/so-lieu.md",
+    "category": "Buổi 06",
+    "route": "/buoi/06/demo/02-doi-agent-ho-so-nha-pho/.claude/rules/so-lieu",
+    "title": "Quy tắc số liệu (luôn áp dụng)",
+    "headings": [],
+    "wordCount": 81,
+    "promptsCount": 0
+  },
+  {
+    "id": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho___demo___02-doi-agent-ho-so-nha-pho___00_yeu-cau-khach-hang.md",
+    "sourcePath": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/demo/02-doi-agent-ho-so-nha-pho/00_yeu-cau-khach-hang.md",
+    "category": "Buổi 06",
+    "route": "/buoi/06/demo/02-doi-agent-ho-so-nha-pho/00-yeu-cau-khach-hang",
+    "title": "Yêu cầu của khách hàng (tình huống mẫu để thực hành)",
+    "headings": [],
+    "wordCount": 125,
+    "promptsCount": 0
+  },
+  {
+    "id": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho___demo___02-doi-agent-ho-so-nha-pho___01_prompt-chay-doi.md",
+    "sourcePath": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/demo/02-doi-agent-ho-so-nha-pho/01_prompt-chay-doi.md",
+    "category": "Buổi 06",
+    "route": "/buoi/06/prompt",
+    "title": "Prompt chạy đội agent (demo trong lớp, khoảng 10 phút)",
+    "headings": [],
+    "wordCount": 419,
+    "promptsCount": 3
+  },
+  {
+    "id": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho___demo___02-doi-agent-ho-so-nha-pho___CLAUDE.md",
+    "sourcePath": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/demo/02-doi-agent-ho-so-nha-pho/CLAUDE.md",
+    "category": "Buổi 06",
+    "route": "/buoi/06/demo/02-doi-agent-ho-so-nha-pho/claude",
+    "title": "CLAUDE.md: Demo đội agent hồ sơ nhà phố",
+    "headings": [],
+    "wordCount": 79,
+    "promptsCount": 0
+  },
+  {
+    "id": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho___demo___02-doi-agent-ho-so-nha-pho___dau-vao___02_ban-ve-a3-kt01-kt04.md",
+    "sourcePath": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/demo/02-doi-agent-ho-so-nha-pho/dau-vao/02_ban-ve-a3-kt01-kt04.md",
+    "category": "Buổi 06",
+    "route": "/buoi/06/demo/02-doi-agent-ho-so-nha-pho/dau-vao/02-ban-ve-a3-kt01-kt04",
+    "title": "02_ban-ve-a3-kt01-kt04",
+    "headings": [],
+    "wordCount": 3986,
+    "promptsCount": 0
+  },
+  {
+    "id": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho___demo___02-doi-agent-ho-so-nha-pho___dau-vao___03_bang-thong-ke-cua.md",
+    "sourcePath": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/demo/02-doi-agent-ho-so-nha-pho/dau-vao/03_bang-thong-ke-cua.md",
+    "category": "Buổi 06",
+    "route": "/buoi/06/demo/02-doi-agent-ho-so-nha-pho/dau-vao/03-bang-thong-ke-cua",
+    "title": "03_bang-thong-ke-cua",
+    "headings": [],
+    "wordCount": 278,
+    "promptsCount": 0
+  },
+  {
+    "id": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho___demo___02-doi-agent-ho-so-nha-pho___dau-vao___04_tom-tat-boq-phan-tho.md",
+    "sourcePath": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/demo/02-doi-agent-ho-so-nha-pho/dau-vao/04_tom-tat-boq-phan-tho.md",
+    "category": "Buổi 06",
+    "route": "/buoi/06/demo/02-doi-agent-ho-so-nha-pho/dau-vao/04-tom-tat-boq-phan-tho",
+    "title": "Tóm tắt BOQ phần thô: nhà phố mẫu lô 7x20m",
+    "headings": [],
+    "wordCount": 4513,
+    "promptsCount": 0
+  },
+  {
+    "id": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho___demo___02-doi-agent-ho-so-nha-pho___ket-qua-mau___00_phieu-giao-viec.md",
+    "sourcePath": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/demo/02-doi-agent-ho-so-nha-pho/ket-qua-mau/00_phieu-giao-viec.md",
+    "category": "Buổi 06",
+    "route": "/buoi/06/demo/02-doi-agent-ho-so-nha-pho/ket-qua-mau/00-phieu-giao-viec",
+    "title": "Phiếu giao việc: hồ sơ trình phương án nhà phố lô 7x20m",
+    "headings": [],
+    "wordCount": 366,
+    "promptsCount": 0
+  },
+  {
+    "id": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho___demo___02-doi-agent-ho-so-nha-pho___ket-qua-mau___99_bao-cao-tong-hop.md",
+    "sourcePath": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/demo/02-doi-agent-ho-so-nha-pho/ket-qua-mau/99_bao-cao-tong-hop.md",
+    "category": "Buổi 06",
+    "route": "/buoi/06/demo/02-doi-agent-ho-so-nha-pho/ket-qua-mau/99-bao-cao-tong-hop",
+    "title": "Báo cáo tổng hợp: hồ sơ trình phương án nhà phố lô 7x20m",
+    "headings": [],
+    "wordCount": 1023,
+    "promptsCount": 0
+  },
+  {
+    "id": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho___demo___02-doi-agent-ho-so-nha-pho___ket-qua-mau___handoff___02_kien-truc.md",
+    "sourcePath": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/demo/02-doi-agent-ho-so-nha-pho/ket-qua-mau/handoff/02_kien-truc.md",
+    "category": "Buổi 06",
+    "route": "/buoi/06/demo/02-doi-agent-ho-so-nha-pho/ket-qua-mau/handoff/02-kien-truc",
+    "title": "02. Bàn giao phần kiến trúc: nhà phố lô 7x20m",
+    "headings": [],
+    "wordCount": 2435,
+    "promptsCount": 0
+  },
+  {
+    "id": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho___demo___02-doi-agent-ho-so-nha-pho___ket-qua-mau___handoff___03_boc-khoi-luong.md",
+    "sourcePath": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/demo/02-doi-agent-ho-so-nha-pho/ket-qua-mau/handoff/03_boc-khoi-luong.md",
+    "category": "Buổi 06",
+    "route": "/buoi/06/demo/02-doi-agent-ho-so-nha-pho/ket-qua-mau/handoff/03-boc-khoi-luong",
+    "title": "Bàn giao 03: Bảng khối lượng phần thô sơ bộ",
+    "headings": [],
+    "wordCount": 3459,
+    "promptsCount": 0
+  },
+  {
+    "id": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho___demo___02-doi-agent-ho-so-nha-pho___ket-qua-mau___handoff___04_kiem-tra.md",
+    "sourcePath": "06_Buoi_06_Quy_Trinh_Tron_Goi_Ho_So_Nha_Pho/demo/02-doi-agent-ho-so-nha-pho/ket-qua-mau/handoff/04_kiem-tra.md",
+    "category": "Buổi 06",
+    "route": "/buoi/06/demo/02-doi-agent-ho-so-nha-pho/ket-qua-mau/handoff/04-kiem-tra",
+    "title": "Bàn giao: kiem-tra (agent ky-su-kiem-tra, chỉ đọc)",
+    "headings": [],
+    "wordCount": 869,
+    "promptsCount": 0
+  },
+  {
+    "id": "README.md",
+    "sourcePath": "README.md",
+    "category": "Giới thiệu",
+    "route": "/gioi-thieu",
+    "title": "KHÓA ĐÀO TẠO THỰC CHIẾN: AI AGENT TRONG KỸ THUẬT & XÂY DỰNG",
+    "headings": [],
+    "wordCount": 1161,
+    "promptsCount": 0
+  },
+  {
+    "id": "templates___Mau_Bang_BOQ_Chuan_Hoa.md",
+    "sourcePath": "templates/Mau_Bang_BOQ_Chuan_Hoa.md",
+    "category": "Biểu mẫu",
+    "route": "/bieu-mau/mau-bang-boq-chuan-hoa",
+    "title": "BẢNG TIÊN LƯỢNG KHỐI LƯỢNG CHUẨN HÓA (STANDARDIZED BOQ TEMPLATE)",
+    "headings": [],
+    "wordCount": 592,
+    "promptsCount": 0
+  },
+  {
+    "id": "templates___Mau_Bang_Quan_Tri_Rui_Ro_Risk_Register.md",
+    "sourcePath": "templates/Mau_Bang_Quan_Tri_Rui_Ro_Risk_Register.md",
+    "category": "Biểu mẫu",
+    "route": "/bieu-mau/mau-bang-quan-tri-rui-ro-risk-register",
+    "title": "BẢNG QUẢN TRỊ RỦI RO DỰ ÁN XÂY DỰNG (PROJECT RISK REGISTER TEMPLATE)",
+    "headings": [],
+    "wordCount": 925,
+    "promptsCount": 0
+  },
+  {
+    "id": "templates___Mau_Context_Profile_Du_An.md",
+    "sourcePath": "templates/Mau_Context_Profile_Du_An.md",
+    "category": "Biểu mẫu",
+    "route": "/bieu-mau/mau-context-profile-du-an",
+    "title": "MẪU HỒ SƠ BỐI CẢNH DỰ ÁN (PROJECT CONTEXT PROFILE TEMPLATE)",
+    "headings": [],
+    "wordCount": 603,
+    "promptsCount": 0
+  },
+  {
+    "id": "templates___Mau_Design_Brief_Thiet_Ke.md",
+    "sourcePath": "templates/Mau_Design_Brief_Thiet_Ke.md",
+    "category": "Biểu mẫu",
+    "route": "/bieu-mau/mau-design-brief-thiet-ke",
+    "title": "BẢN NHIỆM VỤ THIẾT KẾ KIẾN TRÚC & KỸ THUẬT (DESIGN BRIEF TEMPLATE)",
+    "headings": [],
+    "wordCount": 571,
+    "promptsCount": 0
+  },
+  {
+    "id": "templates___Mau_Nhat_Ky_Thi_Cong_Ngay.md",
+    "sourcePath": "templates/Mau_Nhat_Ky_Thi_Cong_Ngay.md",
+    "category": "Biểu mẫu",
+    "route": "/bieu-mau/mau-nhat-ky-thi-cong-ngay",
+    "title": "MẪU NHẬT KÝ THI CÔNG XÂY DỰNG CÔNG TRÌNH HÀNG NGÀY",
+    "headings": [],
+    "wordCount": 738,
+    "promptsCount": 0
+  },
+  {
+    "id": "templates___Mau_Phieu_Yeu_Cau_RFI.md",
+    "sourcePath": "templates/Mau_Phieu_Yeu_Cau_RFI.md",
+    "category": "Biểu mẫu",
+    "route": "/bieu-mau/mau-phieu-yeu-cau-rfi",
+    "title": "PHIẾU YÊU CẦU LÀM RÕ THÔNG TIN THIẾT KẾ (RFI TEMPLATE)",
+    "headings": [],
+    "wordCount": 550,
+    "promptsCount": 0
+  }
+]
