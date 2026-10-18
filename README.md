@@ -1,13 +1,41 @@
-# CỔNG HỌC TẬP THỰC CHIẾN AI TRONG DỰ ÁN XÂY DỰNG
+# 🏛️ CỔNG HỌC TẬP THỰC CHIẾN AI TRONG DỰ ÁN XÂY DỰNG
 > **Website học tập tĩnh tương tác 3D — Trình bày 100% nguyên văn toàn bộ nội dung khóa học**
 
-🌐 **Địa chỉ truy cập Website trực tuyến:**  
-👉 **[https://tronglong195-ops.github.io/khoa-hoc-ai-xay-dung/](https://tronglong195-ops.github.io/khoa-hoc-ai-xay-dung/)**
+---
+
+## 🌐 ĐỊA CHỈ TRUY CẬP WEBSITE TRỰC TUYẾN (LIVE DEMO)
+
+| 🔗 Kênh truy cập | Địa chỉ URL | Trạng thái |
+|---|---|:---:|
+| 🚀 **Trang Web Trực Tuyến Chính Thức** | **[https://tronglong195-ops.github.io/khoa-hoc-ai-xay-dung/](https://tronglong195-ops.github.io/khoa-hoc-ai-xay-dung/)** | ![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-Online-success?style=for-the-badge&logo=github) |
+| 📦 **Kho Mã Nguồn (Source Code)** | **[https://github.com/tronglong195-ops/khoa-hoc-ai-xay-dung](https://github.com/tronglong195-ops/khoa-hoc-ai-xay-dung)** | ![GitHub Repo](https://img.shields.io/badge/Repository-Main-blue?style=for-the-badge&logo=git) |
+| 📚 **Kho Giáo Trình Gốc (CES Global)** | **[https://github.com/cesglobal-vn/Tai-lieu-khoa-hoc-ai-xay-dung](https://github.com/cesglobal-vn/Tai-lieu-khoa-hoc-ai-xay-dung)** | ![Upstream](https://img.shields.io/badge/Upstream-CES_Global-orange?style=for-the-badge) |
+
+---
+
+## 📑 BẢN ĐỒ TRUY CẬP TRỰC TIẾP CÁC PHÂN HỆ (QUICK LINKS)
+
+Bạn có thể nhấp trực tiếp vào các liên kết bên dưới để đến thẳng các chuyên đề và không gian 3D:
+
+- 🏠 **[Trang Chủ & Hero 3D Nhà Phố 7x20m](https://tronglong195-ops.github.io/khoa-hoc-ai-xay-dung/#/)**
+- 📋 **[Đề Cương Chi Tiết Khóa Học](https://tronglong195-ops.github.io/khoa-hoc-ai-xay-dung/#/tong-quan/de-cuong)**
+- 🤖 **[Kiến Trúc Mạng Lưới 6 AI Agent & Mô Hình 3D](https://tronglong195-ops.github.io/khoa-hoc-ai-xay-dung/#/tong-quan/kien-truc-agent)**
+- 🏢 **6 Buổi Đào Tạo Chính Thức:**
+  - 🔹 **[Buổi 01: Hiểu Đúng AI Xây Dựng & Thiết Lập Bộ Não Dự Án](https://tronglong195-ops.github.io/khoa-hoc-ai-xay-dung/#/buoi/01)** *(Có 3 bệ nổi 3D Cấp độ AI)*
+  - 🔹 **[Buổi 02: Khai Thác Hồ Sơ Kỹ Thuật, Đối Soát & Tạo Skill](https://tronglong195-ops.github.io/khoa-hoc-ai-xay-dung/#/buoi/02)** *(Mô hình 3D đóng gói SKILL.md)*
+  - 🔹 **[Buổi 03: Thiết Kế & Điều Khiển AutoCAD Bằng AI](https://tronglong195-ops.github.io/khoa-hoc-ai-xay-dung/#/buoi/03)** *(3D AutoLISP vẽ bản vẽ)*
+  - 🔹 **[Buổi 04: Agent CLAUDE.md & Dựng Mô Hình 3D Blender](https://tronglong195-ops.github.io/khoa-hoc-ai-xay-dung/#/buoi/04)** *(3D Nhà 7x20m bung tầng + 3 tầng CLAUDE.md)*
+  - 🔹 **[Buổi 05: Agent Chuyên Trách, Render AI & Bóc Khối Lượng](https://tronglong195-ops.github.io/khoa-hoc-ai-xay-dung/#/buoi/05)** *(3D AI chỉ sơn lại, không xây lại)*
+  - 🔹 **[Buổi 06: Quy Trình Trọn Gói Hồ Sơ Nhà Phố (Dây Chuyền 7 Chặng)](https://tronglong195-ops.github.io/khoa-hoc-ai-xay-dung/#/buoi/06)** *(3D Băng chuyền & 3 cổng HITL)*
+- 📊 **[Chuyên Đề Mở Rộng: BOQ & Lập Dự Toán](https://tronglong195-ops.github.io/khoa-hoc-ai-xay-dung/#/chuyen-de/boq-du-toan)**
+- 📝 **[Kho 6 Biểu Mẫu Quy Chuẩn Xây Dựng](https://tronglong195-ops.github.io/khoa-hoc-ai-xay-dung/#/bieu-mau)**
+- ⚡ **[Thư Viện 48+ Prompt Thực Chiến (Sao chép 1-Click)](https://tronglong195-ops.github.io/khoa-hoc-ai-xay-dung/#/prompt)**
+- 🔍 **[Tra Cứu Toàn Văn & Từ Điển Thuật Ngữ Kỹ Thuật](https://tronglong195-ops.github.io/khoa-hoc-ai-xay-dung/#/tra-cuu)**
 
 ---
 
 ## 🏗️ 1. Giới thiệu Dự án
-Website là nền tảng học tập trực tuyến tĩnh (Single Page Application — không backend) số hóa toàn bộ tài nguyên từ kho bài giảng thực chiến [Tai-lieu-khoa-hoc-ai-xay-dung](https://github.com/cesglobal-vn/Tai-lieu-khoa-hoc-ai-xay-dung) của CES Global.
+Website là cổng học tập trực tuyến tĩnh (Single Page Application — không backend) số hóa toàn bộ tài nguyên từ kho bài giảng thực chiến [Tai-lieu-khoa-hoc-ai-xay-dung](https://github.com/cesglobal-vn/Tai-lieu-khoa-hoc-ai-xay-dung) của CES Global.
 
 Hệ thống được thiết kế theo phong cách **Bản vẽ kỹ thuật (Architectural Blueprint)** kết hợp công nghệ **Three.js / React Three Fiber** để trực quan hóa sinh động các bài toán thiết kế, quản lý hồ sơ và tự động hóa xây dựng bằng AI.
 
